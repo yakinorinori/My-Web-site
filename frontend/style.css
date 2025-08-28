@@ -1,0 +1,12 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f7f7f7;
+    margin: 0;
+    padding: 20px;
+}
+h1 {
+    color: #333;
+}
+#sales-table {
+    margin-top: 20px;
+}
