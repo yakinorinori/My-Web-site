@@ -1,0 +1,9 @@
+Host macmini
+    HostName 192.168.151.100
+    User akinoriyamaguchi
+    Port 22
+    ServerAliveInterval 60
+    ServerAliveCountMax 3
+    
+# Mac mini サーバー開発用設定
+# 使用方法: ssh macmini

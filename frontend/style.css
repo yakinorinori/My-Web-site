@@ -1,12 +1,155 @@
+/* 月選択プルダウン用 */
+#month-select-div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    margin-top: 8px;
+}
+
+#month-select-div label {
+    font-size: 1.08em;
+    color: #2a4d8f;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+#month-select {
+    padding: 7px 18px 7px 10px;
+    border-radius: 6px;
+    border: 1px solid #b0b8d8;
+    font-size: 1.08em;
+    background: #fafdff;
+    color: #2a4d8f;
+    font-weight: 500;
+    box-shadow: 0 1.5px 6px rgba(42,77,143,0.04);
+    transition: border 0.2s, box-shadow 0.2s;
+    outline: none;
+    margin-right: 8px;
+}
+#month-select:focus {
+    border: 1.5px solid #4e79a7;
+    box-shadow: 0 2px 8px rgba(42,77,143,0.10);
+}
 body {
-    font-family: Arial, sans-serif;
-    background: #f7f7f7;
+    font-family: 'Segoe UI', 'Meiryo', Arial, sans-serif;
+    background: linear-gradient(120deg, #f7f7fa 60%, #e6ecfa 100%);
     margin: 0;
-    padding: 20px;
+    padding: 0;
+    min-height: 100vh;
 }
+
+#app-root {
+    max-width: 900px;
+    margin: 40px auto 40px auto;
+    padding: 32px 24px 32px 24px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(42,77,143,0.08), 0 1.5px 6px rgba(42,77,143,0.04);
+}
+
 h1 {
-    color: #333;
+    color: #2a4d8f;
+    font-size: 2.2em;
+    margin-bottom: 18px;
+    letter-spacing: 0.04em;
+    text-align: center;
+    font-weight: 700;
+    text-shadow: 0 2px 8px rgba(42,77,143,0.07);
 }
-#sales-table {
-    margin-top: 20px;
+
+button, input[type="button"] {
+    background: linear-gradient(90deg, #2a4d8f 60%, #4e79a7 100%);
+    color: #fff;
+    border: none;
+    padding: 10px 26px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 10px 8px 18px 0;
+    font-size: 1.08em;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(42,77,143,0.07);
+    transition: background 0.2s, box-shadow 0.2s;
+    letter-spacing: 0.03em;
+}
+
+button:hover, input[type="button"]:hover {
+    background: linear-gradient(90deg, #1d3560 60%, #2a4d8f 100%);
+    box-shadow: 0 4px 16px rgba(42,77,143,0.13);
+}
+
+h2, h3 {
+    color: #2a4d8f;
+    margin-top: 32px;
+    margin-bottom: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+#analysis-year, #analysis-month, #analysis-weekday, #analysis-month-person, #sales-table {
+    margin-bottom: 40px;
+    padding: 18px 12px 18px 12px;
+    background: #fafdff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 30px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th, td {
+    border: 1px solid #d0d0e0;
+    padding: 10px 14px;
+    text-align: center;
+    font-size: 1.05em;
+}
+
+th {
+    background: #e6ecfa;
+    color: #2a4d8f;
+    font-weight: bold;
+    letter-spacing: 0.03em;
+}
+
+tr:nth-child(even) {
+    background: #f4f6fb;
+}
+
+canvas {
+    display: block;
+    margin: 32px auto 24px auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(42,77,143,0.07);
+    padding: 8px;
+}
+
+#chart-area {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+}
+
+@media (max-width: 700px) {
+    #app-root {
+        padding: 10px 2vw 10px 2vw;
+    }
+    table, th, td {
+        font-size: 0.95em;
+    }
+    h1 {
+        font-size: 1.3em;
+    }
+    canvas {
+        width: 98vw !important;
+        max-width: 100% !important;
+        height: auto !important;
+    }
 }

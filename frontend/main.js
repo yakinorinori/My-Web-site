@@ -1,30 +1,258 @@
-
 // ページロード時にsales.csvを自動取得して表示
 let globalData = [];
+
+// API設定
+const API_BASE_URL = 'http://192.168.151.100:3001';
+
+// 認証チェック機能
+async function checkAuthentication() {
+    try {
+        console.log('🔍 認証状態をチェック中...');
+        const response = await fetch(`${API_BASE_URL}/check_auth`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+        
+        console.log('📡 認証レスポンス状態:', response.status);
+        
+        if (!response.ok) {
+            console.log('❌ 認証失敗: レスポンスが正常ではありません');
+            showLoginMessage();
+            return false;
+        }
+        
+        const authData = await response.json();
+        console.log('📊 認証データ:', authData);
+        
+        if (!authData.authenticated) {
+            console.log('❌ 認証失敗: authenticated=false');
+            showLoginMessage();
+            return false;
+        }
+        
+        // 認証済みの場合、ユーザー情報を表示
+        console.log('✅ 認証成功:', authData.username);
+        showUserInfo(authData.username);
+        return true;
+    } catch (error) {
+        console.error('🚨 認証チェックエラー:', error);
+        showLoginMessage();
+        return false;
+    }
+}
+
+function showLoginMessage() {
+    console.log('🔐 ログインメッセージを表示中...');
+    const loginUrl = `${API_BASE_URL}/login`;
+    document.getElementById('app-root').innerHTML = `
+        <div style="text-align: center; padding: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; min-height: 100vh;">
+            <h1>🔒 売上管理システム</h1>
+            <div style="background: white; color: #333; max-width: 400px; margin: 30px auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <h2>ログインが必要です</h2>
+                <p>システムにアクセスするには認証が必要です。</p>
+                <button onclick="window.location.href='${loginUrl}'" 
+                        style="background: #667eea; color: white; border: none; padding: 12px 30px; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 10px;">
+                    ログインページへ
+                </button>
+                <div style="margin-top: 20px; padding: 15px; background: #f0f8ff; border-radius: 5px; border-left: 4px solid #2196F3;">
+                    <strong>セキュリティ機能:</strong><br>
+                    ✓ ユーザー認証<br>
+                    ✓ セッション管理<br>
+                    ✓ データ保護
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function showUserInfo(username) {
+    // ユーザー情報とログアウトボタンを追加
+    const userInfo = document.createElement('div');
+    userInfo.id = 'user-info';
+    userInfo.style.cssText = 'position: fixed; top: 10px; right: 10px; background: #667eea; color: white; padding: 10px 20px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 1000;';
+    userInfo.innerHTML = `
+        👤 ${username} 
+        <button onclick="logout()" style="background: #ff4757; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-left: 10px; cursor: pointer;">
+            ログアウト
+        </button>
+    `;
+    document.body.appendChild(userInfo);
+}
+
+async function logout() {
+    try {
+        await fetch(`${API_BASE_URL}/logout`, {
+            method: 'POST',
+            credentials: 'include'
+        });
+        window.location.reload();
+    } catch (error) {
+        console.error('ログアウトエラー:', error);
+        window.location.reload();
+    }
+}
+
+// 認証付きFetch関数
+async function authenticatedFetch(url, options = {}) {
+    const defaultOptions = {
+        credentials: 'include',
+        ...options
+    };
+    
+    const response = await fetch(url, defaultOptions);
+    
+    if (response.status === 401) {
+        showLoginMessage();
+        throw new Error('認証が必要です');
+    }
+    
+    return response;
+}
+
+// アプリケーション初期化（認証チェック後）
+async function initializeApp() {
+    // 認証チェック
+    const isAuthenticated = await checkAuthentication();
+    if (!isAuthenticated) {
+        return;
+    }
+    
+    // 認証成功後、アプリのUIを構築
+    renderApp();
+}
 window.onload = function() {
-    fetch('sales.csv')
+    // 認証チェックしてからアプリ初期化
+    initializeApp();
+}
+
+function renderApp() {
+    // ルート要素取得
+    const root = document.getElementById('app-root');
+    root.innerHTML = '';
+
+    // タイトル
+    const h1 = document.createElement('h1');
+    h1.textContent = '売上管理Webサイト';
+    root.appendChild(h1);
+
+    // ボタン
+    const btnDiv = document.createElement('div');
+    const btnYear = document.createElement('button');
+    btnYear.id = 'btn-year';
+    btnYear.textContent = '年ごとの分析';
+    const btnMonth = document.createElement('button');
+    btnMonth.id = 'btn-month';
+    btnMonth.textContent = '月ごとの分析';
+    btnDiv.appendChild(btnYear);
+    btnDiv.appendChild(btnMonth);
+    root.appendChild(btnDiv);
+
+    // プルダウン（select）追加
+    const monthSelectDiv = document.createElement('div');
+    monthSelectDiv.id = 'month-select-div';
+    monthSelectDiv.style.display = 'none';
+    monthSelectDiv.style.margin = '10px 0 20px 0';
+    const monthLabel = document.createElement('label');
+    monthLabel.textContent = '月を選択: ';
+    monthLabel.setAttribute('for', 'month-select');
+    const monthSelect = document.createElement('select');
+    monthSelect.id = 'month-select';
+    monthSelectDiv.appendChild(monthLabel);
+    monthSelectDiv.appendChild(monthSelect);
+    root.appendChild(monthSelectDiv);
+
+    // 分析用div
+    const divYear = document.createElement('div');
+    divYear.id = 'analysis-year';
+    divYear.style.display = 'none';
+    root.appendChild(divYear);
+    const divMonth = document.createElement('div');
+    divMonth.id = 'analysis-month';
+    root.appendChild(divMonth);
+    const divWeekday = document.createElement('div');
+    divWeekday.id = 'analysis-weekday';
+    root.appendChild(divWeekday);
+    const divTable = document.createElement('div');
+    divTable.id = 'sales-table';
+    root.appendChild(divTable);
+
+    // Chart.js用のグラフエリアも#app-root内に生成
+    let chartArea = document.getElementById('chart-area');
+    if (!chartArea) {
+        chartArea = document.createElement('div');
+        chartArea.id = 'chart-area';
+        chartArea.style.marginTop = '40px';
+        chartArea.style.display = 'flex';
+        chartArea.style.justifyContent = 'center';
+        root.appendChild(chartArea);
+    }
+
+    // sales.csv取得（認証付き・バックエンドから）
+    authenticatedFetch(`${API_BASE_URL}/sales.csv`)
         .then(response => response.text())
         .then(text => {
             const data = csvToArray(text);
             globalData = data;
+            // プルダウンの選択肢をセット
+            const months = Array.from(new Set(data.map(row => row['日付'].slice(0,7)))).sort();
+            monthSelect.innerHTML = '';
+            months.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                monthSelect.appendChild(opt);
+            });
+            // デフォルトは最新月
+            if (months.length > 0) monthSelect.value = months[months.length-1];
+
             showMonthAnalysis();
             // ボタンイベント
-            document.getElementById('btn-year').onclick = showYearAnalysis;
-            document.getElementById('btn-month').onclick = showMonthAnalysis;
+            btnYear.onclick = () => {
+                showYearAnalysis();
+                monthSelectDiv.style.display = 'none';
+            };
+            btnMonth.onclick = () => {
+                showMonthAnalysis();
+                monthSelectDiv.style.display = '';
+            };
+            // プルダウン変更時
+            monthSelect.onchange = () => {
+                showMonthAnalysis();
+            };
+            // 月分析時のみプルダウン表示
+            monthSelectDiv.style.display = '';
         })
-        .catch(() => {
-            document.getElementById('sales-table').innerHTML = '<p>sales.csvが見つかりません</p>';
+        .catch(error => {
+            console.error('データ読み込みエラー:', error);
+            const errorMsg = document.createElement('div');
+            errorMsg.style.cssText = 'text-align: center; padding: 50px; color: #ff4757; background: #ffecec; margin: 20px; border-radius: 10px; border: 1px solid #ff4757;';
+            errorMsg.innerHTML = `
+                <h3>⚠️ データ読み込みエラー</h3>
+                <p>sales.csvファイルの読み込みに失敗しました。</p>
+                <p>ファイルが存在することを確認してください。</p>
+                <button onclick="window.location.reload()" style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                    再読み込み
+                </button>
+            `;
+            root.appendChild(errorMsg);
         });
 };
 
 function showMonthAnalysis() {
     document.getElementById('analysis-year').style.display = 'none';
     document.getElementById('analysis-month').style.display = '';
-    document.getElementById('analysis-weekday').style.display = '';
+    document.getElementById('analysis-weekday').style.display = 'none';
     document.getElementById('sales-table').style.display = 'none';
-    renderMonthAnalysis(globalData);
-    renderWeekdayAnalysis(globalData);
-    renderMonthPersonAnalysis(globalData);
+    // プルダウンで選択された月のみ抽出
+    const monthSelect = document.getElementById('month-select');
+    let filtered = globalData;
+    let selectedMonth = '';
+    if (monthSelect && monthSelect.value) {
+        selectedMonth = monthSelect.value;
+        filtered = globalData.filter(row => row['日付'].slice(0,7) === selectedMonth);
+    }
+    renderMonthAnalysis(filtered, selectedMonth);
+    renderMonthPersonAnalysis(filtered, selectedMonth);
 }
 
 function showYearAnalysis() {
@@ -32,6 +260,7 @@ function showYearAnalysis() {
     document.getElementById('analysis-month').style.display = 'none';
     document.getElementById('analysis-weekday').style.display = 'none';
     document.getElementById('sales-table').style.display = 'none';
+    document.getElementById('month-select-div').style.display = 'none';
     renderYearAnalysis(globalData);
 }
 
@@ -89,44 +318,165 @@ function renderYearAnalysis(data) {
     });
     html += '</table>';
 
-    // 月ごとの合計
+    // 月ごとの合計（折れ線グラフ）
     html += '<h2>月ごとの合計</h2>';
     Object.keys(yearMonthStats).sort().forEach(year => {
-        html += `<h3>${year}</h3><table border="1"><tr><th>月</th><th>売上合計</th><th>客数合計</th></tr>`;
-        Object.keys(yearMonthStats[year]).sort().forEach(month => {
+        html += `<h3>${year}</h3><canvas id="lineChart-year-${year}" width="500" height="220"></canvas>`;
+        html += `<table id="table-year-month-${year}" border="1"><tr><th>月</th><th>売上合計</th><th>客数合計</th></tr>`;
+        const months = Object.keys(yearMonthStats[year]).sort();
+        months.forEach(month => {
             html += `<tr><td>${month}</td><td>${yearMonthStats[year][month].sales.toLocaleString()}</td><td>${yearMonthStats[year][month].customers}</td></tr>`;
         });
         html += '</table>';
+        setTimeout(() => {
+            const table = document.getElementById(`table-year-month-${year}`);
+            if (!table) return;
+            const rows = Array.from(table.querySelectorAll('tr')).slice(1);
+            const labels = [], salesArr = [], customersArr = [];
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 3) {
+                    labels.push(cells[0].textContent);
+                    salesArr.push(Number(cells[1].textContent.replace(/,/g, '')));
+                    customersArr.push(Number(cells[2].textContent.replace(/,/g, '')));
+                }
+            });
+            const ctx = document.getElementById(`lineChart-year-${year}`)?.getContext('2d');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: '売上',
+                                data: salesArr,
+                                borderColor: '#4e79a7',
+                                backgroundColor: 'rgba(78,121,167,0.1)',
+                                fill: false,
+                                tension: 0.2,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: '客数',
+                                data: customersArr,
+                                borderColor: '#f28e2b',
+                                backgroundColor: 'rgba(242,142,43,0.1)',
+                                fill: false,
+                                tension: 0.2,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: false }
+                        },
+                        scales: {
+                            y: { 
+                                beginAtZero: true,
+                                type: 'linear',
+                                display: true,
+                                position: 'left'
+                            },
+                            y1: {
+                                beginAtZero: true,
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                grid: {
+                                    drawOnChartArea: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }, 100);
     });
 
     // 年ごとの支払い者別合計金額は表示しない
 
-    // 曜日ごとの合計
+    // 曜日ごとの合計（棒グラフ）
     html += '<h2>曜日ごとの合計</h2>';
     Object.keys(yearWeekdayStats).sort().forEach(year => {
-        html += `<h3>${year}</h3><table border="1"><tr><th>曜日</th><th>売上合計</th><th>客数合計</th></tr>`;
+        html += `<h3>${year}</h3><canvas id="barChart-year-${year}" width="500" height="220"></canvas>`;
+        html += `<table id="table-year-weekday-${year}" border="1"><tr><th>曜日</th><th>売上合計</th><th>客数合計</th></tr>`;
         weekdays.forEach(wd => {
             if (yearWeekdayStats[year][wd]) {
                 html += `<tr><td>${wd}</td><td>${yearWeekdayStats[year][wd].sales.toLocaleString()}</td><td>${yearWeekdayStats[year][wd].customers}</td></tr>`;
             }
         });
         html += '</table>';
+        setTimeout(() => {
+            const table = document.getElementById(`table-year-weekday-${year}`);
+            if (!table) return;
+            const rows = Array.from(table.querySelectorAll('tr')).slice(1);
+            const labels = [], salesArr = [], customersArr = [];
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 3) {
+                    labels.push(cells[0].textContent);
+                    salesArr.push(Number(cells[1].textContent.replace(/,/g, '')));
+                    customersArr.push(Number(cells[2].textContent.replace(/,/g, '')));
+                }
+            });
+            const ctx = document.getElementById(`barChart-year-${year}`)?.getContext('2d');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: '売上',
+                                data: salesArr,
+                                backgroundColor: 'rgba(78,121,167,0.7)',
+                                borderColor: '#4e79a7',
+                                borderWidth: 1,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: '客数',
+                                data: customersArr,
+                                backgroundColor: 'rgba(242,142,43,0.7)',
+                                borderColor: '#f28e2b',
+                                borderWidth: 1,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: false }
+                        },
+                        scales: {
+                            y: { 
+                                beginAtZero: true,
+                                type: 'linear',
+                                display: true,
+                                position: 'left'
+                            },
+                            y1: {
+                                beginAtZero: true,
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                grid: {
+                                    drawOnChartArea: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }, 100);
     });
 
-    // 年ごとに上位10人を表示
-    html += '<h2>年ごとの上位10人（合計金額順）</h2>';
-    Object.keys(yearPersonStats).sort().forEach(year => {
-        const sortedPersons = Object.entries(yearPersonStats[year])
-            .sort((a,b)=>b[1]-a[1])
-            .slice(0,10);
-        if (sortedPersons.length > 0) {
-            html += `<h3>${year}</h3><table border="1"><tr><th>順位</th><th>支払い者</th><th>合計金額</th></tr>`;
-            sortedPersons.forEach(([person, total], idx) => {
-                html += `<tr><td>${idx+1}</td><td>${person}</td><td>${total.toLocaleString()}円</td></tr>`;
-            });
-            html += '</table>';
-        }
-    });
     document.getElementById('analysis-year').innerHTML = html;
 }
 
@@ -171,7 +521,14 @@ function renderMonthPersonAnalysis(data) {
     if (!target) {
         target = document.createElement('div');
         target.id = 'analysis-month-person';
-        document.body.insertBefore(target, document.getElementById('analysis-month').nextSibling);
+        // #app-root内のanalysis-monthの次に挿入
+        const root = document.getElementById('app-root');
+        const monthDiv = document.getElementById('analysis-month');
+        if (monthDiv && monthDiv.nextSibling) {
+            root.insertBefore(target, monthDiv.nextSibling);
+        } else {
+            root.appendChild(target);
+        }
     }
     target.innerHTML = html;
 }
@@ -202,80 +559,639 @@ function renderTable(data) {
 
 
 // 月別売上・客数分析
-function renderMonthAnalysis(data) {
-    const monthStats = {};
-    // 組数集計用: { month: { date: { 支払い者: true } } }
-    const monthGroups = {};
-    data.forEach(row => {
-        const date = row['日付'];
-        const month = date.slice(0,7); // YYYY/MM
-        const sales = Number(row['売り上げ']) || 0;
-        const customers = Number(row['客数']) || 0;
-        if (!monthStats[month]) monthStats[month] = { sales: 0, customers: 0 };
-        monthStats[month].sales += sales;
-        monthStats[month].customers += customers;
-
-        // 組数集計
-        if (!monthGroups[month]) monthGroups[month] = {};
-        if (!monthGroups[month][date]) monthGroups[month][date] = {};
-        monthGroups[month][date][row['支払い者']] = true;
-    });
-    let html = '<h2>月別売上・客数・組数</h2><table border="1"><tr><th>月</th><th>売上合計</th><th>客数合計</th><th>組数</th></tr>';
-    Object.keys(monthStats).sort().forEach(month => {
-        // 組数計算
-        let groupCount = 0;
-        if (monthGroups[month]) {
-            Object.values(monthGroups[month]).forEach(dateGroup => {
-                groupCount += Object.keys(dateGroup).length;
-            });
-        }
-        html += `<tr><td>${month}</td><td>${monthStats[month].sales.toLocaleString()}</td><td>${monthStats[month].customers}</td><td>${groupCount}</td></tr>`;
-    });
-    html += '</table>';
-    document.getElementById('analysis-month').innerHTML = html;
-}
-
-// 曜日別売上・客数分析（年・月ごと）
-function renderWeekdayAnalysis(data) {
+function renderMonthAnalysis(data, selectedMonth) {
     const weekdays = ['日','月','火','水','木','金','土'];
-    // 年月ごとに集計
-    const ymWeekdayStats = {};
-    // 組数集計用: { ym: { wd: { date: { 支払い者: true } } } }
-    const ymWeekdayGroups = {};
+    
+    // 1ヶ月分の合計集計
+    let totalSales = 0, totalCustomers = 0, totalGroupCount = 0;
+    const groupSet = {};
+    
+    // 曜日別集計
+    const weekdayStats = {};
+    const weekdayGroups = {};
+    
     data.forEach(row => {
         const date = row['日付'];
-        const ym = date.slice(0,7); // YYYY/MM
         const d = new Date(date.replace(/\//g,'-'));
         const wd = weekdays[d.getDay()];
         const sales = Number(row['売り上げ']) || 0;
         const customers = Number(row['客数']) || 0;
-        if (!ymWeekdayStats[ym]) ymWeekdayStats[ym] = {};
-        if (!ymWeekdayStats[ym][wd]) ymWeekdayStats[ym][wd] = { sales: 0, customers: 0 };
-        ymWeekdayStats[ym][wd].sales += sales;
-        ymWeekdayStats[ym][wd].customers += customers;
-
-        // 組数集計
-        if (!ymWeekdayGroups[ym]) ymWeekdayGroups[ym] = {};
-        if (!ymWeekdayGroups[ym][wd]) ymWeekdayGroups[ym][wd] = {};
-        if (!ymWeekdayGroups[ym][wd][date]) ymWeekdayGroups[ym][wd][date] = {};
-        ymWeekdayGroups[ym][wd][date][row['支払い者']] = true;
+        const person = row['支払い者'];
+        
+        // 合計集計
+        totalSales += sales;
+        totalCustomers += customers;
+        if (!groupSet[date]) groupSet[date] = {};
+        groupSet[date][person] = true;
+        
+        // 曜日別集計
+        if (!weekdayStats[wd]) weekdayStats[wd] = { sales: 0, customers: 0 };
+        weekdayStats[wd].sales += sales;
+        weekdayStats[wd].customers += customers;
+        
+        if (!weekdayGroups[wd]) weekdayGroups[wd] = {};
+        if (!weekdayGroups[wd][date]) weekdayGroups[wd][date] = {};
+        weekdayGroups[wd][date][person] = true;
     });
-    let html = '<h2>曜日別売上・客数・組数（年・月ごと）</h2>';
-    Object.keys(ymWeekdayStats).sort().forEach(ym => {
-        html += `<h3>${ym}</h3><table border="1"><tr><th>曜日</th><th>売上合計</th><th>客数合計</th><th>組数</th></tr>`;
+    
+    // 合計組数計算
+    Object.values(groupSet).forEach(dateGroup => {
+        totalGroupCount += Object.keys(dateGroup).length;
+    });
+    
+    // HTML構築
+    let html = `<h2>${selectedMonth}の分析</h2>`;
+    
+    // 合計値をテキストで表示
+    html += `<div style="background-color: #f5f5f5; padding: 20px; margin-bottom: 20px; border-radius: 8px;">`;
+    html += `<h3>月間合計</h3>`;
+    html += `<p style="font-size: 18px; margin: 10px 0;"><strong>合計売上:</strong> ${totalSales.toLocaleString()}円</p>`;
+    html += `<p style="font-size: 18px; margin: 10px 0;"><strong>合計客数:</strong> ${totalCustomers}人</p>`;
+    html += `<p style="font-size: 18px; margin: 10px 0;"><strong>合計組数:</strong> ${totalGroupCount}組</p>`;
+    html += `</div>`;
+    
+    // 曜日別グラフ
+    html += `<h3>曜日別分析</h3>`;
+    html += `<canvas id="monthWeekdayChart-${selectedMonth}" width="600" height="400"></canvas>`;
+    
+    // 曜日別テーブル
+    html += '<table border="1" style="margin-top: 15px;"><tr><th>曜日</th><th>売上</th><th>客数</th><th>組数</th></tr>';
+    const chartData = [];
+    weekdays.forEach(wd => {
+        if (weekdayStats[wd]) {
+            let groupCount = 0;
+            if (weekdayGroups[wd]) {
+                Object.values(weekdayGroups[wd]).forEach(dateGroup => {
+                    groupCount += Object.keys(dateGroup).length;
+                });
+            }
+            html += `<tr><td>${wd}</td><td>${weekdayStats[wd].sales.toLocaleString()}円</td><td>${weekdayStats[wd].customers}人</td><td>${groupCount}組</td></tr>`;
+            chartData.push({
+                weekday: wd,
+                sales: weekdayStats[wd].sales,
+                customers: weekdayStats[wd].customers,
+                groups: groupCount
+            });
+        }
+    });
+    html += '</table>';
+    
+    document.getElementById('analysis-month').innerHTML = html;
+    
+    // 曜日別グラフ描画
+    setTimeout(() => {
+        const ctx = document.getElementById(`monthWeekdayChart-${selectedMonth}`)?.getContext('2d');
+        if (ctx && chartData.length > 0) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.map(d => d.weekday + '曜日'),
+                    datasets: [
+                        {
+                            label: '売上',
+                            data: chartData.map(d => d.sales),
+                            backgroundColor: 'rgba(78,121,167,0.7)',
+                            borderColor: '#4e79a7',
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '客数',
+                            data: chartData.map(d => d.customers),
+                            backgroundColor: 'rgba(242,142,43,0.7)',
+                            borderColor: '#f28e2b',
+                            borderWidth: 1,
+                            yAxisID: 'y1'
+                        },
+                        {
+                            label: '組数',
+                            data: chartData.map(d => d.groups),
+                            backgroundColor: 'rgba(88,195,76,0.7)',
+                            borderColor: '#58c34c',
+                            borderWidth: 1,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: `${selectedMonth}の曜日別実績` }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            position: 'left',
+                            title: { display: true, text: '売上（円）' }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: 'right',
+                            title: { display: true, text: '客数・組数' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+    }, 100);
+}
+
+// 月ごとの分析専用の曜日別分析
+function renderMonthWeekdayAnalysis(data, selectedMonth) {
+    const weekdays = ['日','月','火','水','木','金','土'];
+    // 曜日ごとに集計
+    const weekdayStats = {};
+    const weekdayGroups = {};
+    const weekdayPersons = {};
+    
+    data.forEach(row => {
+        const date = row['日付'];
+        const d = new Date(date.replace(/\//g,'-'));
+        const wd = weekdays[d.getDay()];
+        const sales = Number(row['売り上げ']) || 0;
+        const customers = Number(row['客数']) || 0;
+        const person = row['支払い者'];
+        
+        if (!weekdayStats[wd]) weekdayStats[wd] = { sales: 0, customers: 0, count: 0 };
+        weekdayStats[wd].sales += sales;
+        weekdayStats[wd].customers += customers;
+        weekdayStats[wd].count += 1;
+        
+        // 組数
+        if (!weekdayGroups[wd]) weekdayGroups[wd] = {};
+        if (!weekdayGroups[wd][date]) weekdayGroups[wd][date] = {};
+        weekdayGroups[wd][date][person] = true;
+        
+        // 支払い者別（不明除外）
+        if (person !== '不明') {
+            if (!weekdayPersons[wd]) weekdayPersons[wd] = {};
+            if (!weekdayPersons[wd][person]) weekdayPersons[wd][person] = 0;
+            weekdayPersons[wd][person] += sales;
+        }
+    });
+    
+    let html = `<h2>${selectedMonth}の曜日別分析</h2>`;
+    html += `<canvas id="monthWeekdayChart-${selectedMonth}" width="600" height="400"></canvas>`;
+    html += '<table border="1" style="margin-top: 15px;"><tr><th>曜日</th><th>売上合計</th><th>客数合計</th><th>組数</th><th>平均売上</th><th>回数</th></tr>';
+    
+    const chartData = [];
+    weekdays.forEach(wd => {
+        if (weekdayStats[wd]) {
+            let groupCount = 0;
+            if (weekdayGroups[wd]) {
+                Object.values(weekdayGroups[wd]).forEach(dateGroup => {
+                    groupCount += Object.keys(dateGroup).length;
+                });
+            }
+            const avgSales = Math.round(weekdayStats[wd].sales / weekdayStats[wd].count);
+            html += `<tr><td>${wd}</td><td>${weekdayStats[wd].sales.toLocaleString()}</td><td>${weekdayStats[wd].customers}</td><td>${groupCount}</td><td>${avgSales.toLocaleString()}</td><td>${weekdayStats[wd].count}</td></tr>`;
+            chartData.push({
+                weekday: wd,
+                sales: weekdayStats[wd].sales,
+                customers: weekdayStats[wd].customers,
+                groups: groupCount
+            });
+        }
+    });
+    html += '</table>';
+    
+    // 支払い者別上位分析
+    html += `<h3>${selectedMonth}の曜日別主要顧客</h3>`;
+    weekdays.forEach(wd => {
+        if (weekdayPersons[wd]) {
+            const topPersons = Object.entries(weekdayPersons[wd])
+                .sort((a,b) => b[1] - a[1])
+                .slice(0, 3);
+            if (topPersons.length > 0) {
+                html += `<h4>${wd}曜日の上位3名</h4>`;
+                html += `<table border="1"><tr><th>順位</th><th>支払い者</th><th>合計金額</th></tr>`;
+                topPersons.forEach(([person, total], idx) => {
+                    html += `<tr><td>${idx+1}</td><td>${person}</td><td>${total.toLocaleString()}円</td></tr>`;
+                });
+                html += '</table>';
+            }
+        }
+    });
+    
+    // 分析結果を表示
+    let target = document.getElementById('analysis-month-weekday');
+    if (!target) {
+        target = document.createElement('div');
+        target.id = 'analysis-month-weekday';
+        // #app-root内のanalysis-monthの次に挿入
+        const root = document.getElementById('app-root');
+        const monthDiv = document.getElementById('analysis-month');
+        if (monthDiv && monthDiv.nextSibling) {
+            root.insertBefore(target, monthDiv.nextSibling);
+        } else {
+            root.appendChild(target);
+        }
+    }
+    target.innerHTML = html;
+    
+    // グラフ描画
+    setTimeout(() => {
+        const ctx = document.getElementById(`monthWeekdayChart-${selectedMonth}`)?.getContext('2d');
+        if (ctx && chartData.length > 0) {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartData.map(d => d.weekday),
+                    datasets: [
+                        {
+                            label: '売上',
+                            data: chartData.map(d => d.sales),
+                            backgroundColor: 'rgba(78,121,167,0.7)',
+                            borderColor: '#4e79a7',
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '客数',
+                            data: chartData.map(d => d.customers),
+                            backgroundColor: 'rgba(242,142,43,0.7)',
+                            borderColor: '#f28e2b',
+                            borderWidth: 1,
+                            yAxisID: 'y1'
+                        },
+                        {
+                            label: '組数',
+                            data: chartData.map(d => d.groups),
+                            backgroundColor: 'rgba(88,195,76,0.7)',
+                            borderColor: '#58c34c',
+                            borderWidth: 1,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: `${selectedMonth}の曜日別実績` }
+                    },
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            position: 'left',
+                            title: { display: true, text: '売上（円）' }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: 'right',
+                            title: { display: true, text: '客数・組数' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+    }, 100);
+}
+
+// 曜日別売上・客数分析（年・月ごと）
+function renderWeekdayAnalysis(data, selectedMonth) {
+    const weekdays = ['日','月','火','水','木','金','土'];
+    // 曜日ごとに詳細集計
+    const weekdayStats = {};
+    const weekdayGroups = {};
+    const weekdayDetails = {}; // 日付別詳細
+    const weekdayPersons = {}; // 支払い者別
+    
+    data.forEach(row => {
+        const date = row['日付'];
+        const d = new Date(date.replace(/\//g,'-'));
+        const wd = weekdays[d.getDay()];
+        const sales = Number(row['売り上げ']) || 0;
+        const customers = Number(row['客数']) || 0;
+        const person = row['支払い者'];
+        
+        // 基本統計
+        if (!weekdayStats[wd]) weekdayStats[wd] = { sales: 0, customers: 0, count: 0 };
+        weekdayStats[wd].sales += sales;
+        weekdayStats[wd].customers += customers;
+        weekdayStats[wd].count += 1;
+        
+        // 組数
+        if (!weekdayGroups[wd]) weekdayGroups[wd] = {};
+        if (!weekdayGroups[wd][date]) weekdayGroups[wd][date] = {};
+        weekdayGroups[wd][date][person] = true;
+        
+        // 日付別詳細
+        if (!weekdayDetails[wd]) weekdayDetails[wd] = {};
+        if (!weekdayDetails[wd][date]) weekdayDetails[wd][date] = { sales: 0, customers: 0 };
+        weekdayDetails[wd][date].sales += sales;
+        weekdayDetails[wd][date].customers += customers;
+        
+        // 支払い者別（不明除外）
+        if (person !== '不明') {
+            if (!weekdayPersons[wd]) weekdayPersons[wd] = {};
+            if (!weekdayPersons[wd][person]) weekdayPersons[wd][person] = 0;
+            weekdayPersons[wd][person] += sales;
+        }
+    });
+    
+    let html = `<h2>${selectedMonth || ''}の曜日別詳細分析</h2>`;
+    
+    // 各曜日ごとに詳細分析を作成
+    weekdays.forEach(wd => {
+        if (weekdayStats[wd]) {
+            let groupCount = 0;
+            if (weekdayGroups[wd]) {
+                Object.values(weekdayGroups[wd]).forEach(dateGroup => {
+                    groupCount += Object.keys(dateGroup).length;
+                });
+            }
+            
+            // 平均値計算
+            const avgSales = Math.round(weekdayStats[wd].sales / weekdayStats[wd].count);
+            const avgCustomers = Math.round(weekdayStats[wd].customers / weekdayStats[wd].count);
+            
+            html += `<div style="margin-bottom: 30px; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">`;
+            html += `<h3>${wd}曜日の分析</h3>`;
+            
+            // 基本統計
+            html += `<h4>基本統計</h4>`;
+            html += `<table border="1" style="margin-bottom: 15px;"><tr><th>項目</th><th>合計</th><th>平均</th><th>回数</th></tr>`;
+            html += `<tr><td>売上</td><td>${weekdayStats[wd].sales.toLocaleString()}円</td><td>${avgSales.toLocaleString()}円</td><td>${weekdayStats[wd].count}回</td></tr>`;
+            html += `<tr><td>客数</td><td>${weekdayStats[wd].customers}人</td><td>${avgCustomers}人</td><td>-</td></tr>`;
+            html += `<tr><td>組数</td><td>${groupCount}組</td><td>${Math.round(groupCount / weekdayStats[wd].count)}組</td><td>-</td></tr>`;
+            html += '</table>';
+            
+            // グラフ1: 基本統計
+            html += `<canvas id="weekdayChart-basic-${selectedMonth}-${wd}" width="400" height="300"></canvas>`;
+            
+            // 日付別推移
+            if (weekdayDetails[wd]) {
+                html += `<h4>日付別推移</h4>`;
+                html += `<canvas id="weekdayChart-trend-${selectedMonth}-${wd}" width="500" height="300"></canvas>`;
+                html += `<table border="1" style="margin-bottom: 15px;"><tr><th>日付</th><th>売上</th><th>客数</th></tr>`;
+                Object.keys(weekdayDetails[wd]).sort().forEach(date => {
+                    const detail = weekdayDetails[wd][date];
+                    html += `<tr><td>${date}</td><td>${detail.sales.toLocaleString()}円</td><td>${detail.customers}人</td></tr>`;
+                });
+                html += '</table>';
+            }
+            
+            // 支払い者別上位5名
+            if (weekdayPersons[wd]) {
+                const topPersons = Object.entries(weekdayPersons[wd])
+                    .sort((a,b) => b[1] - a[1])
+                    .slice(0, 5);
+                if (topPersons.length > 0) {
+                    html += `<h4>支払い者別上位5名</h4>`;
+                    html += `<canvas id="weekdayChart-person-${selectedMonth}-${wd}" width="400" height="300"></canvas>`;
+                    html += `<table border="1"><tr><th>順位</th><th>支払い者</th><th>合計金額</th></tr>`;
+                    topPersons.forEach(([person, total], idx) => {
+                        html += `<tr><td>${idx+1}</td><td>${person}</td><td>${total.toLocaleString()}円</td></tr>`;
+                    });
+                    html += '</table>';
+                }
+            }
+            
+            html += `</div>`;
+        }
+    });
+    
+    document.getElementById('analysis-weekday').innerHTML = html;
+    
+    // 各曜日ごとにグラフを描画
+    setTimeout(() => {
         weekdays.forEach(wd => {
-            if (ymWeekdayStats[ym][wd]) {
-                // 組数計算
+            if (weekdayStats[wd]) {
                 let groupCount = 0;
-                if (ymWeekdayGroups[ym][wd]) {
-                    Object.values(ymWeekdayGroups[ym][wd]).forEach(dateGroup => {
+                if (weekdayGroups[wd]) {
+                    Object.values(weekdayGroups[wd]).forEach(dateGroup => {
                         groupCount += Object.keys(dateGroup).length;
                     });
                 }
-                html += `<tr><td>${wd}</td><td>${ymWeekdayStats[ym][wd].sales.toLocaleString()}</td><td>${ymWeekdayStats[ym][wd].customers}</td><td>${groupCount}</td></tr>`;
+                
+                // 基本統計グラフ
+                const basicCtx = document.getElementById(`weekdayChart-basic-${selectedMonth}-${wd}`)?.getContext('2d');
+                if (basicCtx) {
+                    new Chart(basicCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['売上', '客数', '組数'],
+                            datasets: [{
+                                label: `${wd}曜日の実績`,
+                                data: [weekdayStats[wd].sales, weekdayStats[wd].customers, groupCount],
+                                backgroundColor: [
+                                    'rgba(78,121,167,0.7)',
+                                    'rgba(242,142,43,0.7)',
+                                    'rgba(88,195,76,0.7)'
+                                ],
+                                borderColor: ['#4e79a7', '#f28e2b', '#58c34c'],
+                                borderWidth: 2
+                            }]
+                        },
+                        options: {
+                            responsive: false,
+                            plugins: {
+                                legend: { display: false },
+                                title: { display: true, text: `${wd}曜日の基本統計` }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                }
+                
+                // 日付別推移グラフ
+                if (weekdayDetails[wd]) {
+                    const trendCtx = document.getElementById(`weekdayChart-trend-${selectedMonth}-${wd}`)?.getContext('2d');
+                    if (trendCtx) {
+                        const dates = Object.keys(weekdayDetails[wd]).sort();
+                        const salesData = dates.map(date => weekdayDetails[wd][date].sales);
+                        const customersData = dates.map(date => weekdayDetails[wd][date].customers);
+                        
+                        new Chart(trendCtx, {
+                            type: 'line',
+                            data: {
+                                labels: dates,
+                                datasets: [
+                                    {
+                                        label: '売上',
+                                        data: salesData,
+                                        borderColor: '#4e79a7',
+                                        backgroundColor: 'rgba(78,121,167,0.2)',
+                                        tension: 0.1,
+                                        yAxisID: 'y'
+                                    },
+                                    {
+                                        label: '客数',
+                                        data: customersData,
+                                        borderColor: '#f28e2b',
+                                        backgroundColor: 'rgba(242,142,43,0.2)',
+                                        tension: 0.1,
+                                        yAxisID: 'y1'
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: false,
+                                plugins: {
+                                    title: { display: true, text: `${wd}曜日の日付別推移` }
+                                },
+                                scales: {
+                                    y: { 
+                                        beginAtZero: true,
+                                        position: 'left',
+                                        title: { display: true, text: '売上（円）' }
+                                    },
+                                    y1: {
+                                        beginAtZero: true,
+                                        position: 'right',
+                                        title: { display: true, text: '客数（人）' },
+                                        grid: { drawOnChartArea: false }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+                
+                // 支払い者別グラフ
+                if (weekdayPersons[wd]) {
+                    const topPersons = Object.entries(weekdayPersons[wd])
+                        .sort((a,b) => b[1] - a[1])
+                        .slice(0, 5);
+                    if (topPersons.length > 0) {
+                        const personCtx = document.getElementById(`weekdayChart-person-${selectedMonth}-${wd}`)?.getContext('2d');
+                        if (personCtx) {
+                            new Chart(personCtx, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: topPersons.map(([person, _]) => person),
+                                    datasets: [{
+                                        data: topPersons.map(([_, total]) => total),
+                                        backgroundColor: [
+                                            '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'
+                                        ],
+                                        borderWidth: 2
+                                    }]
+                                },
+                                options: {
+                                    responsive: false,
+                                    plugins: {
+                                        title: { display: true, text: `${wd}曜日の支払い者別構成` },
+                                        legend: { position: 'right' }
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
             }
         });
-        html += '</table>';
-    });
-    document.getElementById('analysis-weekday').innerHTML = html;
+    }, 100);
+}
+
+// 円グラフ・折れ線グラフの初期化はデータ取得後に必要に応じて行う
+
+function drawMonthlyChart() {
+    // キャッシュ回避のためにダミークエリを付与（認証付き・バックエンドから）
+    authenticatedFetch(`${API_BASE_URL}/sales.csv?ts=` + new Date().getTime())
+            .then(response => response.text())
+            .then(csv => {
+                const lines = csv.trim().split('\n');
+                const header = lines[0].split(',');
+                const monthMap = {};
+                for (let i = 1; i < lines.length; i++) {
+                    const cols = lines[i].split(',');
+                    const date = cols[0];
+                    const customer = parseInt(cols[2], 10) || 0;
+                    const sales = parseInt(cols[3], 10) || 0;
+                    const month = date.split('/')[1];
+                    if (!monthMap[month]) monthMap[month] = { sales: 0, customers: 0, groups: 0 };
+                    monthMap[month].sales += sales;
+                    monthMap[month].customers += customer;
+                    monthMap[month].groups += 1;
+                }
+                const months = Object.keys(monthMap).sort((a,b)=>a-b).map(m => m+'月');
+                const salesArr = Object.values(monthMap).map(m => m.sales);
+                const customersArr = Object.values(monthMap).map(m => m.customers);
+                const groupsArr = Object.values(monthMap).map(m => m.groups);
+
+                // Chart.js描画（小さめサイズ、下部に表示）
+                let chartArea = document.getElementById('chart-area');
+                if (!chartArea) {
+                    // #app-root内にchart-areaがなければ作成
+                    const root = document.getElementById('app-root');
+                    chartArea = document.createElement('div');
+                    chartArea.id = 'chart-area';
+                    chartArea.style.marginTop = '40px';
+                    chartArea.style.display = 'flex';
+                    chartArea.style.justifyContent = 'center';
+                    root.appendChild(chartArea);
+                }
+                chartArea.innerHTML = '<canvas id="multiLineChart" width="350" height="180"></canvas>';
+                const ctx = document.getElementById('multiLineChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: months,
+                        datasets: [
+                            {
+                                label: '売上',
+                                data: salesArr,
+                                borderColor: '#4e79a7',
+                                backgroundColor: 'rgba(78,121,167,0.1)',
+                                fill: false,
+                                tension: 0.2
+                            },
+                            {
+                                label: '客数',
+                                data: customersArr,
+                                borderColor: '#f28e2b',
+                                backgroundColor: 'rgba(242,142,43,0.1)',
+                                fill: false,
+                                tension: 0.2
+                            },
+                            {
+                                label: '組数',
+                                data: groupsArr,
+                                borderColor: '#e15759',
+                                backgroundColor: 'rgba(225,87,89,0.1)',
+                                fill: false,
+                                tension: 0.2
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: '月別売上・客数・組数' }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+
+            // 月別売上推移グラフ
+            const monthlySales = Object.values(monthStats).map(stat => stat.sales);
+            const monthlyLabels = Object.keys(monthStats).map(month => month.slice(5)); // MM
+            const lineCtx = document.getElementById('lineChart').getContext('2d');
+            if (window.lineChart) {
+                window.lineChart.destroy();
+            }
+            window.lineChart = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: monthlyLabels,
+                    datasets: [{
+                        label: '売上',
+                        data: monthlySales,
+                        borderColor: '#4e79a7',
+                        backgroundColor: 'rgba(78,121,167,0.1)',
+                        fill: true
+                    }]
+                }
+            });
+        });
 }
