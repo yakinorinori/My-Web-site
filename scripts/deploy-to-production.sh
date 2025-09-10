@@ -9,7 +9,7 @@ BRANCH=${1:-main}
 PROJECT_NAME="My-Web-site"
 MAC_MINI_USER="akinoriyamaguchi"
 MAC_MINI_HOST="192.168.151.100"
-REPO_URL="https://github.com/yourusername/My-Web-site.git"  # 実際のリポジトリURLに変更
+REPO_URL="https://github.com/yakinorinori/My-Web-site.git"
 DEPLOY_PATH="/Users/${MAC_MINI_USER}/個人事業/${PROJECT_NAME}"
 
 echo "🚀 Mac mini 自動デプロイ開始"
