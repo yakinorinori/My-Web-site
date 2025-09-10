@@ -4,6 +4,13 @@
 .env
 .DS_Store
 
+# データファイル（機密情報）
+*.csv
+data/
+uploads/
+*.xlsx
+*.xls
+
 # Python
 __pycache__/
 *.pyc
@@ -25,6 +32,9 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+venv/
+env/
+ENV/
 
 # Node
 node_modules/
