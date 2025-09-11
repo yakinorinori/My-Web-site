@@ -96,12 +96,28 @@ def index():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        # JSONデータとフォームデータの両方に対応
+        if request.is_json:
+            data = request.get_json()
+            username = data.get('username')
+            password = data.get('password')
+        else:
+            username = request.form['username']
+            password = request.form['password']
         
         if username in USERS and check_password_hash(USERS[username], password):
             session['logged_in'] = True
             session['username'] = username
+            
+            # JSONリクエストの場合はJSONレスポンスを返す
+            if request.is_json:
+                return jsonify({
+                    'success': True,
+                    'message': 'ログインに成功しました',
+                    'username': username
+                })
+            
+            # フォームリクエストの場合はHTMLレスポンスを返す
             return '''
             <script>
             alert('ログインに成功しました！');
@@ -123,6 +139,12 @@ def login():
             </div>
             '''
         else:
+            # エラーレスポンス
+            if request.is_json:
+                return jsonify({
+                    'success': False,
+                    'message': 'ユーザー名またはパスワードが間違っています'
+                }), 401
             return render_template_string(LOGIN_HTML, error='ユーザー名またはパスワードが間違っています')
     
     return render_template_string(LOGIN_HTML)
