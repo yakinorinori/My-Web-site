@@ -463,11 +463,19 @@ function createMainApp() {
 
     // データ取得関数
     function loadData(dataType = 'demo') {
-        const url = `${API_BASE_URL}/sales.csv?type=${dataType}`;
+        // GitHub Pages環境では静的ファイルを直接読み込み
+        const url = IS_GITHUB_PAGES 
+            ? './sales.csv'  // GitHub Pages: 相対パスでCSVファイルを読み込み
+            : `${API_BASE_URL}/sales.csv?type=${dataType}`;
         console.log(`📥 データ取得中: ${dataType} data from ${url}`);
         
-        return authenticatedFetch(url)
-            .then(response => response.text())
+        return (IS_GITHUB_PAGES ? fetch(url) : authenticatedFetch(url))
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.text();
+            })
             .then(text => {
                 const data = csvToArray(text);
                 globalData = data;
@@ -476,7 +484,7 @@ function createMainApp() {
                 const dataInfo = document.getElementById('data-info');
                 if (dataInfo) {
                     const recordCount = data.length;
-                    const totalSales = data.reduce((sum, row) => sum + parseInt(row['売上'] || 0), 0);
+                    const totalSales = data.reduce((sum, row) => sum + parseInt(row['売り上げ'] || 0), 0);
                     dataInfo.innerHTML = `
                         ${dataType === 'real' ? '💼 実データ' : '📋 デモデータ'}: 
                         ${recordCount}件のレコード, 
@@ -484,8 +492,10 @@ function createMainApp() {
                     `;
                 }
                 
-                // プルダウンの選択肢をセット
-                const months = Array.from(new Set(data.map(row => row['日付'].slice(0,7)))).sort();
+                // プルダウンの選択肢をセット（エラーハンドリング追加）
+                const months = Array.from(new Set(
+                    data.filter(row => row && row['日付']).map(row => row['日付'].slice(0,7))
+                )).sort();
                 monthSelect.innerHTML = '';
                 months.forEach(m => {
                     const opt = document.createElement('option');
@@ -1384,9 +1394,18 @@ function renderWeekdayAnalysis(data, selectedMonth) {
 // 円グラフ・折れ線グラフの初期化はデータ取得後に必要に応じて行う
 
 function drawMonthlyChart() {
-    // キャッシュ回避のためにダミークエリを付与（認証付き・バックエンドから）
-    authenticatedFetch(`${API_BASE_URL}/sales.csv?ts=` + new Date().getTime())
-            .then(response => response.text())
+    // GitHub Pages環境では静的CSVファイルを読み込み
+    const url = IS_GITHUB_PAGES 
+        ? './sales.csv'
+        : `${API_BASE_URL}/sales.csv?ts=` + new Date().getTime();
+    
+    (IS_GITHUB_PAGES ? fetch(url) : authenticatedFetch(url))
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.text();
+            })
             .then(csv => {
                 const lines = csv.trim().split('\n');
                 const header = lines[0].split(',');
