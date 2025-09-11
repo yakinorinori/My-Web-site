@@ -10,14 +10,21 @@ from flask_cors import CORS
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=['http://localhost:8080', 'http://localhost:8081', 'http://192.168.151.100:8082', 'http://192.168.151.100:8083'])
+CORS(app, supports_credentials=True, origins=[
+    'http://localhost:8080', 
+    'http://localhost:8081', 
+    'http://192.168.151.100:8082', 
+    'http://192.168.151.100:8083',
+    'https://yakinorinori.github.io'  # GitHub Pages HTTPS対応
+])
 app.secret_key = 'your-secret-key-change-this-in-production'  # 本番環境では変更必須
 
 # ユーザー認証情報（本番環境では外部ファイルまたはデータベースに保存）
 USERS = {
     'user1': generate_password_hash('password123', method='pbkdf2:sha256'),
     'user2': generate_password_hash('password456', method='pbkdf2:sha256'), 
-    'user3': generate_password_hash('password789', method='pbkdf2:sha256')
+    'user3': generate_password_hash('password789', method='pbkdf2:sha256'),
+    'kiradan': generate_password_hash('kiradan2024!', method='pbkdf2:sha256')  # 本番用ユーザー
 }
 
 # 認証デコレータ
@@ -217,13 +224,24 @@ def fetch_sales():
 
 if __name__ == '__main__':
     # セキュリティ設定
-    app.config['SESSION_COOKIE_SECURE'] = False  # 開発環境ではHTTPを許可
+    app.config['SESSION_COOKIE_SECURE'] = True  # HTTPS必須
     app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_SAMESITE'] = 'Strict'
+    app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # CORS対応
     
-    print("🔒 セキュア売上管理システム バックエンド")
-    print("📍 アクセス: http://localhost:3001")
+    # SSL証明書のパス
+    ssl_cert = 'cert.pem'
+    ssl_key = 'key.pem'
+    
+    # SSL証明書が存在しない場合は生成
+    if not os.path.exists(ssl_cert) or not os.path.exists(ssl_key):
+        print("🔐 SSL証明書を生成中...")
+        os.system('openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365 -subj "/C=JP/ST=Tokyo/L=Tokyo/O=MyCompany/CN=localhost"')
+    
+    print("🔒 セキュア売上管理システム バックエンド (HTTPS)")
+    print("📍 アクセス: https://192.168.151.100:3001")
     print("🛡️  認証が有効になっています")
+    print("👤 本番ユーザー: kiradan / kiradan2024!")
     
-    app.run(debug=True, port=3001, host='0.0.0.0')
+    # HTTPSサーバーとして起動
+    app.run(debug=True, port=3001, host='0.0.0.0', ssl_context=(ssl_cert, ssl_key))
 

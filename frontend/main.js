@@ -3,8 +3,10 @@ let globalData = [];
 
 // API設定 - 環境に応じて動的に設定
 const API_BASE_URL = window.location.hostname === 'yakinorinori.github.io' 
-    ? '' // GitHub Pages用: 相対パスでローカルファイルを使用
-    : `http://${window.location.hostname}:3001`;  // ローカル開発用
+    ? '' // GitHub Pages用: デモモードでHTTP通信なし
+    : window.location.protocol === 'https:' 
+        ? `https://${window.location.hostname}:3001`  // HTTPS環境
+        : `http://${window.location.hostname}:3001`;  // HTTP環境（開発用）
 
 // GitHub Pages用のフォールバック機能
 const IS_GITHUB_PAGES = window.location.hostname === 'yakinorinori.github.io';

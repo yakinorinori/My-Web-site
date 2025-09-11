@@ -72,8 +72,17 @@ else
 fi
 
 # バックエンドサーバーを起動
-echo "🚀 バックエンドサーバーを起動中..."
+echo "🚀 HTTPSバックエンドサーバーを起動中..."
 cd "$BACKEND_DIR"
+
+# SSL証明書を生成（存在しない場合）
+if [ ! -f "cert.pem" ] || [ ! -f "key.pem" ]; then
+    echo "🔐 SSL証明書を生成中..."
+    openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365 \
+        -subj "/C=JP/ST=Tokyo/L=Tokyo/O=MyCompany/CN=$(ipconfig getifaddr en0)"
+    echo "✅ SSL証明書生成完了"
+fi
+
 nohup python app.py > "$LOG_DIR/backend.log" 2>&1 &
 BACKEND_PID=$!
 echo "$BACKEND_PID" > "$PID_FILE"
@@ -81,8 +90,9 @@ echo "$BACKEND_PID" > "$PID_FILE"
 # 起動確認
 sleep 5
 if ps -p "$BACKEND_PID" > /dev/null 2>&1; then
-    echo "✅ バックエンドサーバー起動成功 (PID: $BACKEND_PID)"
-    echo "📍 アクセス可能: http://$(ipconfig getifaddr en0):3001"
+    echo "✅ HTTPSバックエンドサーバー起動成功 (PID: $BACKEND_PID)"
+    echo "📍 アクセス可能: https://$(ipconfig getifaddr en0):3001"
+    echo "👤 本番ユーザー: kiradan / kiradan2024!"
 else
     echo "❌ バックエンドサーバー起動失敗"
     exit 1
@@ -94,8 +104,9 @@ echo "🎉 Mac mini 常時稼働システム起動完了！"
 echo ""
 echo "📋 アクセス情報:"
 echo "   🌐 フロントエンド: https://yakinorinori.github.io/My-Web-site"
-echo "   🔧 バックエンド: http://$(ipconfig getifaddr en0):3001"
-echo "   📊 ヘルスチェック: http://$(ipconfig getifaddr en0):3001/health"
+echo "   🔧 バックエンド: https://$(ipconfig getifaddr en0):3001"
+echo "   📊 ヘルスチェック: https://$(ipconfig getifaddr en0):3001/health"
+echo "   👤 本番ユーザー: kiradan / kiradan2024!"
 echo ""
 echo "📄 ログファイル:"
 echo "   Backend: $LOG_DIR/backend.log"
