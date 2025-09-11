@@ -7,11 +7,15 @@ set -e
 
 echo "🖥️  Mac mini 常時稼働システム起動中..."
 
-# 基本設定
-PROJECT_DIR="/Users/x21095xx/workspace"
+# 基本設定 - ユーザー名を動的に取得
+CURRENT_USER=$(whoami)
+PROJECT_DIR="/Users/$CURRENT_USER/workspace"
 BACKEND_DIR="$PROJECT_DIR/backend"
 LOG_DIR="$PROJECT_DIR/logs"
 PID_FILE="$LOG_DIR/backend.pid"
+
+echo "👤 現在のユーザー: $CURRENT_USER"
+echo "📁 プロジェクトディレクトリ: $PROJECT_DIR"
 
 # ログディレクトリを作成
 mkdir -p "$LOG_DIR"

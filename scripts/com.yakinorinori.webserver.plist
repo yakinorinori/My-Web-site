@@ -8,7 +8,7 @@
     <key>ProgramArguments</key>
     <array>
         <string>/bin/bash</string>
-        <string>/Users/x21095xx/workspace/scripts/mac-mini-startup.sh</string>
+        <string>/Users/akinoriyamaguchi/workspace/scripts/mac-mini-startup.sh</string>
     </array>
     
     <key>RunAtLoad</key>
@@ -21,13 +21,13 @@
     </dict>
     
     <key>StandardOutPath</key>
-    <string>/Users/x21095xx/workspace/logs/startup.log</string>
+    <string>/Users/akinoriyamaguchi/workspace/logs/startup.log</string>
     
     <key>StandardErrorPath</key>
-    <string>/Users/x21095xx/workspace/logs/startup.error.log</string>
+    <string>/Users/akinoriyamaguchi/workspace/logs/startup.error.log</string>
     
     <key>WorkingDirectory</key>
-    <string>/Users/x21095xx/workspace</string>
+    <string>/Users/akinoriyamaguchi/workspace</string>
     
     <key>StartInterval</key>
     <integer>30</integer>
