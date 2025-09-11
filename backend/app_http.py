@@ -4,7 +4,7 @@ import os
 from functools import wraps
 import hashlib
 from datetime import datetime
-# 売上管理Webサイトのバックエンド
+# 売上管理Webサイトのバックエンド（HTTP版）
 from flask import Flask, request, jsonify, session, render_template_string
 from flask_cors import CORS
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -265,25 +265,10 @@ def fetch_sales():
     return jsonify({"status": "success", "count": len(sales)})
 
 if __name__ == '__main__':
-    # セキュリティ設定
-    app.config['SESSION_COOKIE_SECURE'] = True  # HTTPS必須
-    app.config['SESSION_COOKIE_HTTPONLY'] = True
-    app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # CORS対応
-    
-    # SSL証明書のパス
-    ssl_cert = 'cert.pem'
-    ssl_key = 'key.pem'
-    
-    # SSL証明書が存在しない場合は生成
-    if not os.path.exists(ssl_cert) or not os.path.exists(ssl_key):
-        print("🔐 SSL証明書を生成中...")
-        os.system('openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365 -subj "/C=JP/ST=Tokyo/L=Tokyo/O=MyCompany/CN=localhost"')
-    
-    print("🔒 セキュア売上管理システム バックエンド (HTTPS)")
-    print("📍 アクセス: https://192.168.151.100:3001")
+    print("🌐 売上管理システム バックエンド (HTTP)")
+    print("📍 アクセス: http://localhost:3001")
     print("🛡️  認証が有効になっています")
     print("👤 本番ユーザー: kiradan / kiradan2024!")
     
-    # HTTPSサーバーとして起動
-    app.run(debug=True, port=3001, host='0.0.0.0', ssl_context=(ssl_cert, ssl_key))
-
+    # HTTPサーバーとして起動
+    app.run(debug=True, port=3001, host='0.0.0.0')
