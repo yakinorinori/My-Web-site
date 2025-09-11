@@ -3,13 +3,23 @@ let globalData = [];
 
 // API設定 - 環境に応じて動的に設定
 const API_BASE_URL = window.location.hostname === 'yakinorinori.github.io' 
-    ? 'http://192.168.151.100:3001'  // GitHub Pages用（Mac miniサーバー）
+    ? '' // GitHub Pages用: 相対パスでローカルファイルを使用
     : `http://${window.location.hostname}:3001`;  // ローカル開発用
+
+// GitHub Pages用のフォールバック機能
+const IS_GITHUB_PAGES = window.location.hostname === 'yakinorinori.github.io';
 
 // 認証チェック機能
 async function checkAuthentication() {
     try {
         console.log('🔍 認証状態をチェック中...');
+        
+        // GitHub Pagesの場合は認証をスキップしてデモモードで動作
+        if (IS_GITHUB_PAGES) {
+            console.log('📱 GitHub Pages検出: デモモードで動作中');
+            return true;  // デモモードでは常に認証成功として扱う
+        }
+        
         const response = await fetch(`${API_BASE_URL}/check_auth`, {
             method: 'GET',
             credentials: 'include'
@@ -43,6 +53,39 @@ async function checkAuthentication() {
     }
 }
 
+function showDemoMessage() {
+    console.log('🎬 デモメッセージを表示中...');
+    document.getElementById('app-root').innerHTML = `
+        <div style="text-align: center; padding: 50px; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; min-height: 100vh;">
+            <h1>📊 売上管理システム - デモ版</h1>
+            <div style="background: white; color: #333; max-width: 600px; margin: 30px auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <h2>🌐 GitHub Pages デモモード</h2>
+                <p>このサイトはGitHub Pagesでホストされており、デモ用のサンプルデータを表示しています。</p>
+                
+                <div style="margin: 20px 0; padding: 15px; background: #e8f5e8; border-radius: 5px; border-left: 4px solid #4CAF50;">
+                    <h3>🎯 機能紹介</h3>
+                    <ul style="text-align: left; margin: 10px 0;">
+                        <li>📈 売上データのグラフ表示</li>
+                        <li>🍰 円グラフ、棒グラフ、線グラフ対応</li>
+                        <li>📱 レスポンシブデザイン</li>
+                        <li>🔐 認証システム（ローカル環境）</li>
+                    </ul>
+                </div>
+                
+                <button onclick="loadDemoData()" 
+                        style="background: #4CAF50; color: white; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 10px;">
+                    📊 デモデータを表示
+                </button>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
+                    <strong>💡 フル機能版</strong><br>
+                    完全な認証機能とリアルタイムデータは、ローカル環境（Mac mini）で利用可能です。
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function showLoginMessage() {
     console.log('🔐 ログインメッセージを表示中...');
     const loginUrl = `${API_BASE_URL}/login`;
@@ -65,6 +108,51 @@ function showLoginMessage() {
             </div>
         </div>
     `;
+}
+
+// デモデータ読み込み機能
+function loadDemoData() {
+    console.log('🎬 デモデータを読み込み中...');
+    
+    // GitHub Pages用のサンプルデータ
+    const demoData = [
+        { 日付: "2024-01-01", 商品名: "サンプル商品A", 販売数量: 10, 単価: 1000, 売上: 10000 },
+        { 日付: "2024-01-02", 商品名: "サンプル商品B", 販売数量: 5, 単価: 2000, 売上: 10000 },
+        { 日付: "2024-01-03", 商品名: "サンプル商品C", 販売数量: 8, 単価: 1500, 売上: 12000 },
+        { 日付: "2024-01-04", 商品名: "サンプル商品A", 販売数量: 12, 単価: 1000, 売上: 12000 },
+        { 日付: "2024-01-05", 商品名: "サンプル商品D", 販売数量: 3, 単価: 3000, 売上: 9000 },
+        { 日付: "2024-01-06", 商品名: "サンプル商品B", 販売数量: 7, 単価: 2000, 売上: 14000 },
+        { 日付: "2024-01-07", 商品名: "サンプル商品C", 販売数量: 15, 単価: 1500, 売上: 22500 },
+        { 日付: "2024-01-08", 商品名: "サンプル商品A", 販売数量: 20, 単価: 1000, 売上: 20000 }
+    ];
+    
+    globalData = demoData;
+    
+    // デモ用ユーザー情報を表示
+    showDemoUserInfo();
+    
+    // メインアプリケーションを初期化
+    createMainApp();
+    
+    // グラフを生成
+    createCharts();
+    
+    console.log('✅ デモデータ読み込み完了');
+}
+
+function showDemoUserInfo() {
+    // デモ用ユーザー情報表示
+    const userInfo = document.createElement('div');
+    userInfo.id = 'user-info';
+    userInfo.style.cssText = 'position: fixed; top: 10px; right: 10px; background: #4CAF50; color: white; padding: 10px 20px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 1000;';
+    userInfo.innerHTML = `
+        🎬 デモモード 
+        <button onclick="location.reload()" 
+                style="margin-left: 10px; background: white; color: #4CAF50; border: none; padding: 5px 10px; border-radius: 10px; cursor: pointer; font-size: 12px;">
+            リセット
+        </button>
+    `;
+    document.body.appendChild(userInfo);
 }
 
 function showUserInfo(username) {
@@ -119,22 +207,28 @@ async function initializeApp() {
         return;
     }
     
+    // GitHub Pagesの場合はデモデータで初期化、そうでなければ通常の処理
+    if (IS_GITHUB_PAGES) {
+        console.log('🎬 GitHub Pagesモード: デモデータで初期化');
+        return loadDemoData(); // デモデータを読み込み
+    }
+    
     // 認証成功後、アプリのUIを構築
-    renderApp();
+    createMainApp();
 }
 window.onload = function() {
     // 認証チェックしてからアプリ初期化
     initializeApp();
 }
 
-function renderApp() {
+function createMainApp() {
     // ルート要素取得
     const root = document.getElementById('app-root');
     root.innerHTML = '';
 
     // タイトル
     const h1 = document.createElement('h1');
-    h1.textContent = '売上管理Webサイト';
+    h1.textContent = IS_GITHUB_PAGES ? '📊 売上管理Webサイト - デモ版' : '売上管理Webサイト';
     root.appendChild(h1);
 
     // ボタン
