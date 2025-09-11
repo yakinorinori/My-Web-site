@@ -52,7 +52,23 @@ pip install -q Flask Flask-CORS Werkzeug
 # データファイルを確認
 if [ ! -f "$BACKEND_DIR/data/sales.csv" ]; then
     echo "📊 サンプルデータを配置中..."
-    cp "$PROJECT_DIR/frontend/sales.sample.csv" "$BACKEND_DIR/data/sales.csv"
+    if [ -f "$PROJECT_DIR/frontend/sales.sample.csv" ]; then
+        cp "$PROJECT_DIR/frontend/sales.sample.csv" "$BACKEND_DIR/data/sales.csv"
+        echo "✅ サンプルデータ配置完了"
+    else
+        echo "⚠️  サンプルファイルが見つかりません。基本データを作成中..."
+        cat > "$BACKEND_DIR/data/sales.csv" << 'EOF'
+日付,商品名,販売数量,単価,売上
+2024-01-01,サンプル商品A,10,1000,10000
+2024-01-02,サンプル商品B,5,2000,10000
+2024-01-03,サンプル商品C,8,1500,12000
+2024-01-04,サンプル商品A,12,1000,12000
+2024-01-05,サンプル商品D,3,3000,9000
+EOF
+        echo "✅ 基本データ作成完了"
+    fi
+else
+    echo "✅ データファイルは既に存在します"
 fi
 
 # バックエンドサーバーを起動
