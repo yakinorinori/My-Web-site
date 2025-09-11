@@ -1,9 +1,11 @@
 # 売上管理Webシステム
 
+🚀 **[システムを使用する →](https://yakinorinori.github.io/My-Web-site/)**
+
 ## 📋 概要
 
-Mac miniをサーバーとして利用した売上管理Webアプリケーション。
-Chart.jsによるデータ視覚化と認証機能を備えています。
+24時間稼働のMac miniサーバーとGitHub Pagesを組み合わせた売上管理Webアプリケーション。
+Chart.jsによるデータ視覚化と認証機能を備え、世界中どこからでもアクセス可能です。
 
 ## 🏗️ アーキテクチャ
 
@@ -57,38 +59,60 @@ cd ../backend && python3 app.py &
 ./scripts/monitor-servers.sh
 ```
 
-## 🔐 認証情報
+## � 使用方法
+
+1. **すぐに試す**: [システムページ](https://yakinorinori.github.io/My-Web-site/) にアクセス
+2. **デモデータ**: GitHub Pages版ではサンプルデータで機能を確認
+3. **ローカル利用**: 同一ネットワーク内でMac miniに直接接続で完全機能
+
+## �🔐 認証情報 (ローカル用)
 
 - **user1**: password123
 - **user2**: password456  
 - **user3**: password789
 
-## 🌐 アクセス
+## 🌐 アクセス方法
 
-- **フロントエンド**: http://192.168.151.100:8083
-- **バックエンドAPI**: http://192.168.151.100:3001
+### 🌍 インターネットからアクセス
+**👉 [https://yakinorinori.github.io/My-Web-site/](https://yakinorinori.github.io/My-Web-site/)**
+- 世界中どこからでもアクセス可能
+- HTTPS安全接続
+- デモデータで機能確認
+
+### 🏠 ローカルネットワークからアクセス
+- **Mac mini サーバー**: http://192.168.151.100:3001
+- 実際のデータベース機能
+- 完全な機能利用
 
 ## 📊 機能
 
+- ✅ GitHub Pages 公開サイト
+- ✅ Mac mini 24時間サーバー
+- ✅ Mixed Content エラー対応
+- ✅ 自動デプロイシステム
+- ✅ デモモード実装
 - ✅ ユーザー認証・セッション管理
 - ✅ CSV データインポート
 - ✅ Chart.js による多様なグラフ表示
 - ✅ レスポンシブデザイン
 - ✅ RESTful API
-- ✅ 自動デプロイ・監視
 
-## 🛠️ 技術スタック
+## 🛠️ システム構成
 
+### 🔄 ハイブリッド構成
+- **GitHub Pages**: 公開ウェブサイト (HTTPS)
+- **Mac mini サーバー**: 24時間バックエンド稼働
+- **自動デプロイ**: GitHub Actions
+
+### 💻 技術スタック
 - **フロントエンド**: HTML5, CSS3, JavaScript, Chart.js
 - **バックエンド**: Python, Flask, Flask-CORS
-- **サーバー**: Mac mini (macOS)
-- **CI/CD**: GitHub Actions (予定)
-- **監視**: カスタムシェルスクリプト
+- **ホスティング**: GitHub Pages + Mac mini
+- **CI/CD**: GitHub Actions
+- **認証**: セッション管理
 
-## 📋 TODO
+## 🎯 今後の予定
 
-- [ ] HTTPS対応 (Let's Encrypt)
 - [ ] データベース導入 (PostgreSQL)
-- [ ] GitHub Actions CI/CD
-- [ ] Docker対応
 - [ ] ログ分析ダッシュボード
+- [ ] モバイルアプリ対応
