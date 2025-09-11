@@ -1,8 +1,10 @@
 // ページロード時にsales.csvを自動取得して表示
 let globalData = [];
 
-// API設定
-const API_BASE_URL = 'http://192.168.151.100:3001';
+// API設定 - 環境に応じて動的に設定
+const API_BASE_URL = window.location.hostname === 'yakinorinori.github.io' 
+    ? 'http://192.168.151.100:3001'  // GitHub Pages用（Mac miniサーバー）
+    : `http://${window.location.hostname}:3001`;  // ローカル開発用
 
 // 認証チェック機能
 async function checkAuthentication() {
