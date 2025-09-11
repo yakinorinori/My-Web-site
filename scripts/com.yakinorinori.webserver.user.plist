@@ -14,9 +14,6 @@
     <key>RunAtLoad</key>
     <true/>
     
-    <key>KeepAlive</key>
-    <true/>
-    
     <key>StandardOutPath</key>
     <string>/Users/akinoriyamaguchi/workspace/logs/startup.log</string>
     
@@ -25,5 +22,8 @@
     
     <key>WorkingDirectory</key>
     <string>/Users/akinoriyamaguchi/workspace</string>
+    
+    <key>ThrottleInterval</key>
+    <integer>60</integer>
 </dict>
 </plist>

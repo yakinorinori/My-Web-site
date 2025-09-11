@@ -24,10 +24,11 @@ mkdir -p "$LOG_DIR"
 if [ -f "$PID_FILE" ]; then
     OLD_PID=$(cat "$PID_FILE")
     if ps -p "$OLD_PID" > /dev/null 2>&1; then
-        echo "既存のサーバー (PID: $OLD_PID) を停止中..."
-        kill "$OLD_PID"
-        sleep 2
+        echo "✅ サーバーは既に稼働中です (PID: $OLD_PID)"
+        echo "📍 アクセス可能: http://$(ipconfig getifaddr en0 2>/dev/null || echo "localhost"):3001"
+        exit 0
     fi
+    echo "🗑️  古いPIDファイルを削除"
     rm -f "$PID_FILE"
 fi
 
