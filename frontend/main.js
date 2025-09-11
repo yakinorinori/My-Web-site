@@ -1,5 +1,6 @@
 // ページロード時にsales.csvを自動取得して表示
 // 更新: 2025-09-11 ログイン画面修正
+console.log('🚀 main.js読み込み開始');
 let globalData = [];
 
 // API設定 - 環境に応じて動的に設定
@@ -281,6 +282,10 @@ async function authenticatedFetch(url, options = {}) {
 
 // アプリケーション初期化（認証チェック後）
 async function initializeApp() {
+    console.log('🔧 initializeApp()開始');
+    console.log('🌐 hostname:', window.location.hostname);
+    console.log('📍 IS_GITHUB_PAGES:', IS_GITHUB_PAGES);
+    
     // GitHub Pagesの場合
     if (IS_GITHUB_PAGES) {
         console.log('🌐 GitHub Pagesモード');
@@ -289,16 +294,19 @@ async function initializeApp() {
         const isAuthenticated = await checkAuthentication();
         if (!isAuthenticated) {
             // 未認証の場合はログイン画面を表示
+            console.log('🔑 ログイン画面を表示');
             showGitHubPagesLogin();
             return;
         }
         
         // 認証済みの場合はメインアプリを表示
+        console.log('✅ 認証済み - メインアプリ表示');
         createMainApp();
         return;
     }
     
     // Mac mini環境では認証チェック
+    console.log('🖥️ Mac mini環境モード');
     const isAuthenticated = await checkAuthentication();
     if (!isAuthenticated) {
         return; // showLoginMessage()は既にcheckAuthentication内で呼ばれる
@@ -308,6 +316,7 @@ async function initializeApp() {
     createMainApp();
 }
 window.onload = function() {
+    console.log('🌟 ページ読み込み完了 - initializeApp()を実行');
     // 認証チェックしてからアプリ初期化
     initializeApp();
 }
