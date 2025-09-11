@@ -16,10 +16,20 @@ async function checkAuthentication() {
     try {
         console.log('🔍 認証状態をチェック中...');
         
-        // GitHub Pagesの場合は認証をスキップしてデモモードで動作
+        // GitHub Pagesの場合はローカルストレージをチェック
         if (IS_GITHUB_PAGES) {
-            console.log('📱 GitHub Pages検出: デモモードで動作中');
-            return true;  // デモモードでは常に認証成功として扱う
+            console.log('📱 GitHub Pages検出: ローカル認証状態をチェック');
+            const isAuth = localStorage.getItem('githubPagesAuth') === 'true';
+            const username = localStorage.getItem('githubPagesUser');
+            
+            if (isAuth && username) {
+                console.log('✅ GitHub Pages認証済み:', username);
+                showUserInfo(username);
+                return true;
+            } else {
+                console.log('❌ GitHub Pages未認証');
+                return false;
+            }
         }
         
         const response = await fetch(`${API_BASE_URL}/check_auth`, {
@@ -52,6 +62,73 @@ async function checkAuthentication() {
         console.error('🚨 認証チェックエラー:', error);
         showLoginMessage();
         return false;
+    }
+}
+
+function showGitHubPagesLogin() {
+    console.log('🌐 GitHub Pagesログイン画面を表示中...');
+    document.getElementById('app-root').innerHTML = `
+        <div style="text-align: center; padding: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; min-height: 100vh;">
+            <h1>🔐 売上管理システム</h1>
+            
+            <div style="background: white; color: #333; max-width: 400px; margin: 30px auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <h2>ログイン</h2>
+                <form id="login-form" style="text-align: left;">
+                    <div style="margin-bottom: 15px;">
+                        <label for="username">ユーザー名:</label>
+                        <input type="text" id="username" name="username" 
+                               style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;"
+                               placeholder="kiradan">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label for="password">パスワード:</label>
+                        <input type="password" id="password" name="password" 
+                               style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;"
+                               placeholder="パスワードを入力">
+                    </div>
+                    <button type="submit" style="width: 100%; background: #667eea; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
+                        ログイン
+                    </button>
+                </form>
+                
+                <div id="login-error" style="margin-top: 15px; color: #dc3545; display: none;"></div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 5px; border-left: 4px solid #4CAF50;">
+                    <strong>💡 デモ用アカウント</strong><br>
+                    ユーザー名: kiradan<br>
+                    パスワード: kiradan2024!
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // ログインフォームのイベントリスナー
+    document.getElementById('login-form').addEventListener('submit', handleGitHubPagesLogin);
+}
+
+async function handleGitHubPagesLogin(event) {
+    event.preventDefault();
+    
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('login-error');
+    
+    console.log('🔑 GitHub Pagesログイン試行:', username);
+    
+    // 簡易認証（GitHub Pages用）
+    if (username === 'kiradan' && password === 'kiradan2024!') {
+        console.log('✅ GitHub Pagesログイン成功');
+        
+        // ローカルストレージに認証状態を保存
+        localStorage.setItem('githubPagesAuth', 'true');
+        localStorage.setItem('githubPagesUser', username);
+        
+        // メインアプリを表示
+        createMainApp();
+    } else {
+        console.log('❌ GitHub Pagesログイン失敗');
+        errorDiv.textContent = 'ユーザー名またはパスワードが正しくありません';
+        errorDiv.style.display = 'block';
     }
 }
 
@@ -203,16 +280,27 @@ async function authenticatedFetch(url, options = {}) {
 
 // アプリケーション初期化（認証チェック後）
 async function initializeApp() {
-    // 認証チェック
-    const isAuthenticated = await checkAuthentication();
-    if (!isAuthenticated) {
+    // GitHub Pagesの場合
+    if (IS_GITHUB_PAGES) {
+        console.log('🌐 GitHub Pagesモード');
+        
+        // 認証状態をチェック
+        const isAuthenticated = await checkAuthentication();
+        if (!isAuthenticated) {
+            // 未認証の場合はログイン画面を表示
+            showGitHubPagesLogin();
+            return;
+        }
+        
+        // 認証済みの場合はメインアプリを表示
+        createMainApp();
         return;
     }
     
-    // GitHub Pagesの場合はデモデータで初期化、そうでなければ通常の処理
-    if (IS_GITHUB_PAGES) {
-        console.log('🎬 GitHub Pagesモード: デモデータで初期化');
-        return loadDemoData(); // デモデータを読み込み
+    // Mac mini環境では認証チェック
+    const isAuthenticated = await checkAuthentication();
+    if (!isAuthenticated) {
+        return; // showLoginMessage()は既にcheckAuthentication内で呼ばれる
     }
     
     // 認証成功後、アプリのUIを構築
@@ -282,25 +370,60 @@ function createMainApp() {
         chartArea.style.marginTop = '40px';
         chartArea.style.display = 'flex';
         chartArea.style.justifyContent = 'center';
+        
+        // データソース選択ボタンを追加
+        const dataSourceSelector = document.createElement('div');
+        dataSourceSelector.style.cssText = 'margin: 20px 0; text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;';
+        dataSourceSelector.innerHTML = `
+            <h3>📊 データソース選択</h3>
+            <button id="demo-data-btn" class="data-source-btn" style="margin: 5px; padding: 10px 20px; background: #17a2b8; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                📋 デモデータ
+            </button>
+            <button id="real-data-btn" class="data-source-btn" style="margin: 5px; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                💼 実データ（Mac mini）
+            </button>
+            <div id="data-info" style="margin-top: 10px; font-size: 14px; color: #6c757d;"></div>
+        `;
+        root.appendChild(dataSourceSelector);
         root.appendChild(chartArea);
+        
+        // デフォルトでデモデータを読み込み
+        loadData('demo');
     }
 
-    // sales.csv取得（認証付き・バックエンドから）
-    authenticatedFetch(`${API_BASE_URL}/sales.csv`)
-        .then(response => response.text())
-        .then(text => {
-            const data = csvToArray(text);
-            globalData = data;
-            // プルダウンの選択肢をセット
-            const months = Array.from(new Set(data.map(row => row['日付'].slice(0,7)))).sort();
-            monthSelect.innerHTML = '';
-            months.forEach(m => {
-                const opt = document.createElement('option');
-                opt.value = m;
-                opt.textContent = m;
-                monthSelect.appendChild(opt);
-            });
-            // デフォルトは最新月
+    // データ取得関数
+    function loadData(dataType = 'demo') {
+        const url = `${API_BASE_URL}/sales.csv?type=${dataType}`;
+        console.log(`📥 データ取得中: ${dataType} data from ${url}`);
+        
+        return authenticatedFetch(url)
+            .then(response => response.text())
+            .then(text => {
+                const data = csvToArray(text);
+                globalData = data;
+                
+                // データ情報を更新
+                const dataInfo = document.getElementById('data-info');
+                if (dataInfo) {
+                    const recordCount = data.length;
+                    const totalSales = data.reduce((sum, row) => sum + parseInt(row['売上'] || 0), 0);
+                    dataInfo.innerHTML = `
+                        ${dataType === 'real' ? '💼 実データ' : '📋 デモデータ'}: 
+                        ${recordCount}件のレコード, 
+                        総売上: ¥${totalSales.toLocaleString()}
+                    `;
+                }
+                
+                // プルダウンの選択肢をセット
+                const months = Array.from(new Set(data.map(row => row['日付'].slice(0,7)))).sort();
+                monthSelect.innerHTML = '';
+                months.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m;
+                    opt.textContent = m;
+                    monthSelect.appendChild(opt);
+                });
+                // デフォルトは最新月
             if (months.length > 0) monthSelect.value = months[months.length-1];
 
             showMonthAnalysis();
@@ -1292,4 +1415,25 @@ function drawMonthlyChart() {
                 }
             });
         });
+}
+
+// データソース選択ボタンのイベントリスナー
+document.addEventListener('DOMContentLoaded', function() {
+    const demoBtn = document.getElementById('demo-data-btn');
+    const realBtn = document.getElementById('real-data-btn');
+    
+    if (demoBtn) {
+        demoBtn.addEventListener('click', () => {
+            console.log('🎬 デモデータを選択');
+            loadData('demo');
+        });
+    }
+    
+    if (realBtn) {
+        realBtn.addEventListener('click', () => {
+            console.log('💼 実データを選択');
+            loadData('real');
+        });
+    }
+});
 }

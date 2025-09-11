@@ -98,7 +98,31 @@ LOGIN_HTML = '''
 def index():
     if 'logged_in' not in session or not session['logged_in']:
         return render_template_string(LOGIN_HTML), 200
-    return "売上管理Webサイト バックエンドAPI - ログイン済み"
+    
+    # ログイン済みの場合、GitHub Pagesにリダイレクト
+    username = session.get('username', 'ユーザー')
+    return '''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>ログイン成功</title>
+        <meta http-equiv="refresh" content="2;url=https://yakinorinori.github.io/My-Web-site/">
+        <style>
+            body { font-family: Arial; text-align: center; padding: 50px; background: #f0f8ff; }
+            .success { background: white; padding: 30px; border-radius: 10px; margin: 50px auto; max-width: 400px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+            .btn { background: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; margin: 10px; display: inline-block; }
+        </style>
+    </head>
+    <body>
+        <div class="success">
+            <h1>🎉 ログイン成功！</h1>
+            <p><strong>ユーザー:</strong> ''' + username + '''</p>
+            <p>2秒後にシステムに移動します...</p>
+            <a href="https://yakinorinori.github.io/My-Web-site/" class="btn">🚀 今すぐアクセス</a>
+        </div>
+    </body>
+    </html>
+    '''
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -182,7 +206,14 @@ def get_sales():
 @app.route('/sales_csv', methods=['GET'])
 @login_required
 def get_sales_csv():
-    csv_path = os.path.join('data', 'sales.csv')
+    # 本番データかデモデータかをクエリパラメータで選択
+    data_type = request.args.get('type', 'demo')  # demo | real
+    
+    if data_type == 'real':
+        csv_path = os.path.join('data', 'sales_real.csv')
+    else:
+        csv_path = os.path.join('data', 'sales.csv')
+    
     sales = []
     if os.path.exists(csv_path):
         with open(csv_path, 'r', encoding='utf-8') as f:
@@ -195,14 +226,23 @@ def get_sales_csv():
 @app.route('/sales.csv', methods=['GET'])
 @login_required
 def get_sales_csv_file():
-    csv_path = os.path.join('data', 'sales.csv')
+    # 本番データかデモデータかをクエリパラメータで選択
+    data_type = request.args.get('type', 'demo')  # demo | real
+    
+    if data_type == 'real':
+        csv_path = os.path.join('data', 'sales_real.csv')
+        filename = 'sales_real.csv'
+    else:
+        csv_path = os.path.join('data', 'sales.csv')
+        filename = 'sales.csv'
+    
     if os.path.exists(csv_path):
         with open(csv_path, 'r', encoding='utf-8') as f:
             csv_content = f.read()
         response = app.response_class(
             csv_content,
             mimetype='text/csv',
-            headers={"Content-disposition": "inline; filename=sales.csv"}
+            headers={"Content-disposition": f"inline; filename={filename}"}
         )
         return response
     else:
