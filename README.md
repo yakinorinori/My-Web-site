@@ -57,8 +57,24 @@ python3 -m http.server 8080
 
 ## 🚀 デプロイメント
 - **GitHub Pages**: プッシュ時に自動デプロイ
-- **Mac mini**: GitHub Actions で自動デプロイ
+- **Mac mini**: GitHub Actions で自動デプロイ（要SSH設定）
 - **SSL証明書**: 自動更新対応
+
+### Mac mini SSH設定
+GitHub リポジトリの `Settings > Secrets and variables > Actions` で以下を設定：
+
+| Secret名 | 値 | 説明 |
+|----------|-----|------|
+| `MAC_MINI_HOST` | `192.168.151.100` | Mac miniのIPアドレス |
+| `MAC_MINI_USER` | `your_username` | Mac miniのユーザー名 |
+| `SSH_PRIVATE_KEY` | SSH秘密鍵の内容 | `cat ~/.ssh/id_rsa` の出力 |
+
+```bash
+# SSH鍵生成例（Mac mini側で実行）
+ssh-keygen -t rsa -b 4096 -C "github-actions"
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+cat ~/.ssh/id_rsa  # この内容をSSH_PRIVATE_KEYに設定
+```
 
 ## 📈 データ形式
 CSVファイル形式：
