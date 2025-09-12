@@ -70,35 +70,210 @@ async function checkAuthentication() {
 function showGitHubPagesLogin() {
     console.log('🌐 GitHub Pagesログイン画面を表示中...');
     document.getElementById('app-root').innerHTML = `
-        <div style="text-align: center; padding: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; min-height: 100vh;">
-            <h1>🔐 売上管理システム</h1>
+        <div style="
+            min-height: 100vh;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #43e97b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            position: relative;
+            overflow: hidden;
+        ">
+            <!-- 背景パターン -->
+            <div style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><polygon points=\"50,5 20,95 80,95\" fill=\"white\" opacity=\"0.05\"/></svg>') repeat;
+                animation: float 25s infinite linear;
+            "></div>
             
-            <div style="background: white; color: #333; max-width: 400px; margin: 30px auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <h2>ログイン</h2>
-                <form id="login-form" style="text-align: left;">
-                    <div style="margin-bottom: 15px;">
-                        <label for="username">ユーザー名:</label>
-                        <input type="text" id="username" name="username" 
-                               style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;"
-                               placeholder="kiradan">
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <label for="password">パスワード:</label>
-                        <input type="password" id="password" name="password" 
-                               style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;"
-                               placeholder="パスワードを入力">
-                    </div>
-                    <button type="submit" style="width: 100%; background: #667eea; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
-                        ログイン
-                    </button>
-                </form>
+            <!-- メインコンテナ -->
+            <div style="
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(20px);
+                border-radius: 24px;
+                box-shadow: 0 32px 64px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.2);
+                width: 100%;
+                max-width: 440px;
+                margin: 20px;
+                overflow: hidden;
+                position: relative;
+                z-index: 1;
+            ">
+                <!-- ヘッダー -->
+                <div style="
+                    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                    padding: 40px 40px 50px 40px;
+                    text-align: center;
+                    position: relative;
+                ">
+                    <div style="
+                        width: 80px;
+                        height: 80px;
+                        background: rgba(255, 255, 255, 0.2);
+                        border-radius: 50%;
+                        margin: 0 auto 24px auto;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 32px;
+                        backdrop-filter: blur(10px);
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                    ">🌐</div>
+                    <h1 style="
+                        color: white;
+                        margin: 0;
+                        font-size: 28px;
+                        font-weight: 700;
+                        letter-spacing: -0.5px;
+                    ">売上管理システム</h1>
+                    <p style="
+                        color: rgba(255, 255, 255, 0.9);
+                        margin: 12px 0 0 0;
+                        font-size: 16px;
+                        font-weight: 400;
+                    ">GitHub Pages Demo</p>
+                </div>
                 
-                <div id="login-error" style="margin-top: 15px; color: #dc3545; display: none;"></div>
-                
-                <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 5px; border-left: 4px solid #4CAF50;">
-                    <strong>💡 デモ用アカウント</strong><br>
-                    ユーザー名: kiradan<br>
-                    パスワード: kiradan2024!
+                <!-- ログインフォーム -->
+                <div style="padding: 40px;">
+                    <form id="login-form">
+                        <div style="margin-bottom: 24px;">
+                            <label style="
+                                display: block;
+                                margin-bottom: 8px;
+                                color: #374151;
+                                font-size: 14px;
+                                font-weight: 600;
+                                letter-spacing: 0.025em;
+                            ">ユーザー名</label>
+                            <div style="position: relative;">
+                                <input type="text" id="username" name="username" 
+                                       style="
+                                           width: 100%;
+                                           padding: 16px 16px 16px 48px;
+                                           border: 2px solid #e5e7eb;
+                                           border-radius: 12px;
+                                           font-size: 16px;
+                                           transition: all 0.2s ease;
+                                           background: #f9fafb;
+                                           box-sizing: border-box;
+                                       "
+                                       placeholder="kiradan"
+                                       onfocus="this.style.borderColor='#4facfe'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(79, 172, 254, 0.1)'"
+                                       onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb'; this.style.boxShadow='none'">
+                                <div style="
+                                    position: absolute;
+                                    left: 16px;
+                                    top: 50%;
+                                    transform: translateY(-50%);
+                                    color: #9ca3af;
+                                    font-size: 18px;
+                                ">👤</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 32px;">
+                            <label style="
+                                display: block;
+                                margin-bottom: 8px;
+                                color: #374151;
+                                font-size: 14px;
+                                font-weight: 600;
+                                letter-spacing: 0.025em;
+                            ">パスワード</label>
+                            <div style="position: relative;">
+                                <input type="password" id="password" name="password" 
+                                       style="
+                                           width: 100%;
+                                           padding: 16px 16px 16px 48px;
+                                           border: 2px solid #e5e7eb;
+                                           border-radius: 12px;
+                                           font-size: 16px;
+                                           transition: all 0.2s ease;
+                                           background: #f9fafb;
+                                           box-sizing: border-box;
+                                       "
+                                       placeholder="パスワードを入力"
+                                       onfocus="this.style.borderColor='#4facfe'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(79, 172, 254, 0.1)'"
+                                       onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb'; this.style.boxShadow='none'">
+                                <div style="
+                                    position: absolute;
+                                    left: 16px;
+                                    top: 50%;
+                                    transform: translateY(-50%);
+                                    color: #9ca3af;
+                                    font-size: 18px;
+                                ">🔒</div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" style="
+                            width: 100%;
+                            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                            color: white;
+                            border: none;
+                            padding: 16px;
+                            border-radius: 12px;
+                            font-size: 16px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                            position: relative;
+                            overflow: hidden;
+                        "
+                        onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 12px 24px rgba(79, 172, 254, 0.25)'"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                        onmousedown="this.style.transform='translateY(0px)'"
+                        onmouseup="this.style.transform='translateY(-1px)'">
+                            <span style="position: relative; z-index: 1;">🌐 デモログイン</span>
+                        </button>
+                    </form>
+                    
+                    <div id="login-error" style="
+                        margin-top: 20px;
+                        padding: 16px;
+                        background: #fef2f2;
+                        border: 1px solid #fecaca;
+                        border-radius: 8px;
+                        color: #dc2626;
+                        font-size: 14px;
+                        display: none;
+                    "></div>
+                    
+                    <!-- デモアカウント情報 -->
+                    <div style="
+                        margin-top: 32px;
+                        padding: 20px;
+                        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+                        border-radius: 12px;
+                        border: 1px solid #a7f3d0;
+                    ">
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            margin-bottom: 12px;
+                        ">
+                            <span style="font-size: 20px; margin-right: 8px;">🎯</span>
+                            <span style="
+                                color: #047857;
+                                font-weight: 600;
+                                font-size: 14px;
+                            ">デモアカウント</span>
+                        </div>
+                        <div style="
+                            color: #047857;
+                            font-size: 14px;
+                            line-height: 1.6;
+                            font-family: 'SF Mono', Monaco, monospace;
+                        ">
+                            <div>👨‍💼 <strong>kiradan</strong> / kiradan2024!</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -170,39 +345,236 @@ function showDemoMessage() {
 function showLoginMessage() {
     console.log('🔐 ログインメッセージを表示中...');
     document.getElementById('app-root').innerHTML = `
-        <div style="text-align: center; padding: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; min-height: 100vh;">
-            <h1>🔒 売上管理システム</h1>
-            <div style="background: white; color: #333; max-width: 400px; margin: 30px auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <h2>ログイン</h2>
-                <form id="login-form" style="text-align: left;">
-                    <div style="margin-bottom: 15px;">
-                        <label for="username">ユーザー名:</label>
-                        <input type="text" id="username" name="username" 
-                               style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;"
-                               placeholder="ユーザー名を入力" required>
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <label for="password">パスワード:</label>
-                        <input type="password" id="password" name="password" 
-                               style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px;"
-                               placeholder="パスワードを入力" required>
-                    </div>
-                    <button type="submit" style="width: 100%; background: #667eea; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
-                        ログイン
-                    </button>
-                </form>
+        <div style="
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            position: relative;
+            overflow: hidden;
+        ">
+            <!-- 背景アニメーション -->
+            <div style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"20\" cy=\"20\" r=\"2\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"80\" cy=\"20\" r=\"1\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"40\" cy=\"60\" r=\"1.5\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"70\" cy=\"80\" r=\"1\" fill=\"white\" opacity=\"0.1\"/></svg>') repeat;
+                animation: float 20s infinite linear;
+            "></div>
+            
+            <!-- メインコンテナ -->
+            <div style="
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 24px;
+                box-shadow: 0 32px 64px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.2);
+                width: 100%;
+                max-width: 440px;
+                margin: 20px;
+                overflow: hidden;
+                position: relative;
+                z-index: 1;
+            ">
+                <!-- ヘッダー -->
+                <div style="
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    padding: 40px 40px 50px 40px;
+                    text-align: center;
+                    position: relative;
+                ">
+                    <div style="
+                        width: 80px;
+                        height: 80px;
+                        background: rgba(255, 255, 255, 0.2);
+                        border-radius: 50%;
+                        margin: 0 auto 24px auto;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 32px;
+                        backdrop-filter: blur(10px);
+                        border: 1px solid rgba(255, 255, 255, 0.3);
+                    ">📊</div>
+                    <h1 style="
+                        color: white;
+                        margin: 0;
+                        font-size: 28px;
+                        font-weight: 700;
+                        letter-spacing: -0.5px;
+                    ">売上管理システム</h1>
+                    <p style="
+                        color: rgba(255, 255, 255, 0.9);
+                        margin: 12px 0 0 0;
+                        font-size: 16px;
+                        font-weight: 400;
+                    ">Professional Analytics Platform</p>
+                </div>
                 
-                <div id="login-error" style="margin-top: 15px; color: #dc3545; display: none;"></div>
-                
-                <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 5px; border-left: 4px solid #4CAF50;">
-                    <strong>💡 デモ用アカウント</strong><br>
-                    user1 / password123<br>
-                    user2 / password456<br>
-                    user3 / password789<br>
-                    kiradan / kiradan2024!
+                <!-- ログインフォーム -->
+                <div style="padding: 40px;">
+                    <form id="login-form">
+                        <div style="margin-bottom: 24px;">
+                            <label style="
+                                display: block;
+                                margin-bottom: 8px;
+                                color: #374151;
+                                font-size: 14px;
+                                font-weight: 600;
+                                letter-spacing: 0.025em;
+                            ">ユーザー名</label>
+                            <div style="position: relative;">
+                                <input type="text" id="username" name="username" 
+                                       style="
+                                           width: 100%;
+                                           padding: 16px 16px 16px 48px;
+                                           border: 2px solid #e5e7eb;
+                                           border-radius: 12px;
+                                           font-size: 16px;
+                                           transition: all 0.2s ease;
+                                           background: #f9fafb;
+                                           box-sizing: border-box;
+                                       "
+                                       placeholder="ユーザー名を入力"
+                                       required
+                                       onfocus="this.style.borderColor='#667eea'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)'"
+                                       onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb'; this.style.boxShadow='none'">
+                                <div style="
+                                    position: absolute;
+                                    left: 16px;
+                                    top: 50%;
+                                    transform: translateY(-50%);
+                                    color: #9ca3af;
+                                    font-size: 18px;
+                                ">👤</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 32px;">
+                            <label style="
+                                display: block;
+                                margin-bottom: 8px;
+                                color: #374151;
+                                font-size: 14px;
+                                font-weight: 600;
+                                letter-spacing: 0.025em;
+                            ">パスワード</label>
+                            <div style="position: relative;">
+                                <input type="password" id="password" name="password" 
+                                       style="
+                                           width: 100%;
+                                           padding: 16px 16px 16px 48px;
+                                           border: 2px solid #e5e7eb;
+                                           border-radius: 12px;
+                                           font-size: 16px;
+                                           transition: all 0.2s ease;
+                                           background: #f9fafb;
+                                           box-sizing: border-box;
+                                       "
+                                       placeholder="パスワードを入力"
+                                       required
+                                       onfocus="this.style.borderColor='#667eea'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)'"
+                                       onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb'; this.style.boxShadow='none'">
+                                <div style="
+                                    position: absolute;
+                                    left: 16px;
+                                    top: 50%;
+                                    transform: translateY(-50%);
+                                    color: #9ca3af;
+                                    font-size: 18px;
+                                ">🔒</div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" style="
+                            width: 100%;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white;
+                            border: none;
+                            padding: 16px;
+                            border-radius: 12px;
+                            font-size: 16px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                            position: relative;
+                            overflow: hidden;
+                        "
+                        onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 12px 24px rgba(102, 126, 234, 0.25)'"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
+                        onmousedown="this.style.transform='translateY(0px)'"
+                        onmouseup="this.style.transform='translateY(-1px)'">
+                            <span style="position: relative; z-index: 1;">🚀 ログイン</span>
+                        </button>
+                    </form>
+                    
+                    <div id="login-error" style="
+                        margin-top: 20px;
+                        padding: 16px;
+                        background: #fef2f2;
+                        border: 1px solid #fecaca;
+                        border-radius: 8px;
+                        color: #dc2626;
+                        font-size: 14px;
+                        display: none;
+                    "></div>
+                    
+                    <!-- デモアカウント情報 -->
+                    <div style="
+                        margin-top: 32px;
+                        padding: 20px;
+                        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                        border-radius: 12px;
+                        border: 1px solid #bae6fd;
+                    ">
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            margin-bottom: 12px;
+                        ">
+                            <span style="font-size: 20px; margin-right: 8px;">💡</span>
+                            <span style="
+                                color: #0369a1;
+                                font-weight: 600;
+                                font-size: 14px;
+                            ">デモアカウント</span>
+                        </div>
+                        <div style="
+                            color: #0369a1;
+                            font-size: 13px;
+                            line-height: 1.6;
+                            font-family: 'SF Mono', Monaco, monospace;
+                        ">
+                            <div>👨‍💼 <strong>kiradan</strong> / kiradan2024!</div>
+                            <div>👤 <strong>user1</strong> / password123</div>
+                            <div>👤 <strong>user2</strong> / password456</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+        
+        <style>
+            @keyframes float {
+                0% { transform: translateY(0px) rotate(0deg); }
+                50% { transform: translateY(-20px) rotate(180deg); }
+                100% { transform: translateY(0px) rotate(360deg); }
+            }
+            
+            input:focus {
+                outline: none !important;
+            }
+            
+            @media (max-width: 480px) {
+                .login-container {
+                    margin: 10px;
+                    padding: 30px 20px;
+                }
+            }
+        </style>
     `;
     
     // ログインフォームのイベントリスナーを追加
