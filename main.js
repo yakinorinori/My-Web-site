@@ -922,7 +922,7 @@ function showMonthAnalysis() {
     let selectedMonth = '';
     if (monthSelect && monthSelect.value) {
         selectedMonth = monthSelect.value;
-        filtered = globalData.filter(row => row['日付'].slice(0,7) === selectedMonth);
+        filtered = globalData.filter(row => row && row['日付'] && row['日付'].slice(0,7) === selectedMonth);
     }
     renderMonthAnalysis(filtered, selectedMonth);
     renderMonthPersonAnalysis(filtered, selectedMonth);
@@ -946,6 +946,7 @@ function renderYearAnalysis(data) {
     const yearMonthStats = {};
     const yearWeekdayStats = {};
     data.forEach(row => {
+        if (!row || !row['日付']) return; // null/undefined チェック
         const year = row['日付'].slice(0,4); // YYYY
         const month = row['日付'].slice(0,7); // YYYY/MM
         const date = row['日付'];
@@ -1169,6 +1170,7 @@ function csvToArray(str) {
 function renderMonthPersonAnalysis(data) {
     const monthPersonStats = {};
     data.forEach(row => {
+        if (!row || !row['日付']) return; // null/undefined チェック
         const month = row['日付'].slice(0,7); // YYYY/MM
         const person = row['支払い者'];
         if (person === '不明') return; // 除外
