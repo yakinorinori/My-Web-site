@@ -72,7 +72,7 @@ function showGitHubPagesLogin() {
     document.getElementById('app-root').innerHTML = `
         <div style="
             min-height: 100vh;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #43e97b 100%);
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 50%, #22d3ee 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -87,18 +87,18 @@ function showGitHubPagesLogin() {
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><polygon points=\"50,5 20,95 80,95\" fill=\"white\" opacity=\"0.05\"/></svg>') repeat;
+                background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"25\" cy=\"25\" r=\"1.5\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"75\" cy=\"25\" r=\"1\" fill=\"white\" opacity=\"0.08\"/><circle cx=\"50\" cy=\"75\" r=\"1.2\" fill=\"white\" opacity=\"0.06\"/></svg>') repeat;
                 animation: float 25s infinite linear;
             "></div>
             
             <!-- メインコンテナ -->
             <div style="
-                background: rgba(255, 255, 255, 0.98);
-                backdrop-filter: blur(20px);
-                border-radius: 24px;
-                box-shadow: 0 32px 64px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.2);
+                background: rgba(255, 255, 255, 0.96);
+                backdrop-filter: blur(24px);
+                border-radius: 20px;
+                box-shadow: 0 24px 48px rgba(14, 165, 233, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.2);
                 width: 100%;
-                max-width: 440px;
+                max-width: 420px;
                 margin: 20px;
                 overflow: hidden;
                 position: relative;
@@ -106,169 +106,178 @@ function showGitHubPagesLogin() {
             ">
                 <!-- ヘッダー -->
                 <div style="
-                    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-                    padding: 40px 40px 50px 40px;
+                    background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+                    padding: 40px 40px 45px 40px;
                     text-align: center;
                     position: relative;
                 ">
                     <div style="
-                        width: 80px;
-                        height: 80px;
-                        background: rgba(255, 255, 255, 0.2);
-                        border-radius: 50%;
-                        margin: 0 auto 24px auto;
+                        width: 72px;
+                        height: 72px;
+                        background: rgba(255, 255, 255, 0.15);
+                        border-radius: 16px;
+                        margin: 0 auto 20px auto;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        font-size: 32px;
-                        backdrop-filter: blur(10px);
-                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        font-size: 28px;
+                        backdrop-filter: blur(12px);
+                        border: 1px solid rgba(255, 255, 255, 0.25);
                     ">🌐</div>
                     <h1 style="
                         color: white;
                         margin: 0;
-                        font-size: 28px;
-                        font-weight: 700;
-                        letter-spacing: -0.5px;
+                        font-size: 26px;
+                        font-weight: 600;
+                        letter-spacing: -0.3px;
                     ">売上管理システム</h1>
                     <p style="
-                        color: rgba(255, 255, 255, 0.9);
-                        margin: 12px 0 0 0;
-                        font-size: 16px;
+                        color: rgba(255, 255, 255, 0.92);
+                        margin: 8px 0 0 0;
+                        font-size: 15px;
                         font-weight: 400;
+                        opacity: 0.9;
                     ">GitHub Pages Demo</p>
                 </div>
                 
                 <!-- ログインフォーム -->
-                <div style="padding: 40px;">
+                <div style="padding: 36px;">
                     <form id="login-form">
-                        <div style="margin-bottom: 24px;">
+                        <div style="margin-bottom: 22px;">
                             <label style="
                                 display: block;
-                                margin-bottom: 8px;
-                                color: #374151;
-                                font-size: 14px;
+                                margin-bottom: 6px;
+                                color: #1e293b;
+                                font-size: 13px;
                                 font-weight: 600;
-                                letter-spacing: 0.025em;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
                             ">ユーザー名</label>
                             <div style="position: relative;">
                                 <input type="text" id="username" name="username" 
                                        style="
                                            width: 100%;
-                                           padding: 16px 16px 16px 48px;
-                                           border: 2px solid #e5e7eb;
-                                           border-radius: 12px;
-                                           font-size: 16px;
+                                           padding: 14px 14px 14px 44px;
+                                           border: 1.5px solid #e2e8f0;
+                                           border-radius: 10px;
+                                           font-size: 15px;
                                            transition: all 0.2s ease;
-                                           background: #f9fafb;
+                                           background: #f8fafc;
                                            box-sizing: border-box;
+                                           color: #1e293b;
                                        "
                                        placeholder="kiradan"
-                                       onfocus="this.style.borderColor='#4facfe'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(79, 172, 254, 0.1)'"
-                                       onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb'; this.style.boxShadow='none'">
+                                       onfocus="this.style.borderColor='#0ea5e9'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(14, 165, 233, 0.1)'"
+                                       onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none'">
                                 <div style="
                                     position: absolute;
-                                    left: 16px;
+                                    left: 14px;
                                     top: 50%;
                                     transform: translateY(-50%);
-                                    color: #9ca3af;
-                                    font-size: 18px;
+                                    color: #64748b;
+                                    font-size: 16px;
                                 ">👤</div>
                             </div>
                         </div>
                         
-                        <div style="margin-bottom: 32px;">
+                        <div style="margin-bottom: 28px;">
                             <label style="
                                 display: block;
-                                margin-bottom: 8px;
-                                color: #374151;
-                                font-size: 14px;
+                                margin-bottom: 6px;
+                                color: #1e293b;
+                                font-size: 13px;
                                 font-weight: 600;
-                                letter-spacing: 0.025em;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
                             ">パスワード</label>
                             <div style="position: relative;">
                                 <input type="password" id="password" name="password" 
                                        style="
                                            width: 100%;
-                                           padding: 16px 16px 16px 48px;
-                                           border: 2px solid #e5e7eb;
-                                           border-radius: 12px;
-                                           font-size: 16px;
+                                           padding: 14px 14px 14px 44px;
+                                           border: 1.5px solid #e2e8f0;
+                                           border-radius: 10px;
+                                           font-size: 15px;
                                            transition: all 0.2s ease;
-                                           background: #f9fafb;
+                                           background: #f8fafc;
                                            box-sizing: border-box;
+                                           color: #1e293b;
                                        "
                                        placeholder="パスワードを入力"
-                                       onfocus="this.style.borderColor='#4facfe'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(79, 172, 254, 0.1)'"
-                                       onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb'; this.style.boxShadow='none'">
+                                       onfocus="this.style.borderColor='#0ea5e9'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(14, 165, 233, 0.1)'"
+                                       onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none'">
                                 <div style="
                                     position: absolute;
-                                    left: 16px;
+                                    left: 14px;
                                     top: 50%;
                                     transform: translateY(-50%);
-                                    color: #9ca3af;
-                                    font-size: 18px;
+                                    color: #64748b;
+                                    font-size: 16px;
                                 ">🔒</div>
                             </div>
                         </div>
                         
                         <button type="submit" style="
                             width: 100%;
-                            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
                             color: white;
                             border: none;
-                            padding: 16px;
-                            border-radius: 12px;
-                            font-size: 16px;
+                            padding: 14px;
+                            border-radius: 10px;
+                            font-size: 15px;
                             font-weight: 600;
                             cursor: pointer;
                             transition: all 0.2s ease;
                             position: relative;
                             overflow: hidden;
+                            text-transform: uppercase;
+                            letter-spacing: 0.05em;
                         "
-                        onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 12px 24px rgba(79, 172, 254, 0.25)'"
+                        onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 8px 20px rgba(14, 165, 233, 0.3)'"
                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
                         onmousedown="this.style.transform='translateY(0px)'"
                         onmouseup="this.style.transform='translateY(-1px)'">
-                            <span style="position: relative; z-index: 1;">🌐 デモログイン</span>
+                            <span style="position: relative; z-index: 1;">デモログイン</span>
                         </button>
                     </form>
                     
                     <div id="login-error" style="
-                        margin-top: 20px;
-                        padding: 16px;
+                        margin-top: 18px;
+                        padding: 14px;
                         background: #fef2f2;
                         border: 1px solid #fecaca;
                         border-radius: 8px;
                         color: #dc2626;
-                        font-size: 14px;
+                        font-size: 13px;
                         display: none;
                     "></div>
                     
                     <!-- デモアカウント情報 -->
                     <div style="
-                        margin-top: 32px;
-                        padding: 20px;
-                        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-                        border-radius: 12px;
-                        border: 1px solid #a7f3d0;
+                        margin-top: 28px;
+                        padding: 18px;
+                        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                        border-radius: 10px;
+                        border: 1px solid #bae6fd;
                     ">
                         <div style="
                             display: flex;
                             align-items: center;
-                            margin-bottom: 12px;
+                            margin-bottom: 10px;
                         ">
-                            <span style="font-size: 20px; margin-right: 8px;">🎯</span>
+                            <span style="font-size: 18px; margin-right: 8px;">🎯</span>
                             <span style="
-                                color: #047857;
+                                color: #0369a1;
                                 font-weight: 600;
-                                font-size: 14px;
+                                font-size: 13px;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
                             ">デモアカウント</span>
                         </div>
                         <div style="
-                            color: #047857;
-                            font-size: 14px;
-                            line-height: 1.6;
+                            color: #0369a1;
+                            font-size: 13px;
+                            line-height: 1.5;
                             font-family: 'SF Mono', Monaco, monospace;
                         ">
                             <div>👨‍💼 <strong>kiradan</strong> / kiradan2024!</div>
@@ -309,45 +318,12 @@ async function handleGitHubPagesLogin(event) {
     }
 }
 
-function showDemoMessage() {
-    console.log('🎬 デモメッセージを表示中...');
-    document.getElementById('app-root').innerHTML = `
-        <div style="text-align: center; padding: 50px; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); color: white; min-height: 100vh;">
-            <h1>📊 売上管理システム - デモ版</h1>
-            <div style="background: white; color: #333; max-width: 600px; margin: 30px auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                <h2>🌐 GitHub Pages デモモード</h2>
-                <p>このサイトはGitHub Pagesでホストされており、デモ用のサンプルデータを表示しています。</p>
-                
-                <div style="margin: 20px 0; padding: 15px; background: #e8f5e8; border-radius: 5px; border-left: 4px solid #4CAF50;">
-                    <h3>🎯 機能紹介</h3>
-                    <ul style="text-align: left; margin: 10px 0;">
-                        <li>📈 売上データのグラフ表示</li>
-                        <li>🍰 円グラフ、棒グラフ、線グラフ対応</li>
-                        <li>📱 レスポンシブデザイン</li>
-                        <li>🔐 認証システム（ローカル環境）</li>
-                    </ul>
-                </div>
-                
-                <button onclick="loadDemoData()" 
-                        style="background: #4CAF50; color: white; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 10px;">
-                    📊 デモデータを表示
-                </button>
-                
-                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
-                    <strong>💡 フル機能版</strong><br>
-                    完全な認証機能とリアルタイムデータは、ローカル環境（Mac mini）で利用可能です。
-                </div>
-            </div>
-        </div>
-    `;
-}
-
 function showLoginMessage() {
     console.log('🔐 ログインメッセージを表示中...');
     document.getElementById('app-root').innerHTML = `
         <div style="
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 50%, #22d3ee 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -355,25 +331,25 @@ function showLoginMessage() {
             position: relative;
             overflow: hidden;
         ">
-            <!-- 背景アニメーション -->
+            <!-- 背景パターン -->
             <div style="
                 position: absolute;
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"20\" cy=\"20\" r=\"2\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"80\" cy=\"20\" r=\"1\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"40\" cy=\"60\" r=\"1.5\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"70\" cy=\"80\" r=\"1\" fill=\"white\" opacity=\"0.1\"/></svg>') repeat;
-                animation: float 20s infinite linear;
+                background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"25\" cy=\"25\" r=\"1.5\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"75\" cy=\"25\" r=\"1\" fill=\"white\" opacity=\"0.08\"/><circle cx=\"50\" cy=\"75\" r=\"1.2\" fill=\"white\" opacity=\"0.06\"/></svg>') repeat;
+                animation: float 30s infinite linear;
             "></div>
             
             <!-- メインコンテナ -->
             <div style="
-                background: rgba(255, 255, 255, 0.95);
-                backdrop-filter: blur(20px);
-                border-radius: 24px;
-                box-shadow: 0 32px 64px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.2);
+                background: rgba(255, 255, 255, 0.96);
+                backdrop-filter: blur(24px);
+                border-radius: 20px;
+                box-shadow: 0 24px 48px rgba(14, 165, 233, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.2);
                 width: 100%;
-                max-width: 440px;
+                max-width: 420px;
                 margin: 20px;
                 overflow: hidden;
                 position: relative;
@@ -381,171 +357,180 @@ function showLoginMessage() {
             ">
                 <!-- ヘッダー -->
                 <div style="
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    padding: 40px 40px 50px 40px;
+                    background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+                    padding: 40px 40px 45px 40px;
                     text-align: center;
                     position: relative;
                 ">
                     <div style="
-                        width: 80px;
-                        height: 80px;
-                        background: rgba(255, 255, 255, 0.2);
-                        border-radius: 50%;
-                        margin: 0 auto 24px auto;
+                        width: 72px;
+                        height: 72px;
+                        background: rgba(255, 255, 255, 0.15);
+                        border-radius: 16px;
+                        margin: 0 auto 20px auto;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        font-size: 32px;
-                        backdrop-filter: blur(10px);
-                        border: 1px solid rgba(255, 255, 255, 0.3);
+                        font-size: 28px;
+                        backdrop-filter: blur(12px);
+                        border: 1px solid rgba(255, 255, 255, 0.25);
                     ">📊</div>
                     <h1 style="
                         color: white;
                         margin: 0;
-                        font-size: 28px;
-                        font-weight: 700;
-                        letter-spacing: -0.5px;
+                        font-size: 26px;
+                        font-weight: 600;
+                        letter-spacing: -0.3px;
                     ">売上管理システム</h1>
                     <p style="
-                        color: rgba(255, 255, 255, 0.9);
-                        margin: 12px 0 0 0;
-                        font-size: 16px;
+                        color: rgba(255, 255, 255, 0.92);
+                        margin: 8px 0 0 0;
+                        font-size: 15px;
                         font-weight: 400;
-                    ">Professional Analytics Platform</p>
+                        opacity: 0.9;
+                    ">Business Analytics Platform</p>
                 </div>
                 
                 <!-- ログインフォーム -->
-                <div style="padding: 40px;">
+                <div style="padding: 36px;">
                     <form id="login-form">
-                        <div style="margin-bottom: 24px;">
+                        <div style="margin-bottom: 22px;">
                             <label style="
                                 display: block;
-                                margin-bottom: 8px;
-                                color: #374151;
-                                font-size: 14px;
+                                margin-bottom: 6px;
+                                color: #1e293b;
+                                font-size: 13px;
                                 font-weight: 600;
-                                letter-spacing: 0.025em;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
                             ">ユーザー名</label>
                             <div style="position: relative;">
                                 <input type="text" id="username" name="username" 
                                        style="
                                            width: 100%;
-                                           padding: 16px 16px 16px 48px;
-                                           border: 2px solid #e5e7eb;
-                                           border-radius: 12px;
-                                           font-size: 16px;
+                                           padding: 14px 14px 14px 44px;
+                                           border: 1.5px solid #e2e8f0;
+                                           border-radius: 10px;
+                                           font-size: 15px;
                                            transition: all 0.2s ease;
-                                           background: #f9fafb;
+                                           background: #f8fafc;
                                            box-sizing: border-box;
+                                           color: #1e293b;
                                        "
                                        placeholder="ユーザー名を入力"
                                        required
-                                       onfocus="this.style.borderColor='#667eea'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)'"
-                                       onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb'; this.style.boxShadow='none'">
+                                       onfocus="this.style.borderColor='#0ea5e9'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(14, 165, 233, 0.1)'"
+                                       onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none'">
                                 <div style="
                                     position: absolute;
-                                    left: 16px;
+                                    left: 14px;
                                     top: 50%;
                                     transform: translateY(-50%);
-                                    color: #9ca3af;
-                                    font-size: 18px;
+                                    color: #64748b;
+                                    font-size: 16px;
                                 ">👤</div>
                             </div>
                         </div>
                         
-                        <div style="margin-bottom: 32px;">
+                        <div style="margin-bottom: 28px;">
                             <label style="
                                 display: block;
-                                margin-bottom: 8px;
-                                color: #374151;
-                                font-size: 14px;
+                                margin-bottom: 6px;
+                                color: #1e293b;
+                                font-size: 13px;
                                 font-weight: 600;
-                                letter-spacing: 0.025em;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
                             ">パスワード</label>
                             <div style="position: relative;">
                                 <input type="password" id="password" name="password" 
                                        style="
                                            width: 100%;
-                                           padding: 16px 16px 16px 48px;
-                                           border: 2px solid #e5e7eb;
-                                           border-radius: 12px;
-                                           font-size: 16px;
+                                           padding: 14px 14px 14px 44px;
+                                           border: 1.5px solid #e2e8f0;
+                                           border-radius: 10px;
+                                           font-size: 15px;
                                            transition: all 0.2s ease;
-                                           background: #f9fafb;
+                                           background: #f8fafc;
                                            box-sizing: border-box;
+                                           color: #1e293b;
                                        "
                                        placeholder="パスワードを入力"
                                        required
-                                       onfocus="this.style.borderColor='#667eea'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(102, 126, 234, 0.1)'"
-                                       onblur="this.style.borderColor='#e5e7eb'; this.style.background='#f9fafb'; this.style.boxShadow='none'">
+                                       onfocus="this.style.borderColor='#0ea5e9'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(14, 165, 233, 0.1)'"
+                                       onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none'">
                                 <div style="
                                     position: absolute;
-                                    left: 16px;
+                                    left: 14px;
                                     top: 50%;
                                     transform: translateY(-50%);
-                                    color: #9ca3af;
-                                    font-size: 18px;
+                                    color: #64748b;
+                                    font-size: 16px;
                                 ">🔒</div>
                             </div>
                         </div>
                         
                         <button type="submit" style="
                             width: 100%;
-                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
                             color: white;
                             border: none;
-                            padding: 16px;
-                            border-radius: 12px;
-                            font-size: 16px;
+                            padding: 14px;
+                            border-radius: 10px;
+                            font-size: 15px;
                             font-weight: 600;
                             cursor: pointer;
                             transition: all 0.2s ease;
                             position: relative;
                             overflow: hidden;
+                            text-transform: uppercase;
+                            letter-spacing: 0.05em;
                         "
-                        onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 12px 24px rgba(102, 126, 234, 0.25)'"
+                        onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 8px 20px rgba(14, 165, 233, 0.3)'"
                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'"
                         onmousedown="this.style.transform='translateY(0px)'"
                         onmouseup="this.style.transform='translateY(-1px)'">
-                            <span style="position: relative; z-index: 1;">🚀 ログイン</span>
+                            <span style="position: relative; z-index: 1;">ログイン</span>
                         </button>
                     </form>
                     
                     <div id="login-error" style="
-                        margin-top: 20px;
-                        padding: 16px;
+                        margin-top: 18px;
+                        padding: 14px;
                         background: #fef2f2;
                         border: 1px solid #fecaca;
                         border-radius: 8px;
                         color: #dc2626;
-                        font-size: 14px;
+                        font-size: 13px;
                         display: none;
                     "></div>
                     
                     <!-- デモアカウント情報 -->
                     <div style="
-                        margin-top: 32px;
-                        padding: 20px;
+                        margin-top: 28px;
+                        padding: 18px;
                         background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-                        border-radius: 12px;
+                        border-radius: 10px;
                         border: 1px solid #bae6fd;
                     ">
                         <div style="
                             display: flex;
                             align-items: center;
-                            margin-bottom: 12px;
+                            margin-bottom: 10px;
                         ">
-                            <span style="font-size: 20px; margin-right: 8px;">💡</span>
+                            <span style="font-size: 18px; margin-right: 8px;">�</span>
                             <span style="
                                 color: #0369a1;
                                 font-weight: 600;
-                                font-size: 14px;
+                                font-size: 13px;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
                             ">デモアカウント</span>
                         </div>
                         <div style="
                             color: #0369a1;
                             font-size: 13px;
-                            line-height: 1.6;
+                            line-height: 1.5;
                             font-family: 'SF Mono', Monaco, monospace;
                         ">
                             <div>👨‍💼 <strong>kiradan</strong> / kiradan2024!</div>
@@ -560,7 +545,7 @@ function showLoginMessage() {
         <style>
             @keyframes float {
                 0% { transform: translateY(0px) rotate(0deg); }
-                50% { transform: translateY(-20px) rotate(180deg); }
+                50% { transform: translateY(-15px) rotate(180deg); }
                 100% { transform: translateY(0px) rotate(360deg); }
             }
             
@@ -571,7 +556,7 @@ function showLoginMessage() {
             @media (max-width: 480px) {
                 .login-container {
                     margin: 10px;
-                    padding: 30px 20px;
+                    padding: 28px 18px;
                 }
             }
         </style>
@@ -621,51 +606,6 @@ async function handleLogin(event) {
         errorDiv.textContent = 'ネットワークエラーが発生しました';
         errorDiv.style.display = 'block';
     }
-}
-
-// デモデータ読み込み機能
-function loadDemoData() {
-    console.log('🎬 デモデータを読み込み中...');
-    
-    // GitHub Pages用のサンプルデータ
-    const demoData = [
-        { 日付: "2024-01-01", 商品名: "サンプル商品A", 販売数量: 10, 単価: 1000, 売上: 10000 },
-        { 日付: "2024-01-02", 商品名: "サンプル商品B", 販売数量: 5, 単価: 2000, 売上: 10000 },
-        { 日付: "2024-01-03", 商品名: "サンプル商品C", 販売数量: 8, 単価: 1500, 売上: 12000 },
-        { 日付: "2024-01-04", 商品名: "サンプル商品A", 販売数量: 12, 単価: 1000, 売上: 12000 },
-        { 日付: "2024-01-05", 商品名: "サンプル商品D", 販売数量: 3, 単価: 3000, 売上: 9000 },
-        { 日付: "2024-01-06", 商品名: "サンプル商品B", 販売数量: 7, 単価: 2000, 売上: 14000 },
-        { 日付: "2024-01-07", 商品名: "サンプル商品C", 販売数量: 15, 単価: 1500, 売上: 22500 },
-        { 日付: "2024-01-08", 商品名: "サンプル商品A", 販売数量: 20, 単価: 1000, 売上: 20000 }
-    ];
-    
-    globalData = demoData;
-    
-    // デモ用ユーザー情報を表示
-    showDemoUserInfo();
-    
-    // メインアプリケーションを初期化
-    createMainApp();
-    
-    // グラフを生成
-    createCharts();
-    
-    console.log('✅ デモデータ読み込み完了');
-}
-
-function showDemoUserInfo() {
-    // デモ用ユーザー情報表示
-    const userInfo = document.createElement('div');
-    userInfo.id = 'user-info';
-    userInfo.style.cssText = 'position: fixed; top: 10px; right: 10px; background: #4CAF50; color: white; padding: 10px 20px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 1000;';
-    userInfo.innerHTML = `
-        🎬 デモモード 
-        <button onclick="location.reload()" 
-                style="margin-left: 10px; background: white; color: #4CAF50; border: none; padding: 5px 10px; border-radius: 10px; cursor: pointer; font-size: 12px;">
-            リセット
-        </button>
-    `;
-    document.body.appendChild(userInfo);
 }
 
 function showUserInfo(username) {
@@ -754,147 +694,602 @@ window.onload = function() {
 }
 
 function createMainApp() {
+    console.log('🏢 メインアプリケーション初期化中...');
+    
     // ルート要素取得
     const root = document.getElementById('app-root');
     root.innerHTML = '';
-
-    // タイトル
-    const h1 = document.createElement('h1');
-    h1.textContent = IS_GITHUB_PAGES ? '📊 売上管理Webサイト - デモ版' : '売上管理Webサイト';
-    root.appendChild(h1);
-
-    // ボタン
-    const btnDiv = document.createElement('div');
-    const btnYear = document.createElement('button');
-    btnYear.id = 'btn-year';
-    btnYear.textContent = '年ごとの分析';
-    const btnMonth = document.createElement('button');
-    btnMonth.id = 'btn-month';
-    btnMonth.textContent = '月ごとの分析';
-    btnDiv.appendChild(btnYear);
-    btnDiv.appendChild(btnMonth);
-    root.appendChild(btnDiv);
-
-    // プルダウン（select）追加
+    
+    // メインコンテナのスタイル設定
+    root.style.cssText = `
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        margin: 0;
+        padding: 0;
+    `;
+    
+    // ヘッダー作成
+    const header = document.createElement('div');
+    header.style.cssText = `
+        background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+        color: white;
+        padding: 20px 0;
+        box-shadow: 0 4px 20px rgba(14, 165, 233, 0.15);
+        position: relative;
+        overflow: hidden;
+    `;
+    
+    header.innerHTML = `
+        <div style="
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        ">
+            <div style="display: flex; align-items: center;">
+                <div style="
+                    width: 48px;
+                    height: 48px;
+                    background: rgba(255, 255, 255, 0.15);
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                    margin-right: 16px;
+                    backdrop-filter: blur(12px);
+                    border: 1px solid rgba(255, 255, 255, 0.25);
+                ">📊</div>
+                <div>
+                    <h1 style="
+                        margin: 0;
+                        font-size: 24px;
+                        font-weight: 600;
+                        letter-spacing: -0.3px;
+                    ">${IS_GITHUB_PAGES ? '売上管理システム - デモ版' : '売上管理システム'}</h1>
+                    <p style="
+                        margin: 4px 0 0 0;
+                        font-size: 14px;
+                        opacity: 0.9;
+                        font-weight: 400;
+                    ">Business Analytics Dashboard</p>
+                </div>
+            </div>
+            <div style="
+                display: flex;
+                align-items: center;
+                font-size: 14px;
+                opacity: 0.9;
+            ">
+                <span style="margin-right: 12px;">👤 ${localStorage.getItem('username') || 'ユーザー'}</span>
+                <button onclick="logout()" style="
+                    background: rgba(255, 255, 255, 0.15);
+                    color: white;
+                    border: 1px solid rgba(255, 255, 255, 0.25);
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    font-size: 13px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    backdrop-filter: blur(12px);
+                    transition: all 0.2s ease;
+                "
+                onmouseover="this.style.background='rgba(255, 255, 255, 0.25)'"
+                onmouseout="this.style.background='rgba(255, 255, 255, 0.15)'">
+                    ログアウト
+                </button>
+            </div>
+        </div>
+        
+        <!-- 背景パターン -->
+        <div style="
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"25\" cy=\"25\" r=\"1.5\" fill=\"white\" opacity=\"0.06\"/><circle cx=\"75\" cy=\"25\" r=\"1\" fill=\"white\" opacity=\"0.04\"/><circle cx=\"50\" cy=\"75\" r=\"1.2\" fill=\"white\" opacity=\"0.05\"/></svg>') repeat;
+            z-index: 1;
+        "></div>
+    `;
+    
+    root.appendChild(header);
+    
+    // メインコンテンツ領域
+    const mainContent = document.createElement('div');
+    mainContent.style.cssText = `
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px 20px;
+    `;
+    
+    // 分析選択カード
+    const analysisSelector = document.createElement('div');
+    analysisSelector.style.cssText = `
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    `;
+    
+    // 年分析ボタン
+    const yearCard = document.createElement('div');
+    yearCard.style.cssText = `
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(14, 165, 233, 0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    `;
+    
+    yearCard.innerHTML = `
+        <div style="
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        ">
+            <div style="
+                width: 48px;
+                height: 48px;
+                background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                color: white;
+                margin-right: 16px;
+            ">📈</div>
+            <div>
+                <h3 style="
+                    margin: 0;
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #1e293b;
+                ">年間分析</h3>
+                <p style="
+                    margin: 4px 0 0 0;
+                    font-size: 14px;
+                    color: #64748b;
+                ">年別の売上・客数・組数を分析</p>
+            </div>
+        </div>
+        <div style="
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 8px;
+            border: 1px solid #bae6fd;
+        ">
+            <span style="
+                color: #0369a1;
+                font-size: 13px;
+                font-weight: 500;
+            ">🎯 長期トレンド分析に最適</span>
+        </div>
+    `;
+    
+    yearCard.onclick = () => {
+        showYearAnalysis();
+        monthSelectDiv.style.display = 'none';
+        // アクティブ状態の管理
+        yearCard.style.boxShadow = '0 8px 30px rgba(14, 165, 233, 0.2)';
+        yearCard.style.transform = 'translateY(-2px)';
+        monthCard.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
+        monthCard.style.transform = 'translateY(0)';
+    };
+    
+    yearCard.onmouseenter = () => {
+        if (yearCard.style.transform !== 'translateY(-2px)') {
+            yearCard.style.transform = 'translateY(-4px)';
+            yearCard.style.boxShadow = '0 12px 40px rgba(14, 165, 233, 0.15)';
+        }
+    };
+    
+    yearCard.onmouseleave = () => {
+        if (yearCard.style.transform !== 'translateY(-2px)') {
+            yearCard.style.transform = 'translateY(0)';
+            yearCard.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
+        }
+    };
+    
+    // 月分析ボタン
+    const monthCard = document.createElement('div');
+    monthCard.style.cssText = `
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(14, 165, 233, 0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    `;
+    
+    monthCard.innerHTML = `
+        <div style="
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        ">
+            <div style="
+                width: 48px;
+                height: 48px;
+                background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                color: white;
+                margin-right: 16px;
+            ">📊</div>
+            <div>
+                <h3 style="
+                    margin: 0;
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #1e293b;
+                ">月間分析</h3>
+                <p style="
+                    margin: 4px 0 0 0;
+                    font-size: 14px;
+                    color: #64748b;
+                ">月別の詳細な売上分析</p>
+            </div>
+        </div>
+        <div style="
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 8px;
+            border: 1px solid #bae6fd;
+        ">
+            <span style="
+                color: #0369a1;
+                font-size: 13px;
+                font-weight: 500;
+            ">📋 詳細な月次レポート</span>
+        </div>
+    `;
+    
+    monthCard.onclick = () => {
+        showMonthAnalysis();
+        monthSelectDiv.style.display = 'block';
+        // アクティブ状態の管理
+        monthCard.style.boxShadow = '0 8px 30px rgba(14, 165, 233, 0.2)';
+        monthCard.style.transform = 'translateY(-2px)';
+        yearCard.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
+        yearCard.style.transform = 'translateY(0)';
+    };
+    
+    monthCard.onmouseenter = () => {
+        if (monthCard.style.transform !== 'translateY(-2px)') {
+            monthCard.style.transform = 'translateY(-4px)';
+            monthCard.style.boxShadow = '0 12px 40px rgba(14, 165, 233, 0.15)';
+        }
+    };
+    
+    monthCard.onmouseleave = () => {
+        if (monthCard.style.transform !== 'translateY(-2px)') {
+            monthCard.style.transform = 'translateY(0)';
+            monthCard.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
+        }
+    };
+    
+    analysisSelector.appendChild(yearCard);
+    analysisSelector.appendChild(monthCard);
+    mainContent.appendChild(analysisSelector);
+    
+    // 月選択プルダウン（スタイリッシュに）
     const monthSelectDiv = document.createElement('div');
     monthSelectDiv.id = 'month-select-div';
-    monthSelectDiv.style.display = 'none';
-    monthSelectDiv.style.margin = '10px 0 20px 0';
-    const monthLabel = document.createElement('label');
-    monthLabel.textContent = '月を選択: ';
-    monthLabel.setAttribute('for', 'month-select');
-    const monthSelect = document.createElement('select');
-    monthSelect.id = 'month-select';
-    monthSelectDiv.appendChild(monthLabel);
-    monthSelectDiv.appendChild(monthSelect);
-    root.appendChild(monthSelectDiv);
+    monthSelectDiv.style.cssText = `
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(14, 165, 233, 0.1);
+        display: none;
+    `;
+    
+    monthSelectDiv.innerHTML = `
+        <div style="
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        ">
+            <span style="
+                color: #1e293b;
+                font-size: 16px;
+                font-weight: 600;
+                margin-right: 12px;
+            ">📅 対象月を選択</span>
+        </div>
+        <select id="month-select" style="
+            width: 100%;
+            max-width: 300px;
+            padding: 12px 16px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            background: #f8fafc;
+            color: #1e293b;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        "
+        onfocus="this.style.borderColor='#0ea5e9'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(14, 165, 233, 0.1)'"
+        onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none'">
+        </select>
+    `;
+    
+    
+    const monthSelect = monthSelectDiv.querySelector('#month-select');
+    mainContent.appendChild(monthSelectDiv);
 
+    // 分析結果表示エリア
+    const analysisContainer = document.createElement('div');
+    analysisContainer.style.cssText = `
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(14, 165, 233, 0.1);
+        overflow: hidden;
+        margin-bottom: 24px;
+    `;
+    
     // 分析用div
     const divYear = document.createElement('div');
     divYear.id = 'analysis-year';
-    divYear.style.display = 'none';
-    root.appendChild(divYear);
+    divYear.style.cssText = `
+        display: none;
+        padding: 24px;
+    `;
+    
     const divMonth = document.createElement('div');
     divMonth.id = 'analysis-month';
-    root.appendChild(divMonth);
+    divMonth.style.cssText = `
+        padding: 24px;
+    `;
+    
     const divWeekday = document.createElement('div');
     divWeekday.id = 'analysis-weekday';
-    root.appendChild(divWeekday);
+    divWeekday.style.cssText = `
+        padding: 24px;
+    `;
+    
     const divTable = document.createElement('div');
     divTable.id = 'sales-table';
-    root.appendChild(divTable);
+    divTable.style.cssText = `
+        padding: 24px;
+    `;
 
-    // Chart.js用のグラフエリアも#app-root内に生成
+    analysisContainer.appendChild(divYear);
+    analysisContainer.appendChild(divMonth);
+    analysisContainer.appendChild(divWeekday);
+    analysisContainer.appendChild(divTable);
+    mainContent.appendChild(analysisContainer);
+
+    // Chart.js用のグラフエリア
     let chartArea = document.getElementById('chart-area');
     if (!chartArea) {
         chartArea = document.createElement('div');
         chartArea.id = 'chart-area';
-        chartArea.style.marginTop = '40px';
-        chartArea.style.display = 'flex';
-        chartArea.style.justifyContent = 'center';
-        
-        // データソース選択ボタンを追加
-        const dataSourceSelector = document.createElement('div');
-        dataSourceSelector.style.cssText = 'margin: 20px 0; text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;';
-        dataSourceSelector.innerHTML = `
-            <h3>📊 データソース選択</h3>
-            <button id="demo-data-btn" class="data-source-btn" style="margin: 5px; padding: 10px 20px; background: #17a2b8; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                📋 デモデータ
-            </button>
-            <button id="real-data-btn" class="data-source-btn" style="margin: 5px; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                💼 実データ（Mac mini）
-            </button>
-            <div id="data-info" style="margin-top: 10px; font-size: 14px; color: #6c757d;"></div>
+        chartArea.style.cssText = `
+            margin-top: 24px;
+            display: flex;
+            justify-content: center;
         `;
-        root.appendChild(dataSourceSelector);
-        root.appendChild(chartArea);
         
-        // デフォルトでデモデータを読み込み
-        loadData('demo');
+        // データソース選択カード
+        const dataSourceCard = document.createElement('div');
+        dataSourceCard.style.cssText = `
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(14, 165, 233, 0.1);
+        `;
+        
+        dataSourceCard.innerHTML = `
+            <div style="
+                display: flex;
+                align-items: center;
+                margin-bottom: 20px;
+            ">
+                <div style="
+                    width: 48px;
+                    height: 48px;
+                    background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                    color: white;
+                    margin-right: 16px;
+                ">💾</div>
+                <div>
+                    <h3 style="
+                        margin: 0;
+                        font-size: 18px;
+                        font-weight: 600;
+                        color: #1e293b;
+                    ">データソース選択</h3>
+                    <p style="
+                        margin: 4px 0 0 0;
+                        font-size: 14px;
+                        color: #64748b;
+                    ">分析に使用するデータを選択してください</p>
+                </div>
+            </div>
+            
+            <div style="
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-bottom: 16px;
+            ">
+                <button id="real-data-btn" style="
+                    background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+                    color: white;
+                    border: none;
+                    padding: 14px 20px;
+                    border-radius: 10px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                "
+                onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 8px 20px rgba(14, 165, 233, 0.3)'"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                    💼 売上データを読み込み
+                </button>
+            </div>
+            
+            <div id="data-info" style="
+                padding: 16px;
+                background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                border-radius: 8px;
+                border: 1px solid #bae6fd;
+                font-size: 14px;
+                color: #0369a1;
+                font-weight: 500;
+                text-align: center;
+            ">データを選択してください</div>
+        `;
+        
+        mainContent.appendChild(dataSourceCard);
+        mainContent.appendChild(chartArea);
+        
+        // データソースボタンのイベントリスナーを追加
+        setTimeout(() => {
+            const realBtn = document.getElementById('real-data-btn');
+            
+            if (realBtn) {
+                realBtn.onclick = () => {
+                    console.log('💼 実データ選択');
+                    loadData('real');
+                };
+            }
+        }, 100);
+        
+        // デフォルトで実データを読み込み
+        loadData('real');
     }
+    
+    // メインコンテンツをrootに追加
+    root.appendChild(mainContent);
+    
+    // ログアウト関数をグローバルに定義
+    window.logout = function() {
+        console.log('🚪 ログアウト実行中...');
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('username');
+        localStorage.removeItem('githubPagesAuth');
+        localStorage.removeItem('githubPagesUser');
+        
+        // ログイン画面に戻る
+        if (IS_GITHUB_PAGES) {
+            showGitHubPagesLogin();
+        } else {
+            showLoginMessage();
+        }
+    };
 
     // データ取得関数
-    function loadData(dataType = 'demo') {
+    function loadData(dataType = 'real') {
         // GitHub Pages環境では静的ファイルを直接読み込み
         const url = IS_GITHUB_PAGES 
             ? './sales.csv'  // GitHub Pages: 相対パスでCSVファイルを読み込み
-            : `${API_BASE_URL}/sales.csv?type=${dataType}`;
+            : `${API_BASE_URL}/sales.csv`;
         console.log(`📥 データ取得中: ${dataType} data from ${url}`);
         
-        return (IS_GITHUB_PAGES ? fetch(url) : authenticatedFetch(url))
+        return fetch(url)
             .then(response => {
+                console.log('📦 レスポンス受信:', response.status, response.statusText);
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 return response.text();
             })
             .then(text => {
+                console.log('📄 CSVテキスト取得成功:', text.length, '文字');
+                console.log('📝 CSVテキストの最初の200文字:', text.substring(0, 200));
                 const data = csvToArray(text);
+                console.log('📊 CSV解析完了:', data.length, '行');
+                console.log('🔍 データサンプル:', data.slice(0, 3));
                 globalData = data;
                 
                 // データ情報を更新
                 const dataInfo = document.getElementById('data-info');
                 if (dataInfo) {
                     const recordCount = data.length;
-                    const totalSales = data.reduce((sum, row) => sum + parseInt(row['売り上げ'] || 0), 0);
+                    const totalSales = data.reduce((sum, row) => {
+                        const sales = parseInt(row['売り上げ'] || 0);
+                        return sum + sales;
+                    }, 0);
                     dataInfo.innerHTML = `
-                        ${dataType === 'real' ? '💼 実データ' : '📋 デモデータ'}: 
-                        ${recordCount}件のレコード, 
-                        総売上: ¥${totalSales.toLocaleString()}
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            margin-bottom: 8px;
+                        ">
+                            <span style="font-size: 16px; margin-right: 8px;">✅</span>
+                            <strong style="color: #0369a1;">
+                                💼 売上データ 読み込み完了
+                            </strong>
+                        </div>
+                        <div style="font-size: 13px; color: #0369a1;">
+                            📊 ${recordCount}件のレコード | 💰 総売上: ¥${totalSales.toLocaleString()}
+                        </div>
                     `;
+                } else {
+                    console.warn('⚠️ data-info要素が見つかりません');
                 }
                 
                 // プルダウンの選択肢をセット（エラーハンドリング追加）
-                const months = Array.from(new Set(
-                    data.filter(row => row && row['日付']).map(row => row['日付'].slice(0,7))
-                )).sort();
-                monthSelect.innerHTML = '';
-                months.forEach(m => {
-                    const opt = document.createElement('option');
-                    opt.value = m;
-                    opt.textContent = m;
-                    monthSelect.appendChild(opt);
-                });
-                // デフォルトは最新月
-            if (months.length > 0) monthSelect.value = months[months.length-1];
+                const monthSelect = document.getElementById('month-select');
+                if (monthSelect) {
+                    const months = Array.from(new Set(
+                        data.filter(row => row && row['日付']).map(row => row['日付'].slice(0,7))
+                    )).sort();
+                    monthSelect.innerHTML = '';
+                    months.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m;
+                        opt.textContent = m;
+                        monthSelect.appendChild(opt);
+                    });
+                    // デフォルトは最新月
+                    if (months.length > 0) monthSelect.value = months[months.length-1];
+                    
+                    // プルダウン変更時のイベント
+                    monthSelect.onchange = () => {
+                        showMonthAnalysis();
+                    };
+                }
 
-            showMonthAnalysis();
-            // ボタンイベント
-            btnYear.onclick = () => {
-                showYearAnalysis();
-                monthSelectDiv.style.display = 'none';
-            };
-            btnMonth.onclick = () => {
+                // 初期表示は月分析
                 showMonthAnalysis();
-                monthSelectDiv.style.display = '';
-            };
-            // プルダウン変更時
-            monthSelect.onchange = () => {
-                showMonthAnalysis();
-            };
-            // 月分析時のみプルダウン表示
-            monthSelectDiv.style.display = '';
-        })
+                
+                // 月選択divを表示
+                const monthSelectDiv = document.getElementById('month-select-div');
+                if (monthSelectDiv) {
+                    monthSelectDiv.style.display = 'block';
+                }
+            })
         .catch(error => {
             console.error('データ読み込みエラー:', error);
             const errorMsg = document.createElement('div');
@@ -912,10 +1307,35 @@ function createMainApp() {
 };
 
 function showMonthAnalysis() {
+    console.log('📊 月分析表示開始');
+    console.log('🔍 globalData:', globalData ? globalData.length + '件' : 'undefined');
+    
     document.getElementById('analysis-year').style.display = 'none';
     document.getElementById('analysis-month').style.display = '';
     document.getElementById('analysis-weekday').style.display = 'none';
     document.getElementById('sales-table').style.display = 'none';
+    
+    // データが存在しない場合は警告
+    if (!globalData || globalData.length === 0) {
+        const analysisMonth = document.getElementById('analysis-month');
+        if (analysisMonth) {
+            analysisMonth.innerHTML = `
+                <div style="
+                    text-align: center;
+                    padding: 40px;
+                    color: #f59e0b;
+                    background: #fef3c7;
+                    border-radius: 12px;
+                    border: 1px solid #fbbf24;
+                ">
+                    <h3>⚠️ データが読み込まれていません</h3>
+                    <p>データソース選択ボタンをクリックしてデータを読み込んでください。</p>
+                </div>
+            `;
+        }
+        return;
+    }
+    
     // プルダウンで選択された月のみ抽出
     const monthSelect = document.getElementById('month-select');
     let filtered = globalData;
@@ -923,7 +1343,11 @@ function showMonthAnalysis() {
     if (monthSelect && monthSelect.value) {
         selectedMonth = monthSelect.value;
         filtered = globalData.filter(row => row && row['日付'] && row['日付'].slice(0,7) === selectedMonth);
+        console.log('📅 選択された月:', selectedMonth, 'フィルター後:', filtered.length + '件');
+    } else {
+        console.log('📅 月選択なし、全データ表示:', filtered.length + '件');
     }
+    
     renderMonthAnalysis(filtered, selectedMonth);
     renderMonthPersonAnalysis(filtered, selectedMonth);
 }
@@ -979,8 +1403,84 @@ function renderYearAnalysis(data) {
         yearWeekdayStats[year][wd].sales += sales;
         yearWeekdayStats[year][wd].customers += customers;
     });
-    let html = '<h2>年別売上・客数・組数</h2><table border="1"><tr><th>年</th><th>売上合計</th><th>客数合計</th><th>組数</th></tr>';
-    Object.keys(yearStats).sort().forEach(year => {
+    
+    // スタイリッシュなテーブル作成
+    let html = `
+        <div style="margin-bottom: 24px;">
+            <h2 style="
+                color: #1e293b;
+                font-size: 20px;
+                font-weight: 600;
+                margin: 0 0 16px 0;
+                display: flex;
+                align-items: center;
+            ">
+                <span style="
+                    font-size: 20px;
+                    margin-right: 8px;
+                ">📈</span>
+                年別売上・客数・組数
+            </h2>
+            
+            <div style="
+                overflow-x: auto;
+                border-radius: 12px;
+                border: 1px solid #e2e8f0;
+                background: white;
+            ">
+                <table style="
+                    width: 100%;
+                    border-collapse: collapse;
+                    font-size: 14px;
+                ">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);">
+                            <th style="
+                                padding: 16px;
+                                text-align: left;
+                                color: white;
+                                font-weight: 600;
+                                border: none;
+                                font-size: 13px;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
+                            ">年</th>
+                            <th style="
+                                padding: 16px;
+                                text-align: right;
+                                color: white;
+                                font-weight: 600;
+                                border: none;
+                                font-size: 13px;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
+                            ">売上合計</th>
+                            <th style="
+                                padding: 16px;
+                                text-align: right;
+                                color: white;
+                                font-weight: 600;
+                                border: none;
+                                font-size: 13px;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
+                            ">客数合計</th>
+                            <th style="
+                                padding: 16px;
+                                text-align: right;
+                                color: white;
+                                font-weight: 600;
+                                border: none;
+                                font-size: 13px;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
+                            ">組数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    `;
+    
+    Object.keys(yearStats).sort().forEach((year, index) => {
         // 組数計算
         let groupCount = 0;
         if (yearGroups[year]) {
@@ -988,20 +1488,193 @@ function renderYearAnalysis(data) {
                 groupCount += Object.keys(dateGroup).length;
             });
         }
-        html += `<tr><td>${year}</td><td>${yearStats[year].sales.toLocaleString()}</td><td>${yearStats[year].customers}</td><td>${groupCount}</td></tr>`;
+        
+        const bgColor = index % 2 === 0 ? '#f8fafc' : 'white';
+        html += `
+            <tr style="
+                background: ${bgColor};
+                transition: background-color 0.2s ease;
+            "
+            onmouseover="this.style.background='#f0f9ff'"
+            onmouseout="this.style.background='${bgColor}'">
+                <td style="
+                    padding: 16px;
+                    border: none;
+                    color: #1e293b;
+                    font-weight: 600;
+                ">${year}</td>
+                <td style="
+                    padding: 16px;
+                    border: none;
+                    color: #1e293b;
+                    text-align: right;
+                    font-weight: 500;
+                ">¥${yearStats[year].sales.toLocaleString()}</td>
+                <td style="
+                    padding: 16px;
+                    border: none;
+                    color: #1e293b;
+                    text-align: right;
+                    font-weight: 500;
+                ">${yearStats[year].customers}名</td>
+                <td style="
+                    padding: 16px;
+                    border: none;
+                    color: #1e293b;
+                    text-align: right;
+                    font-weight: 500;
+                ">${groupCount}組</td>
+            </tr>
+        `;
     });
-    html += '</table>';
+    
+    html += `
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
 
     // 月ごとの合計（折れ線グラフ）
-    html += '<h2>月ごとの合計</h2>';
+    html += `
+        <div style="margin-bottom: 24px;">
+            <h2 style="
+                color: #1e293b;
+                font-size: 20px;
+                font-weight: 600;
+                margin: 0 0 16px 0;
+                display: flex;
+                align-items: center;
+            ">
+                <span style="
+                    font-size: 20px;
+                    margin-right: 8px;
+                ">📊</span>
+                月ごとの合計
+            </h2>
+        </div>
+    `;
     Object.keys(yearMonthStats).sort().forEach(year => {
-        html += `<h3>${year}</h3><canvas id="lineChart-year-${year}" width="500" height="220"></canvas>`;
-        html += `<table id="table-year-month-${year}" border="1"><tr><th>月</th><th>売上合計</th><th>客数合計</th></tr>`;
+        html += `
+            <div style="
+                background: white;
+                border-radius: 12px;
+                padding: 20px;
+                margin-bottom: 20px;
+                border: 1px solid #e2e8f0;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            ">
+                <h3 style="
+                    color: #1e293b;
+                    font-size: 18px;
+                    font-weight: 600;
+                    margin: 0 0 16px 0;
+                    display: flex;
+                    align-items: center;
+                ">
+                    <span style="
+                        font-size: 18px;
+                        margin-right: 8px;
+                    ">📅</span>
+                    ${year}年
+                </h3>
+                
+                <div style="
+                    margin-bottom: 16px;
+                    padding: 16px;
+                    background: #f8fafc;
+                    border-radius: 8px;
+                ">
+                    <canvas id="lineChart-year-${year}" width="500" height="220"></canvas>
+                </div>
+                
+                <div style="
+                    overflow-x: auto;
+                    border-radius: 8px;
+                    border: 1px solid #e2e8f0;
+                ">
+                    <table id="table-year-month-${year}" style="
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 14px;
+                    ">
+                        <thead>
+                            <tr style="background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);">
+                                <th style="
+                                    padding: 12px 16px;
+                                    text-align: left;
+                                    color: white;
+                                    font-weight: 600;
+                                    border: none;
+                                    font-size: 13px;
+                                    text-transform: uppercase;
+                                    letter-spacing: 0.05em;
+                                ">月</th>
+                                <th style="
+                                    padding: 12px 16px;
+                                    text-align: right;
+                                    color: white;
+                                    font-weight: 600;
+                                    border: none;
+                                    font-size: 13px;
+                                    text-transform: uppercase;
+                                    letter-spacing: 0.05em;
+                                ">売上合計</th>
+                                <th style="
+                                    padding: 12px 16px;
+                                    text-align: right;
+                                    color: white;
+                                    font-weight: 600;
+                                    border: none;
+                                    font-size: 13px;
+                                    text-transform: uppercase;
+                                    letter-spacing: 0.05em;
+                                ">客数合計</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+        
         const months = Object.keys(yearMonthStats[year]).sort();
-        months.forEach(month => {
-            html += `<tr><td>${month}</td><td>${yearMonthStats[year][month].sales.toLocaleString()}</td><td>${yearMonthStats[year][month].customers}</td></tr>`;
+        months.forEach((month, index) => {
+            const bgColor = index % 2 === 0 ? '#f8fafc' : 'white';
+            html += `
+                <tr style="
+                    background: ${bgColor};
+                    transition: background-color 0.2s ease;
+                "
+                onmouseover="this.style.background='#f0f9ff'"
+                onmouseout="this.style.background='${bgColor}'">
+                    <td style="
+                        padding: 12px 16px;
+                        border: none;
+                        color: #1e293b;
+                        font-weight: 500;
+                    ">${month}</td>
+                    <td style="
+                        padding: 12px 16px;
+                        border: none;
+                        color: #1e293b;
+                        text-align: right;
+                        font-weight: 500;
+                    ">¥${yearMonthStats[year][month].sales.toLocaleString()}</td>
+                    <td style="
+                        padding: 12px 16px;
+                        border: none;
+                        color: #1e293b;
+                        text-align: right;
+                        font-weight: 500;
+                    ">${yearMonthStats[year][month].customers}名</td>
+                </tr>
+            `;
         });
-        html += '</table>';
+        
+        html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
         setTimeout(() => {
             const table = document.getElementById(`table-year-month-${year}`);
             if (!table) return;
@@ -1235,7 +1908,34 @@ function renderTable(data) {
 
 // 月別売上・客数分析
 function renderMonthAnalysis(data, selectedMonth) {
+    console.log('📊 renderMonthAnalysis開始:', data ? data.length + '件' : 'データなし');
+    
     const weekdays = ['日','月','火','水','木','金','土'];
+    
+    // データが存在しない場合の処理
+    if (!data || data.length === 0) {
+        console.log('⚠️ 表示するデータがありません');
+        const analysisMonth = document.getElementById('analysis-month');
+        if (analysisMonth) {
+            analysisMonth.innerHTML = `
+                <div style="
+                    text-align: center;
+                    padding: 40px;
+                    color: #6b7280;
+                    background: #f9fafb;
+                    border-radius: 12px;
+                    border: 1px solid #e5e7eb;
+                ">
+                    <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                    <h3 style="color: #374151; margin: 0 0 8px 0;">データがありません</h3>
+                    <p style="margin: 0; font-size: 14px;">
+                        ${selectedMonth ? `${selectedMonth}のデータが見つかりません` : 'データを読み込んでください'}
+                    </p>
+                </div>
+            `;
+        }
+        return;
+    }
     
     // 1ヶ月分の合計集計
     let totalSales = 0, totalCustomers = 0, totalGroupCount = 0;
