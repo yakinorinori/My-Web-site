@@ -56,11 +56,17 @@ python3 -m http.server 8080
 ```
 
 ## 🚀 デプロイメント
-- **GitHub Pages**: プッシュ時に自動デプロイ
-- **Mac mini**: GitHub Actions で自動デプロイ（要SSH設定）
-- **SSL証明書**: 自動更新対応
+- **GitHub Pages**: プッシュ時に自動デプロイ ✅ 常時稼働
+- **Mac mini**: GitHub Actions で自動デプロイ（要SSH設定）⚠️ 要設定
 
-### Mac mini SSH設定
+### GitHub Actions デプロイ状況確認
+1. リポジトリページで「Actions」タブをクリック
+2. 最新の「Deploy to GitHub Pages and Mac mini」ワークフローを確認
+3. GitHub Pagesは常に成功、Mac miniは設定に依存
+
+### Mac mini SSH設定（オプション）
+**⚠️ 注意**: Mac miniデプロイが失敗してもGitHub Pagesは正常動作します
+
 GitHub リポジトリの `Settings > Secrets and variables > Actions` で以下を設定：
 
 | Secret名 | 値 | 説明 |
@@ -75,6 +81,15 @@ ssh-keygen -t rsa -b 4096 -C "github-actions"
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 cat ~/.ssh/id_rsa  # この内容をSSH_PRIVATE_KEYに設定
 ```
+
+### Mac mini デプロイトラブルシューティング
+Mac miniデプロイが失敗する場合の確認項目：
+
+1. **🖥️ Mac mini起動状況**: Mac mini が起動しているか
+2. **🌐 ネットワーク接続**: WiFi/有線接続が正常か  
+3. **🔐 SSH鍵設定**: GitHub SecretsにSSH鍵が正しく設定されているか
+4. **🛡️ ファイアウォール**: Mac mini のファイアウォール設定確認
+5. **🔌 VPN接続**: VPN経由でのアクセスが必要か
 
 ## 📈 データ形式
 CSVファイル形式：
