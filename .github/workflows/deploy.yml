@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages and Mac mini
+name: Deploy to GitHub Pages
 
 on:
   push:
@@ -71,6 +71,10 @@ jobs:
         echo "🌐✅ GitHub Pages デプロイ成功!"
         echo "📍 URL: ${{ steps.deployment.outputs.page_url }}"
         echo "🕐 デプロイ時刻: $(date)"
+        echo "📝 Mac mini デプロイは無効化されています"
+
+  # Mac mini デプロイは無効化されました
+  # 必要に応じて個別にローカルでデプロイしてください
 
   deploy-macmini:
     needs: test

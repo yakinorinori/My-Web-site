@@ -87,8 +87,10 @@ function showGitHubPagesLogin() {
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"25\" cy=\"25\" r=\"1.5\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"75\" cy=\"25\" r=\"1\" fill=\"white\" opacity=\"0.08\"/><circle cx=\"50\" cy=\"75\" r=\"1.2\" fill=\"white\" opacity=\"0.06\"/></svg>');
-                background-repeat: repeat;
+                background: radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 1px, transparent 1px),
+                            radial-gradient(circle at 75% 25%, rgba(255,255,255,0.08) 1px, transparent 1px),
+                            radial-gradient(circle at 50% 75%, rgba(255,255,255,0.06) 1px, transparent 1px);
+                background-size: 50px 50px;
                 animation: float 25s infinite linear;
                 z-index: 1;
             "></div>
@@ -340,8 +342,10 @@ function showLoginMessage() {
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"25\" cy=\"25\" r=\"1.5\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"75\" cy=\"25\" r=\"1\" fill=\"white\" opacity=\"0.08\"/><circle cx=\"50\" cy=\"75\" r=\"1.2\" fill=\"white\" opacity=\"0.06\"/></svg>');
-                background-repeat: repeat;
+                background: radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 1px, transparent 1px),
+                            radial-gradient(circle at 75% 25%, rgba(255,255,255,0.08) 1px, transparent 1px),
+                            radial-gradient(circle at 50% 75%, rgba(255,255,255,0.06) 1px, transparent 1px);
+                background-size: 50px 50px;
                 animation: float 30s infinite linear;
                 z-index: 1;
             "></div>
@@ -773,8 +777,10 @@ function createMainApp() {
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"25\" cy=\"25\" r=\"1.5\" fill=\"white\" opacity=\"0.06\"/><circle cx=\"75\" cy=\"25\" r=\"1\" fill=\"white\" opacity=\"0.04\"/><circle cx=\"50\" cy=\"75\" r=\"1.2\" fill=\"white\" opacity=\"0.05\"/></svg>');
-            background-repeat: repeat;
+            background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.05) 1px, transparent 1px),
+                        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.03) 1px, transparent 1px),
+                        radial-gradient(circle at 50% 80%, rgba(255,255,255,0.04) 1px, transparent 1px);
+            background-size: 50px 50px;
             z-index: 1;
         "></div>
     `;

@@ -57,39 +57,23 @@ python3 -m http.server 8080
 
 ## 🚀 デプロイメント
 - **GitHub Pages**: プッシュ時に自動デプロイ ✅ 常時稼働
-- **Mac mini**: GitHub Actions で自動デプロイ（要SSH設定）⚠️ 要設定
+- **Mac mini**: ローカル手動デプロイ（GitHub Actions無効化済み）
 
 ### GitHub Actions デプロイ状況確認
 1. リポジトリページで「Actions」タブをクリック
-2. 最新の「Deploy to GitHub Pages and Mac mini」ワークフローを確認
-3. GitHub Pagesは常に成功、Mac miniは設定に依存
+2. 最新の「Deploy to GitHub Pages」ワークフローを確認
+3. GitHub Pagesのみ自動デプロイされます
 
-### Mac mini SSH設定（オプション）
-**⚠️ 注意**: Mac miniデプロイが失敗してもGitHub Pagesは正常動作します
-
-GitHub リポジトリの `Settings > Secrets and variables > Actions` で以下を設定：
-
-| Secret名 | 値 | 説明 |
-|----------|-----|------|
-| `MAC_MINI_HOST` | `192.168.151.100` | Mac miniのIPアドレス |
-| `MAC_MINI_USER` | `your_username` | Mac miniのユーザー名 |
-| `SSH_PRIVATE_KEY` | SSH秘密鍵の内容 | `cat ~/.ssh/id_rsa` の出力 |
+### Mac mini 手動デプロイ（オプション）
+Mac miniでローカルに手動デプロイしたい場合：
 
 ```bash
-# SSH鍵生成例（Mac mini側で実行）
-ssh-keygen -t rsa -b 4096 -C "github-actions"
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
-cat ~/.ssh/id_rsa  # この内容をSSH_PRIVATE_KEYに設定
+# Mac mini上で実行
+cd ~/個人事業/My-Web-site
+git pull origin main
+chmod +x ./scripts/start-all-servers.sh
+./scripts/start-all-servers.sh
 ```
-
-### Mac mini デプロイトラブルシューティング
-Mac miniデプロイが失敗する場合の確認項目：
-
-1. **🖥️ Mac mini起動状況**: Mac mini が起動しているか
-2. **🌐 ネットワーク接続**: WiFi/有線接続が正常か  
-3. **🔐 SSH鍵設定**: GitHub SecretsにSSH鍵が正しく設定されているか
-4. **🛡️ ファイアウォール**: Mac mini のファイアウォール設定確認
-5. **🔌 VPN接続**: VPN経由でのアクセスが必要か
 
 ## 📈 データ形式
 CSVファイル形式：
