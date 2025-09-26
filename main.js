@@ -87,8 +87,10 @@ function showGitHubPagesLogin() {
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"25\" cy=\"25\" r=\"1.5\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"75\" cy=\"25\" r=\"1\" fill=\"white\" opacity=\"0.08\"/><circle cx=\"50\" cy=\"75\" r=\"1.2\" fill=\"white\" opacity=\"0.06\"/></svg>') repeat;
+                background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"25\" cy=\"25\" r=\"1.5\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"75\" cy=\"25\" r=\"1\" fill=\"white\" opacity=\"0.08\"/><circle cx=\"50\" cy=\"75\" r=\"1.2\" fill=\"white\" opacity=\"0.06\"/></svg>');
+                background-repeat: repeat;
                 animation: float 25s infinite linear;
+                z-index: 1;
             "></div>
             
             <!-- メインコンテナ -->
@@ -338,8 +340,10 @@ function showLoginMessage() {
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"25\" cy=\"25\" r=\"1.5\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"75\" cy=\"25\" r=\"1\" fill=\"white\" opacity=\"0.08\"/><circle cx=\"50\" cy=\"75\" r=\"1.2\" fill=\"white\" opacity=\"0.06\"/></svg>') repeat;
+                background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"25\" cy=\"25\" r=\"1.5\" fill=\"white\" opacity=\"0.1\"/><circle cx=\"75\" cy=\"25\" r=\"1\" fill=\"white\" opacity=\"0.08\"/><circle cx=\"50\" cy=\"75\" r=\"1.2\" fill=\"white\" opacity=\"0.06\"/></svg>');
+                background-repeat: repeat;
                 animation: float 30s infinite linear;
+                z-index: 1;
             "></div>
             
             <!-- メインコンテナ -->
@@ -793,7 +797,8 @@ function createMainApp() {
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"25\" cy=\"25\" r=\"1.5\" fill=\"white\" opacity=\"0.06\"/><circle cx=\"75\" cy=\"25\" r=\"1\" fill=\"white\" opacity=\"0.04\"/><circle cx=\"50\" cy=\"75\" r=\"1.2\" fill=\"white\" opacity=\"0.05\"/></svg>') repeat;
+            background-image: url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><circle cx=\"25\" cy=\"25\" r=\"1.5\" fill=\"white\" opacity=\"0.06\"/><circle cx=\"75\" cy=\"25\" r=\"1\" fill=\"white\" opacity=\"0.04\"/><circle cx=\"50\" cy=\"75\" r=\"1.2\" fill=\"white\" opacity=\"0.05\"/></svg>');
+            background-repeat: repeat;
             z-index: 1;
         "></div>
     `;
