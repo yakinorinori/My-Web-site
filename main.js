@@ -26,7 +26,7 @@ async function checkAuthentication() {
             
             if (isAuth && username) {
                 console.log('✅ GitHub Pages認証済み:', username);
-                showUserInfo(username);
+                // ユーザー情報はヘッダーで表示されるため、showUserInfo呼び出しを削除
                 return true;
             } else {
                 console.log('❌ GitHub Pages未認証');
@@ -58,7 +58,7 @@ async function checkAuthentication() {
         
         // 認証済みの場合、ユーザー情報を表示
         console.log('✅ 認証成功:', authData.username);
-        showUserInfo(authData.username);
+        // ユーザー情報はヘッダーで表示されるため、showUserInfo呼び出しを削除
         return true;
     } catch (error) {
         console.error('🚨 認証チェックエラー:', error);
@@ -597,8 +597,7 @@ async function handleLogin(event) {
         
         if (response.ok && result.success) {
             console.log('✅ ログイン成功:', result.username);
-            // ログイン成功後、メインアプリを表示
-            showUserInfo(result.username);
+            // ログイン成功後、メインアプリを表示（ユーザー情報はヘッダーで表示）
             createMainApp();
         } else {
             console.log('❌ ログイン失敗:', result.message);
@@ -612,32 +611,9 @@ async function handleLogin(event) {
     }
 }
 
-function showUserInfo(username) {
-    // ユーザー情報とログアウトボタンを追加
-    const userInfo = document.createElement('div');
-    userInfo.id = 'user-info';
-    userInfo.style.cssText = 'position: fixed; top: 10px; right: 10px; background: #667eea; color: white; padding: 10px 20px; border-radius: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 1000;';
-    userInfo.innerHTML = `
-        👤 ${username} 
-        <button onclick="logout()" style="background: #ff4757; color: white; border: none; padding: 5px 10px; border-radius: 3px; margin-left: 10px; cursor: pointer;">
-            ログアウト
-        </button>
-    `;
-    document.body.appendChild(userInfo);
-}
+// showUserInfo関数は削除 - ヘッダー内のログアウトボタンを使用
 
-async function logout() {
-    try {
-        await fetch(`${API_BASE_URL}/logout`, {
-            method: 'POST',
-            credentials: 'include'
-        });
-        window.location.reload();
-    } catch (error) {
-        console.error('ログアウトエラー:', error);
-        window.location.reload();
-    }
-}
+// 旧logout関数も削除 - createMainApp内のlogout関数を使用
 
 // 認証付きFetch関数
 async function authenticatedFetch(url, options = {}) {
