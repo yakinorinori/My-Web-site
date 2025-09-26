@@ -65,12 +65,19 @@ jobs:
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
+      
+    - name: GitHub Pages Deploy Status
+      run: |
+        echo "🌐✅ GitHub Pages デプロイ成功!"
+        echo "📍 URL: ${{ steps.deployment.outputs.page_url }}"
+        echo "🕐 デプロイ時刻: $(date)"
 
   deploy-macmini:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     continue-on-error: true  # Mac mini デプロイが失敗してもGitHub Pagesデプロイは継続
+    timeout-minutes: 5  # タイムアウトを5分に設定
     
     steps:
     - uses: actions/checkout@v3
@@ -81,55 +88,113 @@ jobs:
         MAC_MINI_USER: ${{ secrets.MAC_MINI_USER }}
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
       run: |
+        echo "🚀 Mac mini デプロイ処理を開始..."
+        echo "タイムスタンプ: $(date)"
+        
         # Secretsが設定されているかチェック
         if [ -z "$MAC_MINI_HOST" ] || [ -z "$MAC_MINI_USER" ] || [ -z "$SSH_PRIVATE_KEY" ]; then
           echo "❌ Mac mini デプロイに必要なSecrets（MAC_MINI_HOST、MAC_MINI_USER、SSH_PRIVATE_KEY）が設定されていません"
           echo "GitHub リポジトリの Settings > Secrets and variables > Actions で設定してください"
+          echo "⏩ Mac miniデプロイをスキップします（GitHub Pagesは正常にデプロイされます）"
           exit 0
         fi
         
+        echo "✅ 必要なSecretsが設定されています"
+        echo "🎯 デプロイ先: $MAC_MINI_USER@$MAC_MINI_HOST"
+        
         # SSH秘密鍵設定
+        echo "🔐 SSH秘密鍵を設定中..."
         mkdir -p ~/.ssh
         echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         
-        # known_hostsに追加（StrictHostKeyCheckingを無効化）
-        ssh-keyscan -H "$MAC_MINI_HOST" >> ~/.ssh/known_hosts 2>/dev/null || {
-          echo "⚠️ ssh-keyscanが失敗しました。StrictHostKeyCheckingを無効化してデプロイを続行します"
-          echo "Host $MAC_MINI_HOST" >> ~/.ssh/config
-          echo "  StrictHostKeyChecking no" >> ~/.ssh/config
-          echo "  UserKnownHostsFile /dev/null" >> ~/.ssh/config
-        }
+        # SSH設定を最適化
+        cat > ~/.ssh/config << EOF
+        Host mac-mini
+            HostName $MAC_MINI_HOST
+            User $MAC_MINI_USER
+            IdentityFile ~/.ssh/id_rsa
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+            ConnectTimeout 30
+            ServerAliveInterval 10
+            ServerAliveCountMax 3
+        EOF
+        
+        echo "📡 SSH設定完了"
+        
+        # ネットワーク疎通確認
+        echo "🌐 Mac mini への疎通確認..."
+        if ping -c 3 -W 5 "$MAC_MINI_HOST" > /dev/null 2>&1; then
+          echo "✅ Ping成功: Mac mini にネットワーク経由で到達可能"
+        else
+          echo "⚠️ Ping失敗: Mac mini への疎通に問題がある可能性があります"
+          echo "（VPN環境やファイアウォールの影響の可能性）"
+        fi
         
         # SSH接続テスト
-        echo "🔌 Mac mini ($MAC_MINI_HOST) への接続をテストしています..."
-        if ssh -o ConnectTimeout=10 "$MAC_MINI_USER@$MAC_MINI_HOST" "echo 'SSH接続成功'" 2>/dev/null; then
-          echo "✅ SSH接続が確立されました"
-          
+        echo "🔌 SSH接続テスト中..."
+        SSH_TEST_RESULT=""
+        if timeout 30s ssh mac-mini "echo 'SSH接続テスト成功'" 2>&1; then
+          SSH_TEST_RESULT="success"
+          echo "✅ SSH接続が正常に確立されました"
+        else
+          SSH_TEST_RESULT="failed"
+          echo "❌ SSH接続に失敗しました"
+        fi
+        
+        if [ "$SSH_TEST_RESULT" = "success" ]; then
           # デプロイ実行
-          echo "🚀 Mac mini へのデプロイを開始します..."
-          ssh "$MAC_MINI_USER@$MAC_MINI_HOST" << 'EOF'
-            echo "📂 作業ディレクトリに移動..."
-            cd ~/個人事業/My-Web-site || { echo "❌ ディレクトリが見つかりません"; exit 1; }
+          echo "🚀 Mac mini へのデプロイを実行中..."
+          ssh mac-mini << 'EOF'
+            echo "� 現在の作業ディレクトリ: $(pwd)"
+            echo "📂 プロジェクトディレクトリに移動..."
             
-            echo "📥 最新コードを取得..."
-            git pull origin main
-            
-            echo "🔄 サーバーを再起動..."
-            if [ -f "./scripts/start-all-servers.sh" ]; then
-              ./scripts/start-all-servers.sh
-              echo "✅ Mac mini デプロイ完了"
+            if cd ~/個人事業/My-Web-site 2>/dev/null; then
+              echo "✅ ディレクトリ移動成功: $(pwd)"
+              
+              echo "📥 Gitリポジトリの状態確認..."
+              git status --porcelain
+              
+              echo "� 最新コードを取得中..."
+              if git pull origin main; then
+                echo "✅ Git pull 成功"
+                
+                echo "🔄 サーバー再起動処理..."
+                if [ -f "./scripts/start-all-servers.sh" ]; then
+                  echo "📜 start-all-servers.sh を実行中..."
+                  chmod +x ./scripts/start-all-servers.sh
+                  ./scripts/start-all-servers.sh
+                  echo "✅ サーバー再起動完了"
+                else
+                  echo "⚠️ start-all-servers.sh が見つかりません"
+                  echo "📁 利用可能なスクリプト:"
+                  ls -la ./scripts/ 2>/dev/null || echo "scriptsディレクトリが見つかりません"
+                fi
+                
+                echo "🎉 Mac mini デプロイ処理完了"
+              else
+                echo "❌ Git pull に失敗しました"
+                exit 1
+              fi
             else
-              echo "⚠️ start-all-servers.sh が見つかりません"
+              echo "❌ プロジェクトディレクトリ '~/個人事業/My-Web-site' が見つかりません"
+              echo "📁 ホームディレクトリの内容:"
+              ls -la ~/ | head -10
+              exit 1
             fi
         EOF
+        
         else
-          echo "❌ Mac mini への SSH接続に失敗しました"
-          echo "以下を確認してください:"
-          echo "1. MAC_MINI_HOST: $MAC_MINI_HOST にアクセス可能か"
-          echo "2. MAC_MINI_USER: $MAC_MINI_USER が正しいか"
-          echo "3. SSH秘密鍵が正しく設定されているか"
-          echo "4. Mac mini が起動しているか"
-          echo "5. ネットワーク接続が可能か"
+          echo "💡 SSH接続失敗の一般的な原因と対処法:"
+          echo "1. 🖥️  Mac mini が起動していない → Mac mini の電源を確認"
+          echo "2. 🌐 ネットワーク接続問題 → WiFi/有線接続を確認"
+          echo "3. 🔐 SSH鍵認証問題 → GitHub Secretsの設定を確認"
+          echo "4. 🛡️  ファイアウォール → Mac mini のファイアウォール設定を確認"
+          echo "5. 🔌 VPN接続必要 → VPN経由でのアクセスが必要な可能性"
+          echo ""
+          echo "⏩ Mac miniデプロイは失敗しましたが、GitHub Pagesは正常にデプロイされます"
           exit 1
         fi
+        
+        echo "⏰ デプロイ処理終了: $(date)"

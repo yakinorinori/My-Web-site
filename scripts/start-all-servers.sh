@@ -9,10 +9,11 @@ pkill -f "python3.*app.py" 2>/dev/null
 pkill -f "http.server" 2>/dev/null
 sleep 2
 
-# プロジェクトディレクトリに移動
-cd "$(dirname "$0")"
+# プロジェクトルートディレクトリに移動
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
-echo "📂 現在のディレクトリ: $(pwd)"
+echo "📂 プロジェクトルート: $(pwd)"
 
 # バックエンドサーバー起動
 echo "🚀 バックエンドサーバー起動中..."
