@@ -143,6 +143,9 @@ function createMainContent(root) {
         padding: 30px 20px;
     `;
     
+    // モバイル切り替えボタン
+    createMobileToggleButton(mainContent);
+    
     // 分析選択カード
     createAnalysisSelector(mainContent);
     
@@ -579,6 +582,61 @@ function clearAnalysisResults() {
     if (resultsArea) {
         resultsArea.innerHTML = '';
     }
+}
+
+/**
+ * モバイル切り替えボタンを作成
+ */
+function createMobileToggleButton(mainContent) {
+    const mobileToggle = document.createElement('div');
+    mobileToggle.style.cssText = `
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 24px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+    `;
+    
+    mobileToggle.innerHTML = `
+        <div style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        ">
+            <span style="font-size: 24px; margin-right: 12px;">📱</span>
+            <h3 style="
+                color: white;
+                margin: 0;
+                font-size: 20px;
+                font-weight: 600;
+            ">モバイル売上報告</h3>
+        </div>
+        <p style="
+            color: rgba(255, 255, 255, 0.9);
+            margin: 0 0 16px 0;
+            font-size: 14px;
+        ">スマートフォンで伝票撮影・即時報告</p>
+        <button onclick="startMobileSalesReport()" style="
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            transition: all 0.2s ease;
+        "
+        onmouseover="this.style.background='rgba(255, 255, 255, 0.3)'"
+        onmouseout="this.style.background='rgba(255, 255, 255, 0.2)'">
+            📸 モバイル報告を開始
+        </button>
+    `;
+    
+    mainContent.appendChild(mobileToggle);
 }
 
 /**
