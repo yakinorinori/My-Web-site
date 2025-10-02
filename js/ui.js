@@ -206,7 +206,6 @@ function createAnalysisSelector(mainContent) {
     // グローバル参照のために保存
     window.yearCard = yearCard;
     window.monthCard = monthCard;
-    window.reportCard = reportCard;
 }
 
 /**
