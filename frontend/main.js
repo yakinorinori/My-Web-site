@@ -1505,5 +1505,9 @@ document.addEventListener('DOMContentLoaded', function() {
             loadData('real');
         });
     }
+    
+    // 自動レポート機能を初期化
+    console.log('📊 自動レポート機能を初期化中...');
+    setupAutomaticReports();
 });
 }

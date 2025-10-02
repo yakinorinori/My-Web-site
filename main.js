@@ -972,8 +972,95 @@ function createMainApp() {
         }
     };
     
+    // 売上報告書生成カード
+    const reportCard = document.createElement('div');
+    reportCard.style.cssText = `
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(14, 165, 233, 0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    `;
+    
+    reportCard.innerHTML = `
+        <div style="
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        ">
+            <div style="
+                width: 48px;
+                height: 48px;
+                background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 100%);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                color: white;
+                margin-right: 16px;
+            ">📊</div>
+            <div>
+                <h3 style="
+                    margin: 0;
+                    font-size: 18px;
+                    font-weight: 600;
+                    color: #1e293b;
+                ">売上報告書</h3>
+                <p style="
+                    margin: 4px 0 0 0;
+                    font-size: 14px;
+                    color: #64748b;
+                ">包括的な売上レポート生成</p>
+            </div>
+        </div>
+        <div style="
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 8px;
+            border: 1px solid #bae6fd;
+        ">
+            <span style="
+                color: #0369a1;
+                font-size: 13px;
+                font-weight: 500;
+            ">📋 PDF・CSV出力対応</span>
+        </div>
+    `;
+    
+    reportCard.onclick = () => {
+        generateSalesReport('monthly');
+        // アクティブ状態の管理
+        reportCard.style.boxShadow = '0 8px 30px rgba(14, 165, 233, 0.2)';
+        reportCard.style.transform = 'translateY(-2px)';
+        yearCard.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
+        yearCard.style.transform = 'translateY(0)';
+        monthCard.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
+        monthCard.style.transform = 'translateY(0)';
+        monthSelectDiv.style.display = 'none';
+    };
+    
+    reportCard.onmouseenter = () => {
+        if (reportCard.style.transform !== 'translateY(-2px)') {
+            reportCard.style.transform = 'translateY(-4px)';
+            reportCard.style.boxShadow = '0 12px 40px rgba(14, 165, 233, 0.15)';
+        }
+    };
+    
+    reportCard.onmouseleave = () => {
+        if (reportCard.style.transform !== 'translateY(-2px)') {
+            reportCard.style.transform = 'translateY(0)';
+            reportCard.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
+        }
+    };
+
     analysisSelector.appendChild(yearCard);
     analysisSelector.appendChild(monthCard);
+    analysisSelector.appendChild(reportCard);
     mainContent.appendChild(analysisSelector);
     
     // 月選択プルダウン（スタイリッシュに）
@@ -2567,6 +2654,565 @@ function drawMonthlyChart() {
         });
 }
 
+// 売上報告機能
+function generateSalesReport(period = 'monthly') {
+    console.log('📊 売上報告書生成開始:', period);
+    
+    if (!globalData || globalData.length === 0) {
+        console.warn('⚠️ データが読み込まれていません');
+        return;
+    }
+    
+    const reportData = analyzeSalesData(globalData, period);
+    displaySalesReport(reportData, period);
+}
+
+function analyzeSalesData(data, period) {
+    const analysis = {
+        period: period,
+        totalSales: 0,
+        totalCustomers: 0,
+        totalTransactions: data.length,
+        averageTransaction: 0,
+        topCustomers: {},
+        periodAnalysis: {},
+        summary: {}
+    };
+    
+    // 基本統計の計算
+    data.forEach(row => {
+        if (!row || !row['日付']) return;
+        
+        const sales = Number(row['売り上げ']) || 0;
+        const customers = Number(row['客数']) || 0;
+        const person = row['支払い者'];
+        
+        analysis.totalSales += sales;
+        analysis.totalCustomers += customers;
+        
+        // 支払い者別統計
+        if (person && person !== '不明') {
+            if (!analysis.topCustomers[person]) {
+                analysis.topCustomers[person] = { sales: 0, visits: 0 };
+            }
+            analysis.topCustomers[person].sales += sales;
+            analysis.topCustomers[person].visits += 1;
+        }
+        
+        // 期間別分析
+        let periodKey = '';
+        const date = row['日付'];
+        switch (period) {
+            case 'monthly':
+                periodKey = date.slice(0, 7); // YYYY/MM
+                break;
+            case 'quarterly':
+                const month = parseInt(date.slice(5, 7));
+                const quarter = Math.ceil(month / 3);
+                periodKey = `${date.slice(0, 4)}Q${quarter}`;
+                break;
+            case 'yearly':
+                periodKey = date.slice(0, 4); // YYYY
+                break;
+            default:
+                periodKey = date.slice(0, 7);
+        }
+        
+        if (!analysis.periodAnalysis[periodKey]) {
+            analysis.periodAnalysis[periodKey] = { sales: 0, customers: 0, transactions: 0 };
+        }
+        analysis.periodAnalysis[periodKey].sales += sales;
+        analysis.periodAnalysis[periodKey].customers += customers;
+        analysis.periodAnalysis[periodKey].transactions += 1;
+    });
+    
+    // 平均値の計算
+    analysis.averageTransaction = analysis.totalTransactions > 0 
+        ? analysis.totalSales / analysis.totalTransactions 
+        : 0;
+    
+    // 上位顧客のソート
+    analysis.topCustomersList = Object.entries(analysis.topCustomers)
+        .sort(([,a], [,b]) => b.sales - a.sales)
+        .slice(0, 10);
+    
+    // サマリー情報
+    const periods = Object.keys(analysis.periodAnalysis).sort();
+    if (periods.length > 1) {
+        const latest = analysis.periodAnalysis[periods[periods.length - 1]];
+        const previous = analysis.periodAnalysis[periods[periods.length - 2]];
+        
+        analysis.summary = {
+            latestPeriod: periods[periods.length - 1],
+            previousPeriod: periods[periods.length - 2],
+            salesGrowth: previous.sales > 0 
+                ? ((latest.sales - previous.sales) / previous.sales * 100) 
+                : 0,
+            customerGrowth: previous.customers > 0 
+                ? ((latest.customers - previous.customers) / previous.customers * 100) 
+                : 0
+        };
+    }
+    
+    return analysis;
+}
+
+function displaySalesReport(reportData, period) {
+    const reportContainer = document.getElementById('sales-report-container');
+    if (!reportContainer) {
+        // レポートコンテナを作成
+        const container = document.createElement('div');
+        container.id = 'sales-report-container';
+        container.style.cssText = `
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin: 24px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(14, 165, 233, 0.1);
+        `;
+        
+        // メインコンテンツエリアに追加
+        const mainContent = document.querySelector('#app-root > div:last-child');
+        if (mainContent) {
+            mainContent.appendChild(container);
+        }
+    }
+    
+    const container = document.getElementById('sales-report-container');
+    
+    // レポートHTMLの生成
+    let reportHTML = `
+        <div style="margin-bottom: 24px;">
+            <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+                <h2 style="
+                    color: #1e293b;
+                    font-size: 24px;
+                    font-weight: 600;
+                    margin: 0;
+                    display: flex;
+                    align-items: center;
+                ">
+                    <span style="margin-right: 12px;">📊</span>
+                    売上報告書 - ${getPeriodLabel(period)}
+                </h2>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="generateSalesReport('monthly')" style="
+                        padding: 8px 16px;
+                        background: ${period === 'monthly' ? '#0ea5e9' : '#f8fafc'};
+                        color: ${period === 'monthly' ? 'white' : '#64748b'};
+                        border: 1px solid #e2e8f0;
+                        border-radius: 6px;
+                        font-size: 13px;
+                        cursor: pointer;
+                    ">月次</button>
+                    <button onclick="generateSalesReport('quarterly')" style="
+                        padding: 8px 16px;
+                        background: ${period === 'quarterly' ? '#0ea5e9' : '#f8fafc'};
+                        color: ${period === 'quarterly' ? 'white' : '#64748b'};
+                        border: 1px solid #e2e8f0;
+                        border-radius: 6px;
+                        font-size: 13px;
+                        cursor: pointer;
+                    ">四半期</button>
+                    <button onclick="generateSalesReport('yearly')" style="
+                        padding: 8px 16px;
+                        background: ${period === 'yearly' ? '#0ea5e9' : '#f8fafc'};
+                        color: ${period === 'yearly' ? 'white' : '#64748b'};
+                        border: 1px solid #e2e8f0;
+                        border-radius: 6px;
+                        font-size: 13px;
+                        cursor: pointer;
+                    ">年次</button>
+                </div>
+            </div>
+            
+            <!-- サマリーカード -->
+            <div style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 16px;
+                margin-bottom: 24px;
+            ">
+                <div style="
+                    background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+                    color: white;
+                    padding: 20px;
+                    border-radius: 12px;
+                    text-align: center;
+                ">
+                    <div style="font-size: 28px; font-weight: 600; margin-bottom: 4px;">
+                        ¥${reportData.totalSales.toLocaleString()}
+                    </div>
+                    <div style="font-size: 14px; opacity: 0.9;">総売上</div>
+                </div>
+                
+                <div style="
+                    background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
+                    color: white;
+                    padding: 20px;
+                    border-radius: 12px;
+                    text-align: center;
+                ">
+                    <div style="font-size: 28px; font-weight: 600; margin-bottom: 4px;">
+                        ${reportData.totalCustomers}
+                    </div>
+                    <div style="font-size: 14px; opacity: 0.9;">総客数</div>
+                </div>
+                
+                <div style="
+                    background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 100%);
+                    color: white;
+                    padding: 20px;
+                    border-radius: 12px;
+                    text-align: center;
+                ">
+                    <div style="font-size: 28px; font-weight: 600; margin-bottom: 4px;">
+                        ${reportData.totalTransactions}
+                    </div>
+                    <div style="font-size: 14px; opacity: 0.9;">取引件数</div>
+                </div>
+                
+                <div style="
+                    background: linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%);
+                    color: white;
+                    padding: 20px;
+                    border-radius: 12px;
+                    text-align: center;
+                ">
+                    <div style="font-size: 28px; font-weight: 600; margin-bottom: 4px;">
+                        ¥${Math.round(reportData.averageTransaction).toLocaleString()}
+                    </div>
+                    <div style="font-size: 14px; opacity: 0.9;">平均取引額</div>
+                </div>
+            </div>
+    `;
+    
+    // 成長率表示（データがある場合）
+    if (reportData.summary.latestPeriod) {
+        reportHTML += `
+            <div style="
+                background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+                border: 1px solid #bae6fd;
+                border-radius: 8px;
+                padding: 16px;
+                margin-bottom: 24px;
+            ">
+                <h3 style="color: #0369a1; margin: 0 0 12px 0; font-size: 16px;">📈 成長率分析</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div>
+                        <span style="color: #0369a1; font-weight: 500;">売上成長率:</span>
+                        <span style="
+                            color: ${reportData.summary.salesGrowth >= 0 ? '#16a34a' : '#dc2626'};
+                            font-weight: 600;
+                            margin-left: 8px;
+                        ">
+                            ${reportData.summary.salesGrowth >= 0 ? '+' : ''}${reportData.summary.salesGrowth.toFixed(1)}%
+                        </span>
+                    </div>
+                    <div>
+                        <span style="color: #0369a1; font-weight: 500;">客数成長率:</span>
+                        <span style="
+                            color: ${reportData.summary.customerGrowth >= 0 ? '#16a34a' : '#dc2626'};
+                            font-weight: 600;
+                            margin-left: 8px;
+                        ">
+                            ${reportData.summary.customerGrowth >= 0 ? '+' : ''}${reportData.summary.customerGrowth.toFixed(1)}%
+                        </span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // 上位顧客リスト
+    if (reportData.topCustomersList.length > 0) {
+        reportHTML += `
+            <div style="margin-bottom: 24px;">
+                <h3 style="color: #1e293b; margin: 0 0 16px 0; font-size: 18px;">👥 上位顧客</h3>
+                <div style="
+                    overflow-x: auto;
+                    border-radius: 8px;
+                    border: 1px solid #e2e8f0;
+                ">
+                    <table style="
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 14px;
+                    ">
+                        <thead>
+                            <tr style="background: #f8fafc;">
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0;">順位</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0;">顧客名</th>
+                                <th style="padding: 12px; text-align: right; border-bottom: 1px solid #e2e8f0;">売上</th>
+                                <th style="padding: 12px; text-align: right; border-bottom: 1px solid #e2e8f0;">来店回数</th>
+                                <th style="padding: 12px; text-align: right; border-bottom: 1px solid #e2e8f0;">平均単価</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+        
+        reportData.topCustomersList.forEach(([name, data], index) => {
+            const avgTransaction = data.visits > 0 ? data.sales / data.visits : 0;
+            reportHTML += `
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px; font-weight: 600;">${index + 1}</td>
+                    <td style="padding: 12px;">${name}</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 500;">¥${data.sales.toLocaleString()}</td>
+                    <td style="padding: 12px; text-align: right;">${data.visits}回</td>
+                    <td style="padding: 12px; text-align: right;">¥${Math.round(avgTransaction).toLocaleString()}</td>
+                </tr>
+            `;
+        });
+        
+        reportHTML += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+    
+    // 期間別分析
+    const periods = Object.keys(reportData.periodAnalysis).sort();
+    if (periods.length > 0) {
+        reportHTML += `
+            <div style="margin-bottom: 24px;">
+                <h3 style="color: #1e293b; margin: 0 0 16px 0; font-size: 18px;">📅 ${getPeriodLabel(period)}分析</h3>
+                <div style="
+                    overflow-x: auto;
+                    border-radius: 8px;
+                    border: 1px solid #e2e8f0;
+                ">
+                    <table style="
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 14px;
+                    ">
+                        <thead>
+                            <tr style="background: #f8fafc;">
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0;">期間</th>
+                                <th style="padding: 12px; text-align: right; border-bottom: 1px solid #e2e8f0;">売上</th>
+                                <th style="padding: 12px; text-align: right; border-bottom: 1px solid #e2e8f0;">客数</th>
+                                <th style="padding: 12px; text-align: right; border-bottom: 1px solid #e2e8f0;">取引数</th>
+                                <th style="padding: 12px; text-align: right; border-bottom: 1px solid #e2e8f0;">平均単価</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+        
+        periods.forEach(period => {
+            const data = reportData.periodAnalysis[period];
+            const avgTransaction = data.transactions > 0 ? data.sales / data.transactions : 0;
+            reportHTML += `
+                <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 12px; font-weight: 500;">${period}</td>
+                    <td style="padding: 12px; text-align: right; font-weight: 500;">¥${data.sales.toLocaleString()}</td>
+                    <td style="padding: 12px; text-align: right;">${data.customers}</td>
+                    <td style="padding: 12px; text-align: right;">${data.transactions}</td>
+                    <td style="padding: 12px; text-align: right;">¥${Math.round(avgTransaction).toLocaleString()}</td>
+                </tr>
+            `;
+        });
+        
+        reportHTML += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+    
+    reportHTML += `
+            <div style="text-align: center; margin-top: 24px;">
+                <button onclick="exportReportToPDF()" style="
+                    background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%);
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    margin-right: 12px;
+                ">📄 PDF出力</button>
+                <button onclick="exportReportToCSV()" style="
+                    background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%);
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                ">📊 CSV出力</button>
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = reportHTML;
+}
+
+function getPeriodLabel(period) {
+    switch (period) {
+        case 'monthly': return '月次';
+        case 'quarterly': return '四半期';
+        case 'yearly': return '年次';
+        default: return '期間';
+    }
+}
+
+// 定期レポート自動生成機能
+function setupAutomaticReports() {
+    console.log('🔄 定期レポート自動生成を設定中...');
+    
+    // 月末に自動的に月次レポートを生成
+    const now = new Date();
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const timeUntilNextMonth = nextMonth.getTime() - now.getTime();
+    
+    // デモ用：10秒後に最初のレポートを生成
+    setTimeout(() => {
+        console.log('📊 定期月次レポートを自動生成中...');
+        generateSalesReport('monthly');
+        showNotification('月次売上レポートが自動生成されました', 'success');
+    }, 10000);
+    
+    // 実際の月末レポート生成（本番用）
+    setTimeout(() => {
+        generateSalesReport('monthly');
+        showNotification('月次売上レポートが自動生成されました', 'success');
+        
+        // 次月のレポート生成をスケジューリング
+        setInterval(() => {
+            generateSalesReport('monthly');
+            showNotification('月次売上レポートが自動生成されました', 'success');
+        }, 30 * 24 * 60 * 60 * 1000); // 30日間隔
+        
+    }, timeUntilNextMonth);
+    
+    // 四半期レポート（3ヶ月ごと）
+    const currentQuarter = Math.floor(now.getMonth() / 3);
+    const nextQuarterMonth = (currentQuarter + 1) * 3;
+    const nextQuarter = new Date(now.getFullYear(), nextQuarterMonth, 1);
+    const timeUntilNextQuarter = nextQuarter.getTime() - now.getTime();
+    
+    setTimeout(() => {
+        generateSalesReport('quarterly');
+        showNotification('四半期売上レポートが自動生成されました', 'success');
+        
+        setInterval(() => {
+            generateSalesReport('quarterly');
+            showNotification('四半期売上レポートが自動生成されました', 'success');
+        }, 90 * 24 * 60 * 60 * 1000); // 90日間隔
+        
+    }, timeUntilNextQuarter);
+}
+
+// 通知機能
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#16a34a' : type === 'warning' ? '#f59e0b' : '#0ea5e9'};
+        color: white;
+        padding: 16px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        max-width: 300px;
+        font-size: 14px;
+        font-weight: 500;
+        animation: slideIn 0.3s ease-out;
+    `;
+    
+    notification.innerHTML = `
+        <div style="display: flex; align-items: center;">
+            <span style="margin-right: 8px;">
+                ${type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️'}
+            </span>
+            <span>${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" style="
+                background: none;
+                border: none;
+                color: white;
+                margin-left: 12px;
+                cursor: pointer;
+                font-size: 16px;
+            ">×</button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // 5秒後に自動的に削除
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// CSSアニメーションを追加
+if (!document.querySelector('#notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'notification-styles';
+    style.textContent = `
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// エクスポート機能のプレースホルダー
+function exportReportToPDF() {
+    // PDF生成ライブラリを使用した実装（将来的に実装）
+    showNotification('PDF出力機能は開発中です。後日実装予定です。', 'warning');
+}
+
+function exportReportToCSV() {
+    if (!globalData || globalData.length === 0) {
+        alert('エクスポートするデータがありません。');
+        return;
+    }
+    
+    // CSVデータの生成
+    const headers = Object.keys(globalData[0]);
+    let csvContent = headers.join(',') + '\n';
+    
+    globalData.forEach(row => {
+        const values = headers.map(header => {
+            const value = row[header];
+            // カンマが含まれる場合はダブルクォートで囲む
+            return typeof value === 'string' && value.includes(',') 
+                ? `"${value}"` 
+                : value;
+        });
+        csvContent += values.join(',') + '\n';
+    });
+    
+    // ダウンロード処理
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `sales_report_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
 // データソース選択ボタンのイベントリスナー
 document.addEventListener('DOMContentLoaded', function() {
     const demoBtn = document.getElementById('demo-data-btn');
@@ -2585,5 +3231,9 @@ document.addEventListener('DOMContentLoaded', function() {
             loadData('real');
         });
     }
+    
+    // 自動レポート機能を初期化
+    console.log('📊 自動レポート機能を初期化中...');
+    setupAutomaticReports();
 });
 }
