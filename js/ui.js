@@ -209,7 +209,7 @@ function createAnalysisSelector(mainContent) {
 }
 
 /**
- * 分析カードを作成
+ * 分析カードを作成（レポート機能削除済み）
  */
 function createAnalysisCard({ icon, title, description, highlight, onClick }) {
     const card = document.createElement('div');
