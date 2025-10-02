@@ -458,18 +458,26 @@ function hideMonthSelector() {
  */
 function showMonthAnalysis() {
     const monthSelect = document.getElementById('month-select');
-    const selectedMonth = monthSelect ? monthSelect.value : '';
+    let selectedMonth = monthSelect ? monthSelect.value : '';
     
+    // 月が選択されていない場合は現在の月を設定
     if (!selectedMonth) {
-        console.warn('⚠️ 月が選択されていません');
-        return;
+        const currentDate = new Date();
+        selectedMonth = `${currentDate.getFullYear()}/${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+        if (monthSelect) {
+            monthSelect.value = selectedMonth;
+        }
     }
     
     console.log('📅 月次分析表示:', selectedMonth);
     
     const data = getGlobalData();
     if (!data || data.length === 0) {
-        console.warn('⚠️ データが読み込まれていません');
+        console.warn('⚠️ データが読み込まれていません - データを再読み込みします');
+        // データを再読み込み
+        loadData().then(() => {
+            setTimeout(() => showMonthAnalysis(), 500);
+        });
         return;
     }
     
@@ -493,7 +501,11 @@ function showYearAnalysis() {
     
     const data = getGlobalData();
     if (!data || data.length === 0) {
-        console.warn('⚠️ データが読み込まれていません');
+        console.warn('⚠️ データが読み込まれていません - データを再読み込みします');
+        // データを再読み込み
+        loadData().then(() => {
+            setTimeout(() => showYearAnalysis(), 500);
+        });
         return;
     }
     

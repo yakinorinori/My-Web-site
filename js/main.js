@@ -26,6 +26,14 @@ function initializeApp() {
         // 認証システムの初期化
         initAuth();
         
+        // データの初期読み込み
+        loadData().then(() => {
+            console.log('📊 データ読み込み完了');
+            onDataLoaded();
+        }).catch(error => {
+            console.error('❌ データ読み込みエラー:', error);
+        });
+        
         console.log('✅ アプリケーション初期化完了');
     } catch (error) {
         console.error('❌ アプリケーション初期化エラー:', error);
@@ -74,9 +82,6 @@ function initializeApp() {
  */
 function onDataLoaded() {
     console.log('📊 データ読み込み完了後の処理実行');
-    
-    // 自動レポート機能を初期化
-    setupAutomaticReports();
     
     // 初期表示は月分析
     showMonthAnalysis();
@@ -142,7 +147,7 @@ const APP_INFO = {
         'auth.js - 認証システム',
         'data.js - データ処理',
         'charts.js - グラフ表示',
-        'reports.js - レポート生成',
+
         'ui.js - ユーザーインターフェース'
     ]
 };
