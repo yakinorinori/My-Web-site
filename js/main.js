@@ -83,8 +83,13 @@ function initializeApp() {
 function onDataLoaded() {
     console.log('📊 データ読み込み完了後の処理実行');
     
-    // 初期表示は月分析
-    showMonthAnalysis();
+    // データ読み込み完了フラグをリセット
+    window.dataLoadRetryInProgress = false;
+    
+    // 初期表示は年分析（データが確実にある状態で）
+    setTimeout(() => {
+        showYearAnalysis();
+    }, 100);
 }
 
 /**

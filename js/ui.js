@@ -182,7 +182,7 @@ function createAnalysisSelector(mainContent) {
         onClick: () => {
             showYearAnalysis();
             hideMonthSelector();
-            setActiveCard(yearCard, [yearCard, monthCard, reportCard]);
+            setActiveCard(yearCard, [yearCard, monthCard]);
         }
     });
     
@@ -195,25 +195,12 @@ function createAnalysisSelector(mainContent) {
         onClick: () => {
             showMonthAnalysis();
             showMonthSelector();
-            setActiveCard(monthCard, [yearCard, monthCard, reportCard]);
-        }
-    });
-    
-    // レポート生成カード
-    const reportCard = createAnalysisCard({
-        icon: '📋',
-        title: '売上レポート生成',
-        description: '包括的な売上レポートを作成',
-        highlight: '💼 エクスポート機能付き',
-        onClick: () => {
-            generateSalesReport('monthly');
-            setActiveCard(reportCard, [yearCard, monthCard, reportCard]);
+            setActiveCard(monthCard, [yearCard, monthCard]);
         }
     });
     
     analysisSelector.appendChild(yearCard);
     analysisSelector.appendChild(monthCard);
-    analysisSelector.appendChild(reportCard);
     mainContent.appendChild(analysisSelector);
     
     // グローバル参照のために保存
@@ -473,11 +460,18 @@ function showMonthAnalysis() {
     
     const data = getGlobalData();
     if (!data || data.length === 0) {
-        console.warn('⚠️ データが読み込まれていません - データを再読み込みします');
-        // データを再読み込み
-        loadData().then(() => {
-            setTimeout(() => showMonthAnalysis(), 500);
-        });
+        // 再試行制御のため、フラグをチェック
+        if (!window.dataLoadRetryInProgress) {
+            console.warn('⚠️ データが読み込まれていません - データを再読み込みします');
+            window.dataLoadRetryInProgress = true;
+            loadData().then(() => {
+                window.dataLoadRetryInProgress = false;
+                setTimeout(() => showMonthAnalysis(), 500);
+            }).catch(() => {
+                window.dataLoadRetryInProgress = false;
+                console.error('❌ データ読み込みに失敗しました');
+            });
+        }
         return;
     }
     
@@ -501,11 +495,18 @@ function showYearAnalysis() {
     
     const data = getGlobalData();
     if (!data || data.length === 0) {
-        console.warn('⚠️ データが読み込まれていません - データを再読み込みします');
-        // データを再読み込み
-        loadData().then(() => {
-            setTimeout(() => showYearAnalysis(), 500);
-        });
+        // 再試行制御のため、フラグをチェック
+        if (!window.dataLoadRetryInProgress) {
+            console.warn('⚠️ データが読み込まれていません - データを再読み込みします');
+            window.dataLoadRetryInProgress = true;
+            loadData().then(() => {
+                window.dataLoadRetryInProgress = false;
+                setTimeout(() => showYearAnalysis(), 500);
+            }).catch(() => {
+                window.dataLoadRetryInProgress = false;
+                console.error('❌ データ読み込みに失敗しました');
+            });
+        }
         return;
     }
     
