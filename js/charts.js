@@ -42,7 +42,7 @@ function drawMonthlyChart() {
                 const customersArr = Object.values(monthMap).map(m => m.customers);
                 const groupsArr = Object.values(monthMap).map(m => m.groups);
 
-                // Chart.js描画（小さめサイズ、下部に表示）
+                // Chart.js描画（大きめサイズ、下部に表示）
                 let chartArea = document.getElementById('chart-area');
                 if (!chartArea) {
                     // #app-root内にchart-areaがなければ作成
@@ -52,9 +52,12 @@ function drawMonthlyChart() {
                     chartArea.style.marginTop = '40px';
                     chartArea.style.display = 'flex';
                     chartArea.style.justifyContent = 'center';
+                    chartArea.style.width = '100%';
+                    chartArea.style.maxWidth = '900px';
+                    chartArea.style.margin = '40px auto';
                     root.appendChild(chartArea);
                 }
-                chartArea.innerHTML = '<canvas id="multiLineChart" width="350" height="180"></canvas>';
+                chartArea.innerHTML = '<canvas id="multiLineChart" width="800" height="400"></canvas>';
                 const ctx = document.getElementById('multiLineChart').getContext('2d');
                 
                 // 既存チャートを破棄
@@ -94,13 +97,42 @@ function drawMonthlyChart() {
                         ]
                     },
                     options: {
-                        responsive: false,
+                        responsive: true,
+                        maintainAspectRatio: false,
                         plugins: {
-                            legend: { position: 'top' },
-                            title: { display: true, text: '月別売上・客数・組数' }
+                            legend: { 
+                                position: 'top',
+                                labels: {
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            },
+                            title: { 
+                                display: true, 
+                                text: '月別売上・客数・組数',
+                                font: {
+                                    size: 18,
+                                    weight: 'bold'
+                                }
+                            }
                         },
                         scales: {
-                            y: { beginAtZero: true }
+                            y: { 
+                                beginAtZero: true,
+                                ticks: {
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            }
                         }
                     }
                 });
@@ -146,18 +178,40 @@ function drawMonthlySalesChart(data, canvasId = 'lineChart') {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 title: {
                     display: true,
-                    text: '月別売上推移'
+                    text: '月別売上推移',
+                    font: {
+                        size: 18,
+                        weight: 'bold'
+                    }
+                },
+                legend: {
+                    labels: {
+                        font: {
+                            size: 14
+                        }
+                    }
                 }
             },
             scales: {
                 y: {
                     beginAtZero: true,
                     ticks: {
+                        font: {
+                            size: 12
+                        },
                         callback: function(value) {
                             return '¥' + value.toLocaleString();
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 12
                         }
                     }
                 }
