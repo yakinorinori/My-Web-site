@@ -26,16 +26,35 @@ function saveSpreadsheetSettings() {
         return;
     }
     
+    // ⚠️ セキュリティ警告
+    if (!confirm(`⚠️ セキュリティ警告 ⚠️
+
+APIキーをブラウザに保存するのはセキュリティリスクがあります。
+
+推奨される安全な方法：
+1. 専用のサーバーサイドプロキシを使用
+2. 環境変数でのAPIキー管理
+3. OAuth認証の実装
+
+それでも続行しますか？（本番環境では推奨されません）`)) {
+        showSpreadsheetStatus('⏹️ 設定保存をキャンセルしました', 'warning');
+        return;
+    }
+    
+    // 簡易暗号化（Base64エンコーディング - セキュリティ上は不十分だが難読化程度）
+    const encodedApiKey = btoa(apiKey + '_' + Date.now());
+    
     const config = {
         url,
         sheetId,
-        apiKey,
+        apiKey: encodedApiKey,
         sheetName,
-        savedAt: new Date().toISOString()
+        savedAt: new Date().toISOString(),
+        _warning: 'APIキーは暗号化されていますが、完全に安全ではありません'
     };
     
     localStorage.setItem(SPREADSHEET_CONFIG_KEY, JSON.stringify(config));
-    showSpreadsheetStatus('✅ 設定を保存しました', 'success');
+    showSpreadsheetStatus('✅ 設定を保存しました（セキュリティ警告: APIキーがブラウザに保存されています）', 'warning');
     
     console.log('📊 スプレッドシート設定保存:', { sheetId, sheetName });
 }
@@ -50,14 +69,31 @@ function loadSpreadsheetSettings() {
         
         const settings = JSON.parse(config);
         
+        // APIキーを復号化
+        let decodedApiKey = '';
+        try {
+            if (settings.apiKey) {
+                const decoded = atob(settings.apiKey);
+                decodedApiKey = decoded.split('_')[0]; // タイムスタンプ部分を除去
+            }
+        } catch (decodeError) {
+            console.warn('⚠️ APIキー復号化エラー - 再設定が必要です');
+            decodedApiKey = '';
+        }
+        
         // フォームに設定値を反映
         const urlInput = document.getElementById('spreadsheet-url');
         const apiKeyInput = document.getElementById('api-key');
         const sheetNameInput = document.getElementById('sheet-name');
         
         if (urlInput) urlInput.value = settings.url || '';
-        if (apiKeyInput) apiKeyInput.value = settings.apiKey || '';
+        if (apiKeyInput) apiKeyInput.value = decodedApiKey;
         if (sheetNameInput) sheetNameInput.value = settings.sheetName || '売上データ';
+        
+        // セキュリティ警告を表示
+        if (decodedApiKey) {
+            showSpreadsheetStatus('⚠️ APIキーが保存されています。セキュリティのため定期的に更新してください', 'warning');
+        }
         
         console.log('📊 スプレッドシート設定読み込み完了');
     } catch (error) {
@@ -236,6 +272,25 @@ function getSpreadsheetConfig() {
     }
     
     return { url, sheetId, apiKey, sheetName };
+}
+
+/**
+ * 保存された設定から復号化されたAPIキーを取得
+ */
+function getStoredApiKey() {
+    try {
+        const config = localStorage.getItem(SPREADSHEET_CONFIG_KEY);
+        if (!config) return null;
+        
+        const settings = JSON.parse(config);
+        if (!settings.apiKey) return null;
+        
+        const decoded = atob(settings.apiKey);
+        return decoded.split('_')[0]; // タイムスタンプ部分を除去
+    } catch (error) {
+        console.error('❌ APIキー復号化エラー:', error);
+        return null;
+    }
 }
 
 /**

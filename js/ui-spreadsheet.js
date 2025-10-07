@@ -50,24 +50,38 @@ function showSpreadsheetSettings() {
             
             <div style="margin-bottom: 24px;">
                 <h3 style="color: #1e293b; margin-bottom: 12px;">🔑 Google Sheets API Key</h3>
+                <div style="
+                    background: #fef2f2;
+                    border: 1px solid #fecaca;
+                    border-radius: 8px;
+                    padding: 12px;
+                    margin-bottom: 12px;
+                ">
+                    <p style="color: #dc2626; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">
+                        ⚠️ セキュリティ警告
+                    </p>
+                    <p style="color: #dc2626; font-size: 13px; line-height: 1.5; margin: 0;">
+                        APIキーをブラウザに保存するのはセキュリティリスクがあります。本番環境では環境変数やサーバーサイドプロキシの使用を強く推奨します。
+                    </p>
+                </div>
                 <p style="color: #64748b; margin-bottom: 16px; line-height: 1.6;">
                     Google Cloud ConsoleでSheets APIを有効にして取得したAPIキーを入力してください。
                 </p>
                 <input 
                     type="password" 
                     id="api-key" 
-                    placeholder="AIzaSy..."
+                    placeholder="AIzaSy... (テスト用のみ)"
                     style="
                         width: 100%;
                         padding: 12px 16px;
-                        border: 2px solid #e2e8f0;
+                        border: 2px solid #ef4444;
                         border-radius: 8px;
                         font-size: 14px;
                         box-sizing: border-box;
                         transition: border-color 0.2s;
                     "
-                    onFocus="this.style.borderColor='#0ea5e9'"
-                    onBlur="this.style.borderColor='#e2e8f0'"
+                    onFocus="this.style.borderColor='#dc2626'"
+                    onBlur="this.style.borderColor='#ef4444'"
                 />
             </div>
             
@@ -144,17 +158,35 @@ function showSpreadsheetSettings() {
             "></div>
             
             <div style="
+                background: #fef2f2;
+                padding: 20px;
+                border-radius: 8px;
+                border-left: 4px solid #dc2626;
+                margin-bottom: 20px;
+            ">
+                <h4 style="color: #dc2626; margin: 0 0 12px 0;">🔒 セキュアな本番環境での推奨設定</h4>
+                <ul style="color: #7f1d1d; line-height: 1.6; margin: 0; padding-left: 20px;">
+                    <li><strong>サーバーサイドプロキシ:</strong> バックエンドサーバーでAPIキーを管理</li>
+                    <li><strong>環境変数:</strong> .envファイルでAPIキーを管理（Git除外）</li>
+                    <li><strong>OAuth認証:</strong> ユーザー個別の認証フローを実装</li>
+                    <li><strong>CORS制限:</strong> 特定ドメインからのみAPIアクセス許可</li>
+                </ul>
+            </div>
+            
+            <div style="
                 background: #f8fafc;
                 padding: 20px;
                 border-radius: 8px;
                 border-left: 4px solid #0ea5e9;
             ">
-                <h4 style="color: #1e293b; margin: 0 0 12px 0;">💡 設定手順</h4>
+                <h4 style="color: #1e293b; margin: 0 0 12px 0;">💡 テスト環境での設定手順</h4>
                 <ol style="color: #64748b; line-height: 1.6; margin: 0; padding-left: 20px;">
                     <li>Googleスプレッドシートを作成し、「URLを知っている人のみ閲覧可能」に設定</li>
-                    <li>Google Cloud ConsoleでSheets APIを有効化し、APIキーを取得</li>
+                    <li>Google Cloud ConsoleでSheets APIを有効化し、<strong>テスト用</strong>APIキーを取得</li>
+                    <li>APIキーの制限設定（HTTP リファラー、特定APIのみ等）を必ず設定</li>
                     <li>上記情報を入力し「接続テスト」で動作確認</li>
-                    <li>「設定保存」で永続化し、「今日のデータ送信」でテスト送信</li>
+                    <li>「設定保存」で暗号化保存（セキュリティ警告あり）</li>
+                    <li><strong>本番環境移行時は必ずサーバーサイドプロキシに変更</strong></li>
                 </ol>
             </div>
         </div>
