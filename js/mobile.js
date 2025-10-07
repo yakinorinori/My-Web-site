@@ -344,6 +344,22 @@ function createMobileSalesReportScreen() {
                     🎯 売上報告を完了する
                 </button>
             </div>
+            
+            <!-- スプレッドシート連携状況表示 -->
+            <div id="spreadsheet-status-mobile" style="
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                right: 20px;
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 12px 16px;
+                border-radius: 12px;
+                font-size: 13px;
+                text-align: center;
+                backdrop-filter: blur(10px);
+                display: none;
+            "></div>
         </div>
 
 
@@ -356,6 +372,9 @@ function createMobileSalesReportScreen() {
     
     // イベントリスナーを設定
     setupMobileEventListeners();
+    
+    // スプレッドシート連携状況を確認・表示
+    checkAndDisplaySpreadsheetStatus();
 }
 
 /**
@@ -1040,6 +1059,9 @@ function showReportSummary() {
     const totalAmount = receipts.reduce((sum, receipt) => sum + receipt.amount, 0);
     const reportDate = document.getElementById('report-date').value;
     
+    // スプレッドシートに売上データを送信
+    sendMobileSalesDataToSpreadsheet(totalAmount, reportDate);
+    
     const appRoot = document.getElementById('app-root');
     appRoot.innerHTML = `
         <div style="
@@ -1147,6 +1169,122 @@ function showNotification(message, type = 'info') {
             notification.parentNode.removeChild(notification);
         }
     }, duration);
+}
+
+/**
+ * スプレッドシート連携状況を確認・表示
+ */
+function checkAndDisplaySpreadsheetStatus() {
+    const config = getMobileSpreadsheetConfig();
+    const statusDiv = document.getElementById('spreadsheet-status-mobile');
+    
+    if (!statusDiv) return;
+    
+    if (config) {
+        statusDiv.innerHTML = '📊 スプレッドシート連携: 有効 - 売上報告完了時に自動送信されます';
+        statusDiv.style.background = 'rgba(76, 175, 80, 0.9)';
+        statusDiv.style.display = 'block';
+        
+        // 5秒後に自動で非表示
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+        }, 5000);
+    } else {
+        statusDiv.innerHTML = '📊 スプレッドシート連携: 未設定 - デスクトップ版で設定できます';
+        statusDiv.style.background = 'rgba(255, 152, 0, 0.9)';
+        statusDiv.style.display = 'block';
+        
+        // 3秒後に自動で非表示
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+        }, 3000);
+    }
+}
+
+/**
+ * モバイル売上データをスプレッドシートに送信
+ */
+async function sendMobileSalesDataToSpreadsheet(totalAmount, reportDate) {
+    try {
+        // スプレッドシート設定を確認
+        const config = getMobileSpreadsheetConfig();
+        if (!config) {
+            console.log('📊 スプレッドシート設定がありません - スキップします');
+            return;
+        }
+        
+        // 日付形式を変換（YYYY/MM/DD → MM/DD）
+        const formattedDate = formatDateForSpreadsheet(reportDate);
+        
+        // モバイル売上データを構築
+        const mobileData = {
+            date: formattedDate,
+            totalSales: totalAmount,
+            totalCustomers: receipts.length, // 伝票数を客数として使用
+            uniqueCustomers: 1, // モバイル報告では1組として扱う
+            recordCount: receipts.length
+        };
+        
+        console.log('📱 モバイル売上データをスプレッドシートに送信中:', mobileData);
+        
+        // スプレッドシートにデータを送信
+        await appendToSpreadsheet(config, mobileData);
+        
+        showNotification('📊 スプレッドシートに売上データを送信しました！', 'success');
+        
+    } catch (error) {
+        console.error('❌ モバイル売上データ送信エラー:', error);
+        showNotification(`⚠️ スプレッドシート送信に失敗: ${error.message}`, 'warning');
+    }
+}
+
+/**
+ * モバイル用スプレッドシート設定を取得
+ */
+function getMobileSpreadsheetConfig() {
+    try {
+        const config = localStorage.getItem('spreadsheet_config');
+        if (!config) return null;
+        
+        const settings = JSON.parse(config);
+        if (!settings.url || !settings.apiKey) return null;
+        
+        // APIキーを復号化
+        let decodedApiKey = '';
+        try {
+            const decoded = atob(settings.apiKey);
+            decodedApiKey = decoded.split('_')[0]; // タイムスタンプ部分を除去
+        } catch (decodeError) {
+            console.warn('⚠️ APIキー復号化エラー');
+            return null;
+        }
+        
+        return {
+            url: settings.url,
+            sheetId: settings.sheetId,
+            apiKey: decodedApiKey,
+            sheetName: settings.sheetName || '売上データ'
+        };
+        
+    } catch (error) {
+        console.error('❌ スプレッドシート設定取得エラー:', error);
+        return null;
+    }
+}
+
+/**
+ * 日付形式を変換（YYYY-MM-DD → MM/DD）
+ */
+function formatDateForSpreadsheet(dateString) {
+    try {
+        const date = new Date(dateString);
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${month}/${day}`;
+    } catch (error) {
+        console.error('❌ 日付変換エラー:', error);
+        return dateString;
+    }
 }
 
 // モバイルアプリ開始用のグローバル関数
