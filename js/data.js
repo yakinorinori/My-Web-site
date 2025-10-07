@@ -21,24 +21,13 @@ function csvToArray(str) {
 }
 
 /**
- * データを読み込む（リアルデータ、サンプルデータ、またはデモデータ）
+ * データを読み込む（リアルデータまたはデモデータ）
  */
 function loadData(dataType = 'real') {
     // GitHub Pages環境では静的ファイルを直接読み込み
-    let csvFileName;
-    switch (dataType) {
-        case 'sample':
-            csvFileName = 'sample.csv';
-            break;
-        case 'real':
-        default:
-            csvFileName = 'sales.csv';
-            break;
-    }
-    
     const url = IS_GITHUB_PAGES 
-        ? `./${csvFileName}`  // GitHub Pages: 相対パスでCSVファイルを読み込み
-        : `${API_BASE_URL}/${csvFileName}`;
+        ? './sales.csv'  // GitHub Pages: 相対パスでCSVファイルを読み込み
+        : `${API_BASE_URL}/sales.csv`;
     console.log(`📥 データ取得中: ${dataType} data from ${url}`);
     
     return fetch(url)

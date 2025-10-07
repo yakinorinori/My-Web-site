@@ -1,0 +1,175 @@
+/**
+ * スプレッドシート連携設定を表示
+ */
+function showSpreadsheetSettings() {
+    console.log('📊 スプレッドシート連携設定表示');
+    
+    const html = `
+        <div style="
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin: 24px 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(14, 165, 233, 0.1);
+        ">
+            <h2 style="
+                color: #0ea5e9;
+                margin: 0 0 24px 0;
+                font-size: 24px;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            ">
+                📊 Googleスプレッドシート連携設定
+            </h2>
+            
+            <div style="margin-bottom: 24px;">
+                <h3 style="color: #1e293b; margin-bottom: 12px;">🔗 スプレッドシートURL設定</h3>
+                <p style="color: #64748b; margin-bottom: 16px; line-height: 1.6;">
+                    「URLを知っている人のみ閲覧可能」に設定されたGoogleスプレッドシートのURLを入力してください。
+                </p>
+                <input 
+                    type="url" 
+                    id="spreadsheet-url" 
+                    placeholder="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=sharing"
+                    style="
+                        width: 100%;
+                        padding: 12px 16px;
+                        border: 2px solid #e2e8f0;
+                        border-radius: 8px;
+                        font-size: 14px;
+                        box-sizing: border-box;
+                        transition: border-color 0.2s;
+                    "
+                    onFocus="this.style.borderColor='#0ea5e9'"
+                    onBlur="this.style.borderColor='#e2e8f0'"
+                />
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+                <h3 style="color: #1e293b; margin-bottom: 12px;">🔑 Google Sheets API Key</h3>
+                <p style="color: #64748b; margin-bottom: 16px; line-height: 1.6;">
+                    Google Cloud ConsoleでSheets APIを有効にして取得したAPIキーを入力してください。
+                </p>
+                <input 
+                    type="password" 
+                    id="api-key" 
+                    placeholder="AIzaSy..."
+                    style="
+                        width: 100%;
+                        padding: 12px 16px;
+                        border: 2px solid #e2e8f0;
+                        border-radius: 8px;
+                        font-size: 14px;
+                        box-sizing: border-box;
+                        transition: border-color 0.2s;
+                    "
+                    onFocus="this.style.borderColor='#0ea5e9'"
+                    onBlur="this.style.borderColor='#e2e8f0'"
+                />
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+                <h3 style="color: #1e293b; margin-bottom: 12px;">📝 書き込み先シート名</h3>
+                <input 
+                    type="text" 
+                    id="sheet-name" 
+                    placeholder="売上データ"
+                    value="売上データ"
+                    style="
+                        width: 100%;
+                        padding: 12px 16px;
+                        border: 2px solid #e2e8f0;
+                        border-radius: 8px;
+                        font-size: 14px;
+                        box-sizing: border-box;
+                        transition: border-color 0.2s;
+                    "
+                    onFocus="this.style.borderColor='#0ea5e9'"
+                    onBlur="this.style.borderColor='#e2e8f0'"
+                />
+            </div>
+            
+            <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                <button onclick="testSpreadsheetConnection()" style="
+                    background: #10b981;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: background-color 0.2s;
+                " onMouseOver="this.style.background='#059669'" onMouseOut="this.style.background='#10b981'">
+                    🔍 接続テスト
+                </button>
+                
+                <button onclick="saveSpreadsheetSettings()" style="
+                    background: #0ea5e9;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: background-color 0.2s;
+                " onMouseOver="this.style.background='#0284c7'" onMouseOut="this.style.background='#0ea5e9'">
+                    💾 設定保存
+                </button>
+                
+                <button onclick="sendTodayData()" style="
+                    background: #8b5cf6;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: background-color 0.2s;
+                " onMouseOver="this.style.background='#7c3aed'" onMouseOut="this.style.background='#8b5cf6'">
+                    📤 今日のデータ送信
+                </button>
+            </div>
+            
+            <div id="spreadsheet-status" style="
+                padding: 16px;
+                border-radius: 8px;
+                margin-top: 16px;
+                display: none;
+            "></div>
+            
+            <div style="
+                background: #f8fafc;
+                padding: 20px;
+                border-radius: 8px;
+                border-left: 4px solid #0ea5e9;
+            ">
+                <h4 style="color: #1e293b; margin: 0 0 12px 0;">💡 設定手順</h4>
+                <ol style="color: #64748b; line-height: 1.6; margin: 0; padding-left: 20px;">
+                    <li>Googleスプレッドシートを作成し、「URLを知っている人のみ閲覧可能」に設定</li>
+                    <li>Google Cloud ConsoleでSheets APIを有効化し、APIキーを取得</li>
+                    <li>上記情報を入力し「接続テスト」で動作確認</li>
+                    <li>「設定保存」で永続化し、「今日のデータ送信」でテスト送信</li>
+                </ol>
+            </div>
+        </div>
+    `;
+    
+    const resultsArea = document.getElementById('analysis-results');
+    if (resultsArea) {
+        resultsArea.innerHTML = html;
+        
+        // 保存された設定を読み込み
+        if (typeof loadSpreadsheetSettings === 'function') {
+            loadSpreadsheetSettings();
+        }
+    }
+}
+
+// グローバル関数として公開
+window.showSpreadsheetSettings = showSpreadsheetSettings;

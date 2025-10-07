@@ -199,13 +199,27 @@ function createAnalysisSelector(mainContent) {
         }
     });
     
+    // スプレッドシート連携カード
+    const spreadsheetCard = createAnalysisCard({
+        icon: '📊',
+        title: 'スプレッドシート連携',
+        description: 'Googleスプレッドシートとの連携設定',
+        highlight: '🔗 日次売上データを自動送信',
+        onClick: () => {
+            showSpreadsheetSettings();
+            setActiveCard(spreadsheetCard, [yearCard, monthCard, spreadsheetCard]);
+        }
+    });
+
     analysisSelector.appendChild(yearCard);
     analysisSelector.appendChild(monthCard);
+    analysisSelector.appendChild(spreadsheetCard);
     mainContent.appendChild(analysisSelector);
     
     // グローバル参照のために保存
     window.yearCard = yearCard;
     window.monthCard = monthCard;
+    window.spreadsheetCard = spreadsheetCard;
 }
 
 /**
