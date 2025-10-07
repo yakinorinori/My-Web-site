@@ -76,7 +76,8 @@ function drawMonthlyChart() {
                                 borderColor: '#4e79a7',
                                 backgroundColor: 'rgba(78,121,167,0.1)',
                                 fill: false,
-                                tension: 0.2
+                                tension: 0.2,
+                                yAxisID: 'y'
                             },
                             {
                                 label: '客数',
@@ -84,7 +85,8 @@ function drawMonthlyChart() {
                                 borderColor: '#f28e2b',
                                 backgroundColor: 'rgba(242,142,43,0.1)',
                                 fill: false,
-                                tension: 0.2
+                                tension: 0.2,
+                                yAxisID: 'y1'
                             },
                             {
                                 label: '組数',
@@ -92,7 +94,8 @@ function drawMonthlyChart() {
                                 borderColor: '#e15759',
                                 backgroundColor: 'rgba(225,87,89,0.1)',
                                 fill: false,
-                                tension: 0.2
+                                tension: 0.2,
+                                yAxisID: 'y1'
                             }
                         ]
                     },
@@ -119,11 +122,47 @@ function drawMonthlyChart() {
                         },
                         scales: {
                             y: { 
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
                                 beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '売上 (¥)',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
+                                ticks: {
+                                    font: {
+                                        size: 12
+                                    },
+                                    callback: function(value) {
+                                        return '¥' + value.toLocaleString();
+                                    }
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '客数・組数',
+                                    font: {
+                                        size: 14,
+                                        weight: 'bold'
+                                    }
+                                },
                                 ticks: {
                                     font: {
                                         size: 12
                                     }
+                                },
+                                grid: {
+                                    drawOnChartArea: false
                                 }
                             },
                             x: {
