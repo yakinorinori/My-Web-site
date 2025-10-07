@@ -142,6 +142,7 @@ function drawMonthlyChart() {
                                 display: true,
                                 position: 'right',
                                 beginAtZero: true,
+                                max: Math.max(...customersArr) * 3, // 客数最大値の3倍を上限にして売上より下に表示
                                 title: {
                                     display: true,
                                     text: '客数',
