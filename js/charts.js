@@ -57,12 +57,15 @@ function drawMonthlyChart() {
                     chartArea.style.margin = '40px auto';
                     root.appendChild(chartArea);
                 }
-                chartArea.innerHTML = '<canvas id="multiLineChart" width="800" height="400"></canvas>';
-                const ctx = document.getElementById('multiLineChart').getContext('2d');
+                // 確実にチャートを更新するため、タイムスタンプ付きIDを作成
+                const chartId = 'multiLineChart_' + Date.now();
+                chartArea.innerHTML = `<canvas id="${chartId}" width="800" height="400"></canvas>`;
+                const ctx = document.getElementById(chartId).getContext('2d');
                 
                 // 既存チャートを破棄
                 if (chartInstances.multiLineChart) {
                     chartInstances.multiLineChart.destroy();
+                    delete chartInstances.multiLineChart;
                 }
                 
                 chartInstances.multiLineChart = new Chart(ctx, {
@@ -87,15 +90,6 @@ function drawMonthlyChart() {
                                 fill: false,
                                 tension: 0.2,
                                 yAxisID: 'y1'
-                            },
-                            {
-                                label: '組数',
-                                data: groupsArr,
-                                borderColor: '#e15759',
-                                backgroundColor: 'rgba(225,87,89,0.1)',
-                                fill: false,
-                                tension: 0.2,
-                                yAxisID: 'y1'
                             }
                         ]
                     },
@@ -113,7 +107,7 @@ function drawMonthlyChart() {
                             },
                             title: { 
                                 display: true, 
-                                text: '月別売上・客数・組数',
+                                text: '月別売上・客数',
                                 font: {
                                     size: 18,
                                     weight: 'bold'
@@ -150,7 +144,7 @@ function drawMonthlyChart() {
                                 beginAtZero: true,
                                 title: {
                                     display: true,
-                                    text: '客数・組数',
+                                    text: '客数',
                                     font: {
                                         size: 14,
                                         weight: 'bold'
