@@ -28,9 +28,15 @@ function createMainApp() {
     // メインコンテンツ作成
     createMainContent(root);
     
-    // ログアウト関数をグローバルに追加
-    window.logout = () => {
-        logout();
+    // ログアウト関数をグローバルに追加（auth.jsの関数を参照）
+    window.logout = function() {
+        if (typeof logout === 'function') {
+            logout();
+        } else {
+            console.error('❌ logout関数が見つかりません');
+            // フォールバック：シンプルなページリロード
+            window.location.reload();
+        }
     };
 }
 
@@ -496,8 +502,22 @@ function showMonthAnalysis() {
     renderMonthPersonAnalysis(data);
     renderMonthWeekdayAnalysis(data, selectedMonth);
     
-    // チャートを描画
-    drawMonthlySalesChart(monthData);
+    // チャートを描画（Canvas要素が存在することを確認）
+    const chartArea = document.getElementById('analysis-results');
+    if (chartArea) {
+        // Canvas要素を動的に作成
+        let chartCanvas = document.getElementById('monthly-line-chart');
+        if (!chartCanvas) {
+            const canvasContainer = document.createElement('div');
+            canvasContainer.style.cssText = `
+                margin: 20px 0;
+                text-align: center;
+            `;
+            canvasContainer.innerHTML = '<canvas id="monthly-line-chart" width="800" height="400"></canvas>';
+            chartArea.appendChild(canvasContainer);
+        }
+        drawMonthlySalesChart(monthData, 'monthly-line-chart');
+    }
 }
 
 /**
@@ -524,7 +544,14 @@ function showYearAnalysis() {
     }
     
     renderYearAnalysis(data);
-    drawMonthlyChart();
+    
+    // 年次分析用のチャートを表示（Canvas要素の存在を確認）
+    setTimeout(() => {
+        const chartArea = document.getElementById('analysis-results');
+        if (chartArea && chartArea.innerHTML.includes('年間分析')) {
+            drawMonthlyChart();
+        }
+    }, 100);
 }
 
 /**

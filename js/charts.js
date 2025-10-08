@@ -186,7 +186,8 @@ function drawMonthlySalesChart(data, canvasId = 'lineChart') {
     
     const canvas = document.getElementById(canvasId);
     if (!canvas) {
-        console.error(`Canvas ${canvasId} not found`);
+        console.error(`❌ Canvas要素 '${canvasId}' が見つかりません`);
+        console.log('📊 利用可能なCanvas要素:', Array.from(document.querySelectorAll('canvas')).map(c => c.id));
         return;
     }
     
