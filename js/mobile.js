@@ -232,6 +232,58 @@ function createMobileSalesReportScreen() {
                             </div>
                         </div>
                         
+                        <!-- 支払い者入力 -->
+                        <div style="margin-bottom: 16px;">
+                            <label style="
+                                color: white;
+                                font-size: 14px;
+                                font-weight: 500;
+                                display: block;
+                                margin-bottom: 8px;
+                            ">👤 支払い者</label>
+                            <input type="text" id="receipt-payer" placeholder="例: 山田さん、鈴木様" style="
+                                width: 100%;
+                                padding: 12px;
+                                border: 1px solid rgba(255, 255, 255, 0.3);
+                                border-radius: 8px;
+                                background: rgba(255, 255, 255, 0.1);
+                                color: white;
+                                font-size: 16px;
+                                box-sizing: border-box;
+                            ">
+                            <div style="
+                                color: rgba(255, 255, 255, 0.6);
+                                font-size: 11px;
+                                margin-top: 4px;
+                            ">※ 支払った方の名前や会社名など（任意）</div>
+                        </div>
+                        
+                        <!-- 客数入力 -->
+                        <div style="margin-bottom: 16px;">
+                            <label style="
+                                color: white;
+                                font-size: 14px;
+                                font-weight: 500;
+                                display: block;
+                                margin-bottom: 8px;
+                            ">👥 客数</label>
+                            <input type="number" id="receipt-customer-count" value="1" min="1" max="999" step="1" style="
+                                width: 100%;
+                                padding: 12px;
+                                border: 1px solid rgba(255, 255, 255, 0.3);
+                                border-radius: 8px;
+                                background: rgba(255, 255, 255, 0.1);
+                                color: white;
+                                font-size: 16px;
+                                box-sizing: border-box;
+                            ">
+                            <div style="
+                                color: rgba(255, 255, 255, 0.6);
+                                font-size: 11px;
+                                margin-top: 4px;
+                            ">※ この伝票の人数（デフォルト: 1名）</div>
+                        </div>
+                        
                         <!-- 金額入力 -->
                         <div style="margin-bottom: 16px;">
                             <label style="
@@ -639,6 +691,8 @@ function handleImageCapture(event) {
                 timestamp: new Date(),
                 paymentMethod: null,
                 amount: 0,
+                payer: '',          // 支払い者
+                customerCount: 1,   // 客数（デフォルト1名）
                 isPortrait: isPortrait
             };
             
@@ -743,12 +797,22 @@ function confirmReceipt() {
         return;
     }
     
+    // 支払い者と客数を取得
+    const payer = document.getElementById('receipt-payer').value.trim();
+    const customerCount = parseInt(document.getElementById('receipt-customer-count').value) || 1;
+    
+    // データに保存
     currentReceiptData.amount = amount;
+    currentReceiptData.payer = payer;
+    currentReceiptData.customerCount = customerCount;
+    
     receipts.push({...currentReceiptData});
     
     // フォームをリセット
     document.getElementById('current-receipt-form').style.display = 'none';
     document.getElementById('receipt-amount').value = '';
+    document.getElementById('receipt-payer').value = '';
+    document.getElementById('receipt-customer-count').value = '1';
     document.querySelectorAll('.payment-method').forEach(btn => {
         btn.style.background = 'rgba(255, 255, 255, 0.2)';
         btn.style.borderColor = 'rgba(255, 255, 255, 0.3)';
@@ -785,22 +849,28 @@ function updateReceiptList() {
             justify-content: space-between;
         `;
         
+        // 支払い者表示（空の場合は表示しない）
+        const payerDisplay = receipt.payer ? `<div style="color: rgba(255, 255, 255, 0.9); font-size: 13px; margin-top: 2px;">👤 ${receipt.payer}</div>` : '';
+        // 客数表示
+        const customerCountDisplay = `<div style="color: rgba(255, 255, 255, 0.7); font-size: 12px; margin-top: 2px;">👥 ${receipt.customerCount}名</div>`;
+        
         receiptItem.innerHTML = `
-            <div style="display: flex; align-items: center;">
+            <div style="display: flex; align-items: center; flex: 1;">
                 <img src="${receipt.image}" style="
                     width: 30px;
                     height: 40px;
                     object-fit: cover;
                     border-radius: 4px;
                     margin-right: 12px;
+                    flex-shrink: 0;
                 ">
-                <div>
+                <div style="flex: 1; min-width: 0;">
                     <div style="color: white; font-size: 14px; font-weight: 500;">
                         ${receipt.paymentMethod === 'cash' ? '💵 現金' : '💳 その他'}
+                        <span style="margin-left: 8px; color: #4CAF50;">¥${receipt.amount.toLocaleString()}</span>
                     </div>
-                    <div style="color: rgba(255, 255, 255, 0.8); font-size: 12px;">
-                        ¥${receipt.amount.toLocaleString()}
-                    </div>
+                    ${payerDisplay}
+                    ${customerCountDisplay}
                 </div>
             </div>
             <button onclick="removeReceipt(${index})" style="
@@ -811,6 +881,8 @@ function updateReceiptList() {
                 border-radius: 4px;
                 font-size: 12px;
                 cursor: pointer;
+                flex-shrink: 0;
+                margin-left: 8px;
             ">削除</button>
         `;
         
@@ -823,8 +895,10 @@ function updateReceiptList() {
  */
 function updateTotals() {
     const totalAmount = receipts.reduce((sum, receipt) => sum + receipt.amount, 0);
+    const totalCustomers = receipts.reduce((sum, receipt) => sum + (receipt.customerCount || 0), 0);
+    
     document.getElementById('total-amount').textContent = `¥${totalAmount.toLocaleString()}`;
-    document.getElementById('receipt-count').textContent = `伝票数: ${receipts.length}枚`;
+    document.getElementById('receipt-count').textContent = `伝票数: ${receipts.length}枚 | 総客数: ${totalCustomers}名`;
 }
 
 /**
@@ -1057,10 +1131,11 @@ async function saveImageToPhotos(canvas, filename) {
  */
 function showReportSummary() {
     const totalAmount = receipts.reduce((sum, receipt) => sum + receipt.amount, 0);
+    const totalCustomers = receipts.reduce((sum, receipt) => sum + (receipt.customerCount || 0), 0);
     const reportDate = document.getElementById('report-date').value;
     
-    // スプレッドシートに売上データを送信
-    sendMobileSalesDataToSpreadsheet(totalAmount, reportDate);
+    // スプレッドシートに売上データを送信（伝票ごとに送信）
+    sendMobileSalesDataToSpreadsheet(receipts, reportDate);
     
     const appRoot = document.getElementById('app-root');
     appRoot.innerHTML = `
@@ -1091,6 +1166,7 @@ function showReportSummary() {
                 <div style="color: rgba(255, 255, 255, 0.8); margin-bottom: 24px;">
                     <div style="margin-bottom: 8px;">📅 ${reportDate}</div>
                     <div style="margin-bottom: 8px;">📄 伝票数: ${receipts.length}枚</div>
+                    <div style="margin-bottom: 8px;">👥 総客数: ${totalCustomers}名</div>
                     <div style="font-size: 18px; font-weight: 600; color: #4CAF50;">
                         💰 合計: ¥${totalAmount.toLocaleString()}
                     </div>
@@ -1210,7 +1286,7 @@ function checkAndDisplaySpreadsheetStatus() {
 /**
  * モバイル売上データをスプレッドシートに送信
  */
-async function sendMobileSalesDataToSpreadsheet(totalAmount, reportDate) {
+async function sendMobileSalesDataToSpreadsheet(receipts, reportDate) {
     try {
         // スプレッドシート設定を確認
         const config = getMobileSpreadsheetConfig();
@@ -1222,14 +1298,20 @@ async function sendMobileSalesDataToSpreadsheet(totalAmount, reportDate) {
         // 日付形式を変換（YYYY-MM-DD → YYYY/MM/DD）
         const formattedDate = reportDate.replace(/-/g, '/');
         
-        // 客数を計算（伝票数）
-        const totalCustomers = receipts.length;
-        
         console.log('📱 モバイル売上データをスプレッドシートに送信中:', {
             date: formattedDate,
-            totalSales: totalAmount,
-            totalCustomers: totalCustomers
+            receiptsCount: receipts.length
         });
+        
+        // 各伝票のデータを配列に変換
+        const rows = receipts.map(receipt => [
+            formattedDate,                      // 日付
+            receipt.payer || '（未記入）',      // 支払い者
+            receipt.customerCount || 1,         // 客数
+            receipt.amount                      // 売上金額
+        ]);
+        
+        console.log('📊 送信データ:', rows);
         
         // Netlify Functions経由でスプレッドシートにデータを送信
         const response = await fetch('/.netlify/functions/sheets', {
@@ -1241,12 +1323,7 @@ async function sendMobileSalesDataToSpreadsheet(totalAmount, reportDate) {
                 action: 'append',
                 sheetId: config.sheetId,
                 sheetName: config.sheetName || '売上データ',
-                values: [[
-                    formattedDate,
-                    'モバイル報告', // 支払い者
-                    totalCustomers, // 客数（伝票数）
-                    totalAmount // 売上
-                ]]
+                values: rows  // 複数行をまとめて送信
             })
         });
 
@@ -1261,7 +1338,7 @@ async function sendMobileSalesDataToSpreadsheet(totalAmount, reportDate) {
         
         if (result.success) {
             console.log('✅ スプレッドシートに送信成功:', result);
-            showNotification('📊 スプレッドシートに売上データを送信しました！', 'success');
+            showNotification(`📊 ${receipts.length}件の売上データを送信しました！`, 'success');
         } else {
             throw new Error(result.error || 'データ送信失敗');
         }
