@@ -51,32 +51,30 @@ function showSpreadsheetSettings() {
             <div style="margin-bottom: 24px;">
                 <h3 style="color: #1e293b; margin-bottom: 12px;">🔑 Google Sheets API Key</h3>
                 <div style="
-                    background: #dcfce7;
-                    border: 1px solid #86efac;
+                    background: #fff7ed;
+                    border: 1px solid #fed7aa;
                     border-radius: 8px;
                     padding: 12px;
                     margin-bottom: 12px;
                 ">
-                    <p style="color: #16a34a; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">
-                        ✅ デフォルトAPI Keyが自動設定されています
+                    <p style="color: #c2410c; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">
+                        ⚠️ デフォルトAPI Keyが使えない場合
                     </p>
-                    <p style="color: #15803d; font-size: 13px; line-height: 1.5; margin: 0;">
-                        テンプレート用の読み取り専用APIキーが設定済みです。スプレッドシートIDを入力するだけですぐに使えます！
+                    <p style="color: #9a3412; font-size: 12px; line-height: 1.5; margin: 0 0 8px 0;">
+                        接続エラー（HTTP 400）が出る場合は、独自のAPI Keyを取得してください。
                     </p>
-                </div>
-                <div style="
-                    background: #fef2f2;
-                    border: 1px solid #fecaca;
-                    border-radius: 8px;
-                    padding: 12px;
-                    margin-bottom: 12px;
-                ">
-                    <p style="color: #dc2626; font-size: 13px; font-weight: 600; margin: 0 0 8px 0;">
-                        ⚠️ オプション：独自のAPI Keyを使用する場合
-                    </p>
-                    <p style="color: #dc2626; font-size: 12px; line-height: 1.5; margin: 0;">
-                        より高いセキュリティが必要な場合は、独自のAPIキーを入力してください。空白のままでもデフォルトキーで動作します。
-                    </p>
+                    <details style="cursor: pointer;">
+                        <summary style="color: #c2410c; font-size: 12px; font-weight: 600; margin-bottom: 8px;">
+                            📖 API Key取得方法（クリックで表示）
+                        </summary>
+                        <ol style="color: #9a3412; font-size: 11px; line-height: 1.6; margin: 8px 0 0 16px; padding: 0;">
+                            <li><a href="https://console.cloud.google.com" target="_blank" style="color: #ea580c; text-decoration: underline;">Google Cloud Console</a> にアクセス</li>
+                            <li>プロジェクトを作成または選択</li>
+                            <li>「APIとサービス」→「ライブラリ」で「Google Sheets API」を検索して有効化</li>
+                            <li>「認証情報」→「認証情報を作成」→「APIキー」を選択</li>
+                            <li>取得したAPI Keyを下記に入力（推奨: HTTP リファラー制限を設定）</li>
+                        </ol>
+                    </details>
                 </div>
                 <input 
                     type="password" 

@@ -4,7 +4,15 @@
  */
 
 // デフォルトAPI Key（テンプレート用 - 読み取り専用）
+// ⚠️ 注意: このAPI Keyは古い可能性があります。Google Cloud Consoleで新しいキーを取得してください
 const DEFAULT_API_KEY = 'AIzaSyBn9JqF8P3vL0mK2xW4yH1zR5tQ6uC7dE9';
+
+// ⚠️ デフォルトAPI Keyが使えない場合は、下記の手順で独自のキーを取得してください：
+// 1. Google Cloud Console (https://console.cloud.google.com) にアクセス
+// 2. プロジェクトを作成または選択
+// 3. 「APIとサービス」→「ライブラリ」で「Google Sheets API」を有効化
+// 4. 「認証情報」→「認証情報を作成」→「APIキー」を選択
+// 5. 取得したAPI Keyを設定画面に入力
 
 // 設定キー
 const SPREADSHEET_CONFIG_KEY = 'spreadsheet_config';
@@ -174,13 +182,46 @@ async function testSpreadsheetConnection() {
     
     showSpreadsheetStatus('🔍 接続テスト中...', 'info');
     
+    console.log('🔧 接続テスト開始:', {
+        sheetId: config.sheetId,
+        apiKeyLength: config.apiKey?.length,
+        apiKeyPrefix: config.apiKey?.substring(0, 10) + '...',
+        sheetName: config.sheetName
+    });
+    
     try {
         // スプレッドシートの基本情報を取得してテスト
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${config.sheetId}?key=${config.apiKey}`;
+        console.log('📡 リクエストURL:', url.replace(config.apiKey, 'API_KEY_HIDDEN'));
+        
         const response = await fetch(url);
         
+        console.log('📥 レスポンス:', {
+            status: response.status,
+            statusText: response.statusText,
+            ok: response.ok
+        });
+        
         if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            // エラーレスポンスの詳細を取得
+            const errorData = await response.json().catch(() => null);
+            console.error('❌ エラー詳細:', errorData);
+            
+            let errorMsg = `HTTP ${response.status}: ${response.statusText}`;
+            if (errorData?.error?.message) {
+                errorMsg += ` - ${errorData.error.message}`;
+            }
+            
+            // よくあるエラーのヘルプメッセージ
+            if (response.status === 400) {
+                errorMsg += '\n\n💡 ヒント: API Keyが無効です。Google Cloud Consoleで確認してください。';
+            } else if (response.status === 403) {
+                errorMsg += '\n\n💡 ヒント: スプレッドシートが「編集者」権限で共有されているか確認してください。';
+            } else if (response.status === 404) {
+                errorMsg += '\n\n💡 ヒント: スプレッドシートIDが正しいか確認してください。';
+            }
+            
+            throw new Error(errorMsg);
         }
         
         const data = await response.json();
