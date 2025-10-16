@@ -25,10 +25,25 @@ function showSpreadsheetSettings() {
                 📊 Googleスプレッドシート連携設定
             </h2>
             
+            <div style="
+                background: #dbeafe;
+                border: 1px solid #60a5fa;
+                border-radius: 8px;
+                padding: 16px;
+                margin-bottom: 24px;
+            ">
+                <p style="color: #1e40af; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">
+                    🔒 セキュアな設定
+                </p>
+                <p style="color: #1e3a8a; font-size: 12px; line-height: 1.5; margin: 0;">
+                    API KeyはNetlify Functionsで安全に管理されます。ブラウザにAPI Keyは保存されません。
+                </p>
+            </div>
+            
             <div style="margin-bottom: 24px;">
-                <h3 style="color: #1e293b; margin-bottom: 12px;">🔗 スプレッドシートURL設定</h3>
+                <h3 style="color: #1e293b; margin-bottom: 12px;">🔗 スプレッドシートURL</h3>
                 <p style="color: #64748b; margin-bottom: 16px; line-height: 1.6;">
-                    「URLを知っている人のみ閲覧可能」に設定されたGoogleスプレッドシートのURLを入力してください。
+                    「リンクを知っている人のみ閲覧可能」に設定されたGoogleスプレッドシートのURLを入力してください。
                 </p>
                 <input 
                     type="url" 
@@ -46,55 +61,6 @@ function showSpreadsheetSettings() {
                     onFocus="this.style.borderColor='#0ea5e9'"
                     onBlur="this.style.borderColor='#e2e8f0'"
                 />
-            </div>
-            
-            <div style="margin-bottom: 24px;">
-                <h3 style="color: #1e293b; margin-bottom: 12px;">🔑 Google Sheets API Key</h3>
-                <div style="
-                    background: #fff7ed;
-                    border: 1px solid #fed7aa;
-                    border-radius: 8px;
-                    padding: 12px;
-                    margin-bottom: 12px;
-                ">
-                    <p style="color: #c2410c; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">
-                        ⚠️ デフォルトAPI Keyが使えない場合
-                    </p>
-                    <p style="color: #9a3412; font-size: 12px; line-height: 1.5; margin: 0 0 8px 0;">
-                        接続エラー（HTTP 400）が出る場合は、独自のAPI Keyを取得してください。
-                    </p>
-                    <details style="cursor: pointer;">
-                        <summary style="color: #c2410c; font-size: 12px; font-weight: 600; margin-bottom: 8px;">
-                            📖 API Key取得方法（クリックで表示）
-                        </summary>
-                        <ol style="color: #9a3412; font-size: 11px; line-height: 1.6; margin: 8px 0 0 16px; padding: 0;">
-                            <li><a href="https://console.cloud.google.com" target="_blank" style="color: #ea580c; text-decoration: underline;">Google Cloud Console</a> にアクセス</li>
-                            <li>プロジェクトを作成または選択</li>
-                            <li>「APIとサービス」→「ライブラリ」で「Google Sheets API」を検索して有効化</li>
-                            <li>「認証情報」→「認証情報を作成」→「APIキー」を選択</li>
-                            <li>取得したAPI Keyを下記に入力（推奨: HTTP リファラー制限を設定）</li>
-                        </ol>
-                    </details>
-                </div>
-                <input 
-                    type="password" 
-                    id="api-key" 
-                    placeholder="空白 = デフォルトAPI Key使用（推奨）"
-                    style="
-                        width: 100%;
-                        padding: 12px 16px;
-                        border: 2px solid #e2e8f0;
-                        border-radius: 8px;
-                        font-size: 14px;
-                        box-sizing: border-box;
-                        transition: border-color 0.2s;
-                    "
-                    onFocus="this.style.borderColor='#0ea5e9'"
-                    onBlur="this.style.borderColor='#e2e8f0'"
-                />
-                <p style="color: #64748b; font-size: 12px; margin: 8px 0 0 0;">
-                    💡 ヒント: 空白のままで大丈夫です。デフォルトのAPI Keyで動作します。
-                </p>
             </div>
             
             <div style="margin-bottom: 24px;">

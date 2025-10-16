@@ -1,55 +1,68 @@
 /**
  * Googleスプレッドシート連携モジュール (Spreadsheet Module)
- * Google Sheets APIを使用したデータ読み書き機能
+ * Netlify Functions経由でGoogle Sheets APIを使用
+ * 🔒 APIキーはサーバー側で安全に管理されます
  */
-
-// デフォルトAPI Key（テンプレート用 - 読み取り専用）
-// ⚠️ 注意: このAPI Keyは古い可能性があります。Google Cloud Consoleで新しいキーを取得してください
-const DEFAULT_API_KEY = 'AIzaSyBn9JqF8P3vL0mK2xW4yH1zR5tQ6uC7dE9';
-
-// ⚠️ デフォルトAPI Keyが使えない場合は、下記の手順で独自のキーを取得してください：
-// 1. Google Cloud Console (https://console.cloud.google.com) にアクセス
-// 2. プロジェクトを作成または選択
-// 3. 「APIとサービス」→「ライブラリ」で「Google Sheets API」を有効化
-// 4. 「認証情報」→「認証情報を作成」→「APIキー」を選択
-// 5. 取得したAPI Keyを設定画面に入力
 
 // 設定キー
 const SPREADSHEET_CONFIG_KEY = 'spreadsheet_config';
 
+// Netlify Functions エンドポイント
+const NETLIFY_FUNCTION_URL = '/.netlify/functions/sheets';
+
 /**
- * API Keyを取得（デフォルトまたは保存済み）
+ * マイグレーション: 古いAPI Key情報を削除
  */
-function getApiKey() {
-    const config = getSpreadsheetConfig();
-    if (config && config.apiKey) {
-        try {
-            // Base64デコード
-            const decoded = atob(config.apiKey);
-            return decoded.split('_')[0]; // タイムスタンプ除去
-        } catch (e) {
-            console.warn('保存されたAPI Keyのデコードに失敗しました', e);
+function migrateOldApiKeySettings() {
+    try {
+        const stored = localStorage.getItem(SPREADSHEET_CONFIG_KEY);
+        if (stored) {
+            const config = JSON.parse(stored);
+            // API Keyが保存されていたら削除
+            if (config.apiKey) {
+                console.log('🔄 古いAPI Key設定を削除します');
+                delete config.apiKey;
+                delete config._warning;
+                localStorage.setItem(SPREADSHEET_CONFIG_KEY, JSON.stringify(config));
+                console.log('✅ マイグレーション完了: API KeyはNetlify Functionsで管理されます');
+            }
         }
+    } catch (error) {
+        console.error('⚠️ マイグレーションエラー:', error);
     }
-    // 保存済みがなければデフォルトを使用
-    return DEFAULT_API_KEY;
+}
+
+// ページ読み込み時にマイグレーション実行
+if (typeof window !== 'undefined') {
+    window.addEventListener('DOMContentLoaded', migrateOldApiKeySettings);
 }
 
 /**
- * デフォルトAPI Keyを自動設定（初回のみ）
+ * Netlify Functions経由でスプレッドシート操作を実行
  */
-function initializeDefaultApiKey() {
-    const config = getSpreadsheetConfig();
-    if (!config || !config.apiKey) {
-        console.log('🔑 デフォルトAPI Keyを自動設定します');
-        // デフォルト値をLocalStorageに保存（初回のみ）
-        const encodedApiKey = btoa(DEFAULT_API_KEY + '_' + Date.now());
-        const defaultConfig = {
-            apiKey: encodedApiKey,
-            sheetName: '売上データ'
-        };
-        localStorage.setItem(SPREADSHEET_CONFIG_KEY, JSON.stringify(defaultConfig));
-        console.log('✅ デフォルトAPI Key設定完了（スプレッドシートIDは未設定）');
+async function callNetlifyFunction(action, params) {
+    try {
+        const response = await fetch(NETLIFY_FUNCTION_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action,
+                ...params
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Netlify Function エラー (${response.status}): ${errorText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('❌ Netlify Function呼び出しエラー:', error);
+        throw error;
     }
 }
 
@@ -58,18 +71,11 @@ function initializeDefaultApiKey() {
  */
 function saveSpreadsheetSettings() {
     const url = document.getElementById('spreadsheet-url')?.value;
-    let apiKey = document.getElementById('api-key')?.value;
     const sheetName = document.getElementById('sheet-name')?.value || '売上データ';
     
     if (!url) {
         showSpreadsheetStatus('⚠️ スプレッドシートURLは必須です', 'warning');
         return;
-    }
-    
-    // API Keyが空白ならデフォルトを使用
-    if (!apiKey || apiKey.trim() === '') {
-        console.log('🔑 API Key未入力のため、デフォルトAPI Keyを使用します');
-        apiKey = DEFAULT_API_KEY;
     }
     
     // スプレッドシートIDを抽出
@@ -79,33 +85,11 @@ function saveSpreadsheetSettings() {
         return;
     }
     
-    // ⚠️ セキュリティ警告（独自API Keyを入力した場合のみ）
-    if (document.getElementById('api-key')?.value && document.getElementById('api-key')?.value.trim() !== '') {
-        if (!confirm(`⚠️ セキュリティ警告 ⚠️
-
-独自のAPIキーをブラウザに保存するのはセキュリティリスクがあります。
-
-推奨される安全な方法：
-1. 専用のサーバーサイドプロキシを使用
-2. 環境変数でのAPIキー管理
-3. OAuth認証の実装
-
-それでも続行しますか？（本番環境では推奨されません）`)) {
-            showSpreadsheetStatus('⏹️ 設定保存をキャンセルしました', 'warning');
-            return;
-        }
-    }
-    
-    // 簡易暗号化（Base64エンコーディング - セキュリティ上は不十分だが難読化程度）
-    const encodedApiKey = btoa(apiKey + '_' + Date.now());
-    
     const config = {
         url,
         sheetId,
-        apiKey: encodedApiKey,
         sheetName,
-        savedAt: new Date().toISOString(),
-        _warning: 'APIキーは暗号化されていますが、完全に安全ではありません'
+        savedAt: new Date().toISOString()
     };
     
     localStorage.setItem(SPREADSHEET_CONFIG_KEY, JSON.stringify(config));
@@ -133,35 +117,65 @@ function loadSpreadsheetSettings() {
         
         const settings = JSON.parse(config);
         
-        // APIキーを復号化
-        let decodedApiKey = '';
-        try {
-            if (settings.apiKey) {
-                const decoded = atob(settings.apiKey);
-                decodedApiKey = decoded.split('_')[0]; // タイムスタンプ部分を除去
-            }
-        } catch (decodeError) {
-            console.warn('⚠️ APIキー復号化エラー - 再設定が必要です');
-            decodedApiKey = '';
-        }
-        
         // フォームに設定値を反映
         const urlInput = document.getElementById('spreadsheet-url');
-        const apiKeyInput = document.getElementById('api-key');
         const sheetNameInput = document.getElementById('sheet-name');
         
-        if (urlInput) urlInput.value = settings.url || '';
-        if (apiKeyInput) apiKeyInput.value = decodedApiKey;
-        if (sheetNameInput) sheetNameInput.value = settings.sheetName || '売上データ';
-        
-        // セキュリティ警告を表示
-        if (decodedApiKey) {
-            showSpreadsheetStatus('⚠️ APIキーが保存されています。セキュリティのため定期的に更新してください', 'warning');
+        if (urlInput && settings.url) {
+            urlInput.value = settings.url;
+        }
+        if (sheetNameInput && settings.sheetName) {
+            sheetNameInput.value = settings.sheetName;
         }
         
-        console.log('📊 スプレッドシート設定読み込み完了');
+        console.log('✅ スプレッドシート設定を読み込みました');
     } catch (error) {
-        console.error('❌ 設定読み込みエラー:', error);
+        console.error('⚠️ 設定読み込みエラー:', error);
+    }
+}
+
+/**
+ * スプレッドシート接続テスト
+ */
+async function testSpreadsheetConnection() {
+    const config = getSpreadsheetConfig();
+    
+    if (!config || !config.sheetId) {
+        showSpreadsheetStatus('⚠️ スプレッドシートIDが設定されていません。まず「💾 設定保存」してください', 'warning');
+        return;
+    }
+    
+    showSpreadsheetStatus('🔍 接続テスト中...', 'info');
+    
+    console.log('🔧 接続テスト開始:', {
+        sheetId: config.sheetId,
+        sheetName: config.sheetName,
+        functionUrl: NETLIFY_FUNCTION_URL
+    });
+    
+    try {
+        const result = await callNetlifyFunction('test', {
+            sheetId: config.sheetId,
+            sheetName: config.sheetName
+        });
+        
+        if (result.success) {
+            showSpreadsheetStatus(`✅ 接続成功！${result.title || 'スプレッドシート'}に接続できました`, 'success');
+            console.log('✅ スプレッドシート情報:', result);
+        } else {
+            throw new Error(result.error || '接続テスト失敗');
+        }
+    } catch (error) {
+        console.error('❌ 接続テストエラー:', error);
+        let errorMsg = `❌ 接続失敗: ${error.message}`;
+        
+        if (error.message.includes('404')) {
+            errorMsg += '\n\n💡 Netlify Functionsがデプロイされていない可能性があります。';
+        } else if (error.message.includes('403')) {
+            errorMsg += '\n\n💡 API Keyが無効か、スプレッドシートの共有設定を確認してください。';
+        }
+        
+        showSpreadsheetStatus(errorMsg, 'error');
     }
 }
 
@@ -174,106 +188,14 @@ function extractSheetId(url) {
 }
 
 /**
- * スプレッドシート接続テスト
- */
-async function testSpreadsheetConnection() {
-    const config = getSpreadsheetConfig();
-    if (!config) return;
-    
-    showSpreadsheetStatus('🔍 接続テスト中...', 'info');
-    
-    console.log('🔧 接続テスト開始:', {
-        sheetId: config.sheetId,
-        apiKeyLength: config.apiKey?.length,
-        apiKeyPrefix: config.apiKey?.substring(0, 10) + '...',
-        sheetName: config.sheetName,
-        isDefaultKey: config.apiKey === DEFAULT_API_KEY
-    });
-    
-    // デフォルトAPI Key使用時の警告
-    if (config.apiKey === DEFAULT_API_KEY) {
-        console.warn('⚠️ デフォルトAPI Keyを使用しています。このキーは無効な可能性があります。');
-        console.warn('💡 独自のAPI Keyを取得することを強く推奨します。');
-    }
-    
-    try {
-        // スプレッドシートの基本情報を取得してテスト
-        const url = `https://sheets.googleapis.com/v4/spreadsheets/${config.sheetId}?key=${config.apiKey}`;
-        console.log('📡 リクエストURL:', url.replace(config.apiKey, 'API_KEY_HIDDEN'));
-        
-        const response = await fetch(url);
-        
-        console.log('📥 レスポンス:', {
-            status: response.status,
-            statusText: response.statusText,
-            ok: response.ok
-        });
-        
-        if (!response.ok) {
-            // エラーレスポンスの詳細を取得（JSON・テキスト両方試行）
-            let errorData = null;
-            let errorText = '';
-            
-            try {
-                const responseText = await response.text();
-                errorText = responseText;
-                console.log('📄 エラーレスポンステキスト:', responseText.substring(0, 500));
-                
-                // JSONパースを試行
-                try {
-                    errorData = JSON.parse(responseText);
-                    console.error('❌ エラーJSON:', errorData);
-                } catch (e) {
-                    console.warn('JSONパース失敗、テキストとして扱います');
-                }
-            } catch (e) {
-                console.error('レスポンス読み込みエラー:', e);
-            }
-            
-            let errorMsg = `HTTP ${response.status}: ${response.statusText || 'Unknown Error'}`;
-            
-            // エラーメッセージの抽出
-            if (errorData?.error?.message) {
-                errorMsg += `\n詳細: ${errorData.error.message}`;
-            } else if (errorText && errorText.length < 200) {
-                errorMsg += `\n詳細: ${errorText}`;
-            }
-            
-            // よくあるエラーのヘルプメッセージ
-            if (response.status === 400) {
-                errorMsg += '\n\n💡 対処法:\n';
-                errorMsg += '1. 独自のAPI Keyを取得してください（下記のガイド参照）\n';
-                errorMsg += '2. Google Cloud ConsoleでSheets APIが有効か確認\n';
-                errorMsg += '3. API Keyに制限がかかっていないか確認';
-            } else if (response.status === 403) {
-                errorMsg += '\n\n💡 対処法:\n';
-                errorMsg += '1. スプレッドシートを「リンクを知っている全員」に共有\n';
-                errorMsg += '2. 権限を「編集者」に設定';
-            } else if (response.status === 404) {
-                errorMsg += '\n\n💡 対処法: スプレッドシートIDが正しいか確認してください';
-            }
-            
-            throw new Error(errorMsg);
-        }
-        
-        const data = await response.json();
-        const title = data.properties?.title || '不明';
-        
-        showSpreadsheetStatus(`✅ 接続成功！スプレッドシート: "${title}"`, 'success');
-        console.log('📊 接続テスト成功:', { title, sheetId: config.sheetId });
-        
-    } catch (error) {
-        console.error('❌ 接続テストエラー:', error);
-        showSpreadsheetStatus(`❌ 接続失敗: ${error.message}`, 'error');
-    }
-}
-
-/**
  * 今日の売上データを送信
  */
 async function sendTodayData() {
     const config = getSpreadsheetConfig();
-    if (!config) return;
+    if (!config || !config.sheetId) {
+        showSpreadsheetStatus('⚠️ スプレッドシートが設定されていません', 'warning');
+        return;
+    }
     
     showSpreadsheetStatus('📤 今日のデータを送信中...', 'info');
     
@@ -286,10 +208,23 @@ async function sendTodayData() {
             return;
         }
         
-        // スプレッドシートに書き込み
-        await appendToSpreadsheet(config, todayData);
+        // Netlify Functions経由でスプレッドシートに書き込み
+        const result = await callNetlifyFunction('append', {
+            sheetId: config.sheetId,
+            sheetName: config.sheetName || '売上データ',
+            values: [[
+                todayData.date,
+                todayData.payer || '不明',
+                todayData.totalCustomers,
+                todayData.totalSales
+            ]]
+        });
         
-        showSpreadsheetStatus(`✅ データ送信完了！売上: ¥${todayData.totalSales.toLocaleString()}, 客数: ${todayData.totalCustomers}人`, 'success');
+        if (result.success) {
+            showSpreadsheetStatus(`✅ データ送信完了！売上: ¥${todayData.totalSales.toLocaleString()}, 客数: ${todayData.totalCustomers}人`, 'success');
+        } else {
+            throw new Error(result.error || 'データ送信失敗');
+        }
         
     } catch (error) {
         console.error('❌ データ送信エラー:', error);
@@ -346,45 +281,6 @@ async function getTodaysSalesData() {
 }
 
 /**
- * スプレッドシートにデータを追加
- */
-async function appendToSpreadsheet(config, data) {
-    const range = `${config.sheetName}!A:E`; // 日付、売上、客数、組数、取引数
-    const values = [[
-        data.date,
-        data.totalSales,
-        data.totalCustomers,
-        data.uniqueCustomers,
-        data.recordCount
-    ]];
-    
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${config.sheetId}/values/${range}:append?valueInputOption=RAW&key=${config.apiKey}`;
-    
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            values: values
-        })
-    });
-    
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `HTTP ${response.status}`);
-    }
-    
-    const result = await response.json();
-    console.log('📊 スプレッドシート書き込み成功:', result);
-    
-    return result;
-}
-
-/**
- * スプレッドシート設定を取得
- */
-/**
  * スプレッドシート設定を取得（LocalStorageまたは入力フィールドから）
  */
 function getSpreadsheetConfig() {
@@ -394,43 +290,24 @@ function getSpreadsheetConfig() {
         if (stored) {
             const config = JSON.parse(stored);
             
-            // API Keyを復号化
-            let apiKey = DEFAULT_API_KEY;
-            if (config.apiKey) {
-                try {
-                    const decoded = atob(config.apiKey);
-                    apiKey = decoded.split('_')[0];
-                } catch (e) {
-                    console.warn('API Key復号化失敗、デフォルトを使用', e);
-                }
-            }
-            
-            // 設定が完全な場合は返す
-            if (config.sheetId) {
+            if (config.sheetId && config.sheetName) {
                 return {
-                    url: config.url,
                     sheetId: config.sheetId,
-                    apiKey: apiKey,
-                    sheetName: config.sheetName || '売上データ'
+                    sheetName: config.sheetName,
+                    url: config.url
                 };
             }
         }
-    } catch (e) {
-        console.warn('LocalStorage読み込みエラー', e);
+    } catch (error) {
+        console.error('設定読み込みエラー:', error);
     }
     
-    // LocalStorageに設定がない場合は入力フィールドから取得
+    // LocalStorageになければ入力フィールドから取得
     const url = document.getElementById('spreadsheet-url')?.value;
-    let apiKey = document.getElementById('api-key')?.value;
     const sheetName = document.getElementById('sheet-name')?.value || '売上データ';
     
-    // API Keyが空ならデフォルトを使用
-    if (!apiKey || apiKey.trim() === '') {
-        apiKey = DEFAULT_API_KEY;
-    }
-    
     if (!url) {
-        showSpreadsheetStatus('⚠️ スプレッドシートURLを入力してください', 'warning');
+        showSpreadsheetStatus('⚠️ スプレッドシート設定がありません。URLを入力して「💾 設定保存」ボタンをクリックしてください', 'warning');
         return null;
     }
     
@@ -440,26 +317,7 @@ function getSpreadsheetConfig() {
         return null;
     }
     
-    return { url, sheetId, apiKey, sheetName };
-}
-
-/**
- * 保存された設定から復号化されたAPIキーを取得
- */
-function getStoredApiKey() {
-    try {
-        const config = localStorage.getItem(SPREADSHEET_CONFIG_KEY);
-        if (!config) return null;
-        
-        const settings = JSON.parse(config);
-        if (!settings.apiKey) return null;
-        
-        const decoded = atob(settings.apiKey);
-        return decoded.split('_')[0]; // タイムスタンプ部分を除去
-    } catch (error) {
-        console.error('❌ APIキー復号化エラー:', error);
-        return null;
-    }
+    return { url, sheetId, sheetName };
 }
 
 /**
@@ -500,37 +358,25 @@ function showSpreadsheetStatus(message, type = 'info') {
 }
 
 /**
- * スプレッドシートからデータを読み取り
- */
-async function readFromSpreadsheet(config, range) {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${config.sheetId}/values/${range}?key=${config.apiKey}`;
-    
-    const response = await fetch(url);
-    if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `HTTP ${response.status}`);
-    }
-    
-    return await response.json();
-}
-
-/**
  * スプレッドシートから売上データを取得してCSV形式に変換
  */
 async function loadSalesDataFromSpreadsheet() {
     try {
         const config = getSpreadsheetConfig();
-        if (!config) {
+        if (!config || !config.sheetId) {
             throw new Error('スプレッドシート設定が見つかりません');
         }
         
         showSpreadsheetStatus('📊 スプレッドシートからデータを読み込み中...', 'info');
         
-        // 「売上データ」シートの全データを取得
-        const range = `${config.sheetName}!A:E`; // 日付、支払い者、客数、売り上げ、その他
-        const result = await readFromSpreadsheet(config, range);
+        // Netlify Functions経由でデータを取得
+        const result = await callNetlifyFunction('read', {
+            sheetId: config.sheetId,
+            sheetName: config.sheetName || '売上データ',
+            range: 'A:E' // 日付、支払い者、客数、売り上げ、その他
+        });
         
-        if (!result.values || result.values.length === 0) {
+        if (!result.success || !result.values || result.values.length === 0) {
             throw new Error('スプレッドシートにデータがありません');
         }
         
