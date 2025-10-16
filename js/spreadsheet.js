@@ -3,20 +3,65 @@
  * Google Sheets APIを使用したデータ読み書き機能
  */
 
+// デフォルトAPI Key（テンプレート用 - 読み取り専用）
+const DEFAULT_API_KEY = 'AIzaSyBn9JqF8P3vL0mK2xW4yH1zR5tQ6uC7dE9';
+
 // 設定キー
 const SPREADSHEET_CONFIG_KEY = 'spreadsheet_config';
+
+/**
+ * API Keyを取得（デフォルトまたは保存済み）
+ */
+function getApiKey() {
+    const config = getSpreadsheetConfig();
+    if (config && config.apiKey) {
+        try {
+            // Base64デコード
+            const decoded = atob(config.apiKey);
+            return decoded.split('_')[0]; // タイムスタンプ除去
+        } catch (e) {
+            console.warn('保存されたAPI Keyのデコードに失敗しました', e);
+        }
+    }
+    // 保存済みがなければデフォルトを使用
+    return DEFAULT_API_KEY;
+}
+
+/**
+ * デフォルトAPI Keyを自動設定（初回のみ）
+ */
+function initializeDefaultApiKey() {
+    const config = getSpreadsheetConfig();
+    if (!config || !config.apiKey) {
+        console.log('🔑 デフォルトAPI Keyを自動設定します');
+        // デフォルト値をLocalStorageに保存（初回のみ）
+        const encodedApiKey = btoa(DEFAULT_API_KEY + '_' + Date.now());
+        const defaultConfig = {
+            apiKey: encodedApiKey,
+            sheetName: '売上データ'
+        };
+        localStorage.setItem(SPREADSHEET_CONFIG_KEY, JSON.stringify(defaultConfig));
+        console.log('✅ デフォルトAPI Key設定完了（スプレッドシートIDは未設定）');
+    }
+}
 
 /**
  * スプレッドシート設定を保存
  */
 function saveSpreadsheetSettings() {
     const url = document.getElementById('spreadsheet-url')?.value;
-    const apiKey = document.getElementById('api-key')?.value;
+    let apiKey = document.getElementById('api-key')?.value;
     const sheetName = document.getElementById('sheet-name')?.value || '売上データ';
     
-    if (!url || !apiKey) {
-        showSpreadsheetStatus('⚠️ URLとAPIキーは必須です', 'warning');
+    if (!url) {
+        showSpreadsheetStatus('⚠️ スプレッドシートURLは必須です', 'warning');
         return;
+    }
+    
+    // API Keyが空白ならデフォルトを使用
+    if (!apiKey || apiKey.trim() === '') {
+        console.log('🔑 API Key未入力のため、デフォルトAPI Keyを使用します');
+        apiKey = DEFAULT_API_KEY;
     }
     
     // スプレッドシートIDを抽出
@@ -26,10 +71,11 @@ function saveSpreadsheetSettings() {
         return;
     }
     
-    // ⚠️ セキュリティ警告
-    if (!confirm(`⚠️ セキュリティ警告 ⚠️
+    // ⚠️ セキュリティ警告（独自API Keyを入力した場合のみ）
+    if (document.getElementById('api-key')?.value && document.getElementById('api-key')?.value.trim() !== '') {
+        if (!confirm(`⚠️ セキュリティ警告 ⚠️
 
-APIキーをブラウザに保存するのはセキュリティリスクがあります。
+独自のAPIキーをブラウザに保存するのはセキュリティリスクがあります。
 
 推奨される安全な方法：
 1. 専用のサーバーサイドプロキシを使用
@@ -37,8 +83,9 @@ APIキーをブラウザに保存するのはセキュリティリスクがあ�
 3. OAuth認証の実装
 
 それでも続行しますか？（本番環境では推奨されません）`)) {
-        showSpreadsheetStatus('⏹️ 設定保存をキャンセルしました', 'warning');
-        return;
+            showSpreadsheetStatus('⏹️ 設定保存をキャンセルしました', 'warning');
+            return;
+        }
     }
     
     // 簡易暗号化（Base64エンコーディング - セキュリティ上は不十分だが難読化程度）
@@ -468,3 +515,13 @@ window.testSpreadsheetConnection = testSpreadsheetConnection;
 window.sendTodayData = sendTodayData;
 window.loadSalesDataFromSpreadsheet = loadSalesDataFromSpreadsheet;
 window.syncDataFromSpreadsheet = syncDataFromSpreadsheet;
+
+// 初期化：デフォルトAPI Keyを自動設定
+if (typeof window !== 'undefined') {
+    // ページ読み込み時に自動実行
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeDefaultApiKey);
+    } else {
+        initializeDefaultApiKey();
+    }
+}
