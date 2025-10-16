@@ -1109,9 +1109,15 @@ function showReportSummary() {
                 </div>
                 <div style="
                     background: rgba(33, 150, 243, 0.2);
-                    display: none;
+                    border-radius: 12px;
+                    padding: 16px;
+                    margin-bottom: 24px;
+                    font-size: 14px;
+                    color: #2196F3;
+                    border-left: 4px solid #2196F3;
                 ">
-                    � CSVファイルもダウンロードされました
+                    📊 <strong>スプレッドシートに自動送信</strong><br>
+                    売上データが設定されたシートに記録されました
                 </div>
                 <button onclick="location.reload()" style="
                     width: 100%;
@@ -1213,24 +1219,49 @@ async function sendMobileSalesDataToSpreadsheet(totalAmount, reportDate) {
             return;
         }
         
-        // 日付形式を変換（YYYY/MM/DD → MM/DD）
-        const formattedDate = formatDateForSpreadsheet(reportDate);
+        // 日付形式を変換（YYYY-MM-DD → YYYY/MM/DD）
+        const formattedDate = reportDate.replace(/-/g, '/');
         
-        // モバイル売上データを構築
-        const mobileData = {
+        // 客数を計算（伝票数）
+        const totalCustomers = receipts.length;
+        
+        console.log('📱 モバイル売上データをスプレッドシートに送信中:', {
             date: formattedDate,
             totalSales: totalAmount,
-            totalCustomers: receipts.length, // 伝票数を客数として使用
-            uniqueCustomers: 1, // モバイル報告では1組として扱う
-            recordCount: receipts.length
-        };
+            totalCustomers: totalCustomers
+        });
         
-        console.log('📱 モバイル売上データをスプレッドシートに送信中:', mobileData);
+        // Netlify Functions経由でスプレッドシートにデータを送信
+        const response = await fetch('/.netlify/functions/sheets', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: 'append',
+                sheetId: config.sheetId,
+                sheetName: config.sheetName || '売上データ',
+                values: [[
+                    formattedDate,
+                    'モバイル報告', // 支払い者
+                    totalCustomers, // 客数（伝票数）
+                    totalAmount // 売上
+                ]]
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const result = await response.json();
         
-        // スプレッドシートにデータを送信
-        await appendToSpreadsheet(config, mobileData);
-        
-        showNotification('📊 スプレッドシートに売上データを送信しました！', 'success');
+        if (result.success) {
+            console.log('✅ スプレッドシートに送信成功:', result);
+            showNotification('📊 スプレッドシートに売上データを送信しました！', 'success');
+        } else {
+            throw new Error(result.error || 'データ送信失敗');
+        }
         
     } catch (error) {
         console.error('❌ モバイル売上データ送信エラー:', error);
@@ -1247,22 +1278,11 @@ function getMobileSpreadsheetConfig() {
         if (!config) return null;
         
         const settings = JSON.parse(config);
-        if (!settings.url || !settings.apiKey) return null;
-        
-        // APIキーを復号化
-        let decodedApiKey = '';
-        try {
-            const decoded = atob(settings.apiKey);
-            decodedApiKey = decoded.split('_')[0]; // タイムスタンプ部分を除去
-        } catch (decodeError) {
-            console.warn('⚠️ APIキー復号化エラー');
-            return null;
-        }
+        if (!settings.sheetId) return null;
         
         return {
             url: settings.url,
             sheetId: settings.sheetId,
-            apiKey: decodedApiKey,
             sheetName: settings.sheetName || '売上データ'
         };
         
