@@ -186,8 +186,15 @@ async function testSpreadsheetConnection() {
         sheetId: config.sheetId,
         apiKeyLength: config.apiKey?.length,
         apiKeyPrefix: config.apiKey?.substring(0, 10) + '...',
-        sheetName: config.sheetName
+        sheetName: config.sheetName,
+        isDefaultKey: config.apiKey === DEFAULT_API_KEY
     });
+    
+    // デフォルトAPI Key使用時の警告
+    if (config.apiKey === DEFAULT_API_KEY) {
+        console.warn('⚠️ デフォルトAPI Keyを使用しています。このキーは無効な可能性があります。');
+        console.warn('💡 独自のAPI Keyを取得することを強く推奨します。');
+    }
     
     try {
         // スプレッドシートの基本情報を取得してテスト
@@ -203,22 +210,47 @@ async function testSpreadsheetConnection() {
         });
         
         if (!response.ok) {
-            // エラーレスポンスの詳細を取得
-            const errorData = await response.json().catch(() => null);
-            console.error('❌ エラー詳細:', errorData);
+            // エラーレスポンスの詳細を取得（JSON・テキスト両方試行）
+            let errorData = null;
+            let errorText = '';
             
-            let errorMsg = `HTTP ${response.status}: ${response.statusText}`;
+            try {
+                const responseText = await response.text();
+                errorText = responseText;
+                console.log('📄 エラーレスポンステキスト:', responseText.substring(0, 500));
+                
+                // JSONパースを試行
+                try {
+                    errorData = JSON.parse(responseText);
+                    console.error('❌ エラーJSON:', errorData);
+                } catch (e) {
+                    console.warn('JSONパース失敗、テキストとして扱います');
+                }
+            } catch (e) {
+                console.error('レスポンス読み込みエラー:', e);
+            }
+            
+            let errorMsg = `HTTP ${response.status}: ${response.statusText || 'Unknown Error'}`;
+            
+            // エラーメッセージの抽出
             if (errorData?.error?.message) {
-                errorMsg += ` - ${errorData.error.message}`;
+                errorMsg += `\n詳細: ${errorData.error.message}`;
+            } else if (errorText && errorText.length < 200) {
+                errorMsg += `\n詳細: ${errorText}`;
             }
             
             // よくあるエラーのヘルプメッセージ
             if (response.status === 400) {
-                errorMsg += '\n\n💡 ヒント: API Keyが無効です。Google Cloud Consoleで確認してください。';
+                errorMsg += '\n\n💡 対処法:\n';
+                errorMsg += '1. 独自のAPI Keyを取得してください（下記のガイド参照）\n';
+                errorMsg += '2. Google Cloud ConsoleでSheets APIが有効か確認\n';
+                errorMsg += '3. API Keyに制限がかかっていないか確認';
             } else if (response.status === 403) {
-                errorMsg += '\n\n💡 ヒント: スプレッドシートが「編集者」権限で共有されているか確認してください。';
+                errorMsg += '\n\n💡 対処法:\n';
+                errorMsg += '1. スプレッドシートを「リンクを知っている全員」に共有\n';
+                errorMsg += '2. 権限を「編集者」に設定';
             } else if (response.status === 404) {
-                errorMsg += '\n\n💡 ヒント: スプレッドシートIDが正しいか確認してください。';
+                errorMsg += '\n\n💡 対処法: スプレッドシートIDが正しいか確認してください';
             }
             
             throw new Error(errorMsg);
