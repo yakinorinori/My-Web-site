@@ -4,6 +4,11 @@
 .env
 .DS_Store
 
+# Google認証情報（絶対にコミットしない！）
+*service-account*.json
+google-credentials.json
+credentials.json
+
 # データファイル（機密情報）
 *.csv
 data/
