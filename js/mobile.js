@@ -256,6 +256,23 @@ function createMobileSalesReportScreen() {
                                 font-size: 11px;
                                 margin-top: 4px;
                             ">※ 支払った方の名前や会社名など（任意）</div>
+                            <div style="
+                                background: rgba(255, 193, 7, 0.15);
+                                border-left: 3px solid #FFC107;
+                                border-radius: 6px;
+                                padding: 10px 12px;
+                                margin-top: 8px;
+                                font-size: 11px;
+                                color: rgba(255, 193, 7, 0.95);
+                                line-height: 1.5;
+                            ">
+                                <div style="font-weight: 600; margin-bottom: 4px;">⚠️ 同じお客様で伝票が複数ある場合</div>
+                                <div style="color: rgba(255, 193, 7, 0.85);">
+                                    → 1枚目は通常通り記入<br>
+                                    → 2枚目以降は<strong>客数を「0」</strong>にして同じ名前を入力<br>
+                                    <span style="font-size: 10px; opacity: 0.8;">（例: 山田さん 4名 + 山田さん 0名）</span>
+                                </div>
+                            </div>
                         </div>
                         
                         <!-- 客数入力 -->
@@ -267,7 +284,7 @@ function createMobileSalesReportScreen() {
                                 display: block;
                                 margin-bottom: 8px;
                             ">👥 客数</label>
-                            <input type="number" id="receipt-customer-count" value="1" min="1" max="999" step="1" style="
+                            <input type="number" id="receipt-customer-count" value="1" min="0" max="999" step="1" style="
                                 width: 100%;
                                 padding: 12px;
                                 border: 1px solid rgba(255, 255, 255, 0.3);
@@ -281,7 +298,7 @@ function createMobileSalesReportScreen() {
                                 color: rgba(255, 255, 255, 0.6);
                                 font-size: 11px;
                                 margin-top: 4px;
-                            ">※ この伝票の人数（デフォルト: 1名）</div>
+                            ">※ この伝票の人数（通常: 1名以上、追加伝票: 0名）</div>
                         </div>
                         
                         <!-- 金額入力 -->
@@ -799,7 +816,13 @@ function confirmReceipt() {
     
     // 支払い者と客数を取得
     const payer = document.getElementById('receipt-payer').value.trim();
-    const customerCount = parseInt(document.getElementById('receipt-customer-count').value) || 1;
+    const customerCount = parseInt(document.getElementById('receipt-customer-count').value);
+    
+    // 客数のバリデーション（0以上999以下）
+    if (isNaN(customerCount) || customerCount < 0 || customerCount > 999) {
+        showNotification('👥 客数は0〜999の範囲で入力してください', 'error');
+        return;
+    }
     
     // データに保存
     currentReceiptData.amount = amount;
@@ -851,8 +874,10 @@ function updateReceiptList() {
         
         // 支払い者表示（空の場合は表示しない）
         const payerDisplay = receipt.payer ? `<div style="color: rgba(255, 255, 255, 0.9); font-size: 13px; margin-top: 2px;">👤 ${receipt.payer}</div>` : '';
-        // 客数表示
-        const customerCountDisplay = `<div style="color: rgba(255, 255, 255, 0.7); font-size: 12px; margin-top: 2px;">👥 ${receipt.customerCount}名</div>`;
+        // 客数表示（0の場合は追加伝票マークを表示）
+        const customerCountColor = receipt.customerCount === 0 ? 'rgba(255, 193, 7, 0.9)' : 'rgba(255, 255, 255, 0.7)';
+        const customerCountText = receipt.customerCount === 0 ? `${receipt.customerCount}名（追加伝票）` : `${receipt.customerCount}名`;
+        const customerCountDisplay = `<div style="color: ${customerCountColor}; font-size: 12px; margin-top: 2px;">👥 ${customerCountText}</div>`;
         
         receiptItem.innerHTML = `
             <div style="display: flex; align-items: center; flex: 1;">
