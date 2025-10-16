@@ -331,7 +331,7 @@ function showSpreadsheetStatus(message, type = 'info') {
 }
 
 /**
- * スプレッドシートからデータを読み取り（将来の拡張用）
+ * スプレッドシートからデータを読み取り
  */
 async function readFromSpreadsheet(config, range) {
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${config.sheetId}/values/${range}?key=${config.apiKey}`;
@@ -345,8 +345,126 @@ async function readFromSpreadsheet(config, range) {
     return await response.json();
 }
 
+/**
+ * スプレッドシートから売上データを取得してCSV形式に変換
+ */
+async function loadSalesDataFromSpreadsheet() {
+    try {
+        const config = getSpreadsheetConfig();
+        if (!config) {
+            throw new Error('スプレッドシート設定が見つかりません');
+        }
+        
+        showSpreadsheetStatus('📊 スプレッドシートからデータを読み込み中...', 'info');
+        
+        // 「売上データ」シートの全データを取得
+        const range = `${config.sheetName}!A:E`; // 日付、支払い者、客数、売り上げ、その他
+        const result = await readFromSpreadsheet(config, range);
+        
+        if (!result.values || result.values.length === 0) {
+            throw new Error('スプレッドシートにデータがありません');
+        }
+        
+        // データをCSV形式に変換
+        const csvData = convertSpreadsheetDataToCSV(result.values);
+        
+        showSpreadsheetStatus(`✅ ${result.values.length - 1}件のデータを読み込みました`, 'success');
+        
+        return csvData;
+        
+    } catch (error) {
+        console.error('❌ スプレッドシートデータ読み込みエラー:', error);
+        showSpreadsheetStatus(`❌ データ読み込み失敗: ${error.message}`, 'error');
+        throw error;
+    }
+}
+
+/**
+ * スプレッドシートのデータをCSV形式の配列に変換
+ */
+function convertSpreadsheetDataToCSV(values) {
+    if (!values || values.length < 2) {
+        return [];
+    }
+    
+    // ヘッダー行を取得（1行目）
+    const headers = values[0];
+    
+    // ヘッダーから列のインデックスを特定
+    const dateCol = findColumnIndex(headers, ['日付', 'date', '日付']);
+    const payerCol = findColumnIndex(headers, ['支払い者', 'payer', '名前', 'name']);
+    const customersCol = findColumnIndex(headers, ['客数', 'customers', '人数']);
+    const salesCol = findColumnIndex(headers, ['売り上げ', 'sales', '売上', '金額', 'amount']);
+    
+    // データ行を変換（2行目以降）
+    const csvData = [];
+    for (let i = 1; i < values.length; i++) {
+        const row = values[i];
+        
+        // 空行をスキップ
+        if (!row || row.length === 0 || !row[dateCol]) {
+            continue;
+        }
+        
+        csvData.push({
+            '日付': row[dateCol] || '',
+            '支払い者': row[payerCol] || '不明',
+            '客数': parseInt(row[customersCol]) || 0,
+            '売り上げ': parseInt(row[salesCol]) || 0
+        });
+    }
+    
+    console.log(`📊 スプレッドシートから${csvData.length}件のデータを変換しました`);
+    return csvData;
+}
+
+/**
+ * ヘッダーから列のインデックスを検索
+ */
+function findColumnIndex(headers, possibleNames) {
+    for (let i = 0; i < headers.length; i++) {
+        const header = (headers[i] || '').toString().trim();
+        for (const name of possibleNames) {
+            if (header.includes(name) || header.toLowerCase().includes(name.toLowerCase())) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+/**
+ * スプレッドシートからデータを読み込んでシステムに反映
+ */
+async function syncDataFromSpreadsheet() {
+    try {
+        showSpreadsheetStatus('🔄 スプレッドシートと同期中...', 'info');
+        
+        const csvData = await loadSalesDataFromSpreadsheet();
+        
+        // グローバルデータを更新
+        if (typeof setGlobalData === 'function') {
+            setGlobalData(csvData);
+            showSpreadsheetStatus('✅ データ同期完了！', 'success');
+            
+            // UIを更新
+            if (typeof showYearAnalysis === 'function') {
+                showYearAnalysis();
+            }
+        } else {
+            throw new Error('データ設定関数が見つかりません');
+        }
+        
+    } catch (error) {
+        console.error('❌ データ同期エラー:', error);
+        showSpreadsheetStatus(`❌ 同期失敗: ${error.message}`, 'error');
+    }
+}
+
 // グローバル関数として公開
 window.saveSpreadsheetSettings = saveSpreadsheetSettings;
 window.loadSpreadsheetSettings = loadSpreadsheetSettings;
 window.testSpreadsheetConnection = testSpreadsheetConnection;
 window.sendTodayData = sendTodayData;
+window.loadSalesDataFromSpreadsheet = loadSalesDataFromSpreadsheet;
+window.syncDataFromSpreadsheet = syncDataFromSpreadsheet;

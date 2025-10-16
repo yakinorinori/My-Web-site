@@ -106,7 +106,7 @@ function showSpreadsheetSettings() {
                 />
             </div>
             
-            <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px;">
                 <button onclick="testSpreadsheetConnection()" style="
                     background: #10b981;
                     color: white;
@@ -133,6 +133,20 @@ function showSpreadsheetSettings() {
                     transition: background-color 0.2s;
                 " onMouseOver="this.style.background='#0284c7'" onMouseOut="this.style.background='#0ea5e9'">
                     💾 設定保存
+                </button>
+                
+                <button onclick="syncDataFromSpreadsheet()" style="
+                    background: #f59e0b;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: background-color 0.2s;
+                " onMouseOver="this.style.background='#d97706'" onMouseOut="this.style.background='#f59e0b'">
+                    📥 データ読み込み
                 </button>
                 
                 <button onclick="sendTodayData()" style="
