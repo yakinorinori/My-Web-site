@@ -101,9 +101,18 @@ function saveSpreadsheetSettings() {
     };
     
     localStorage.setItem(SPREADSHEET_CONFIG_KEY, JSON.stringify(config));
-    showSpreadsheetStatus('✅ 設定を保存しました（セキュリティ警告: APIキーがブラウザに保存されています）', 'warning');
     
     console.log('📊 スプレッドシート設定保存:', { sheetId, sheetName });
+    
+    // 設定を即座に反映（リロード不要）
+    if (document.getElementById('spreadsheet-url')) {
+        document.getElementById('spreadsheet-url').value = url;
+    }
+    if (document.getElementById('sheet-name')) {
+        document.getElementById('sheet-name').value = sheetName;
+    }
+    
+    showSpreadsheetStatus('✅ 設定を保存しました！「📥 データ読み込み」ボタンでデータを取得できます', 'success');
 }
 
 /**
@@ -302,13 +311,53 @@ async function appendToSpreadsheet(config, data) {
 /**
  * スプレッドシート設定を取得
  */
+/**
+ * スプレッドシート設定を取得（LocalStorageまたは入力フィールドから）
+ */
 function getSpreadsheetConfig() {
+    // まずLocalStorageから取得を試みる
+    try {
+        const stored = localStorage.getItem(SPREADSHEET_CONFIG_KEY);
+        if (stored) {
+            const config = JSON.parse(stored);
+            
+            // API Keyを復号化
+            let apiKey = DEFAULT_API_KEY;
+            if (config.apiKey) {
+                try {
+                    const decoded = atob(config.apiKey);
+                    apiKey = decoded.split('_')[0];
+                } catch (e) {
+                    console.warn('API Key復号化失敗、デフォルトを使用', e);
+                }
+            }
+            
+            // 設定が完全な場合は返す
+            if (config.sheetId) {
+                return {
+                    url: config.url,
+                    sheetId: config.sheetId,
+                    apiKey: apiKey,
+                    sheetName: config.sheetName || '売上データ'
+                };
+            }
+        }
+    } catch (e) {
+        console.warn('LocalStorage読み込みエラー', e);
+    }
+    
+    // LocalStorageに設定がない場合は入力フィールドから取得
     const url = document.getElementById('spreadsheet-url')?.value;
-    const apiKey = document.getElementById('api-key')?.value;
+    let apiKey = document.getElementById('api-key')?.value;
     const sheetName = document.getElementById('sheet-name')?.value || '売上データ';
     
-    if (!url || !apiKey) {
-        showSpreadsheetStatus('⚠️ URLとAPIキーを入力してください', 'warning');
+    // API Keyが空ならデフォルトを使用
+    if (!apiKey || apiKey.trim() === '') {
+        apiKey = DEFAULT_API_KEY;
+    }
+    
+    if (!url) {
+        showSpreadsheetStatus('⚠️ スプレッドシートURLを入力してください', 'warning');
         return null;
     }
     
