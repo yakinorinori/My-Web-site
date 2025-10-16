@@ -1250,11 +1250,14 @@ async function sendMobileSalesDataToSpreadsheet(totalAmount, reportDate) {
             })
         });
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
+        console.log('📥 Response status:', response.status, response.statusText);
 
         const result = await response.json();
+        console.log('📄 Response body:', result);
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${result.error || response.statusText}\n詳細: ${result.details || 'なし'}`);
+        }
         
         if (result.success) {
             console.log('✅ スプレッドシートに送信成功:', result);
@@ -1265,7 +1268,18 @@ async function sendMobileSalesDataToSpreadsheet(totalAmount, reportDate) {
         
     } catch (error) {
         console.error('❌ モバイル売上データ送信エラー:', error);
-        showNotification(`⚠️ スプレッドシート送信に失敗: ${error.message}`, 'warning');
+        
+        // エラーの詳細をより分かりやすく表示
+        let errorMessage = error.message;
+        if (errorMessage.includes('API Key')) {
+            errorMessage = '🔑 API Keyが設定されていません。Netlifyの環境変数を確認してください。';
+        } else if (errorMessage.includes('403')) {
+            errorMessage = '🚫 スプレッドシートへのアクセスが拒否されました。共有設定を確認してください。';
+        } else if (errorMessage.includes('404')) {
+            errorMessage = '🔍 スプレッドシートが見つかりません。URLを確認してください。';
+        }
+        
+        showNotification(`⚠️ ${errorMessage}`, 'warning');
     }
 }
 

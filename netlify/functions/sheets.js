@@ -37,20 +37,25 @@ exports.handler = async (event, context) => {
         const body = JSON.parse(event.body || '{}');
         const { action, sheetId, sheetName, range, values } = body;
 
+        console.log('📥 Request received:', { action, sheetId, sheetName });
+
         // 環境変数からAPI Keyを取得
         const apiKey = process.env.GOOGLE_SHEETS_API_KEY;
         
         if (!apiKey) {
             console.error('❌ GOOGLE_SHEETS_API_KEY environment variable is not set');
+            console.error('Available env vars:', Object.keys(process.env).filter(k => !k.includes('SECRET')));
             return {
                 statusCode: 500,
                 headers,
                 body: JSON.stringify({ 
                     success: false,
-                    error: 'Server configuration error: API Key not configured' 
+                    error: 'Server configuration error: GOOGLE_SHEETS_API_KEY environment variable is not set. Please configure it in Netlify dashboard.' 
                 })
             };
         }
+
+        console.log('✅ API Key found (length:', apiKey.length, ')');
 
         if (!sheetId) {
             return {
@@ -188,12 +193,16 @@ async function readData(sheetId, sheetName, range, apiKey, headers) {
  */
 async function appendData(sheetId, sheetName, values, apiKey, headers) {
     try {
+        console.log('📊 Append data request:', { sheetId, sheetName, values });
+        
         if (!values || !Array.isArray(values)) {
             throw new Error('Invalid values: must be an array');
         }
 
         const range = `${sheetName}!A:E`;
         const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}:append?valueInputOption=RAW&key=${apiKey}`;
+
+        console.log('📡 Calling Google Sheets API...');
 
         const response = await fetch(url, {
             method: 'POST',
@@ -203,9 +212,20 @@ async function appendData(sheetId, sheetName, values, apiKey, headers) {
             body: JSON.stringify({ values })
         });
 
+        console.log('📥 Google Sheets API response:', response.status, response.statusText);
+
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+            const errorText = await response.text();
+            console.error('❌ Google Sheets API error:', errorText);
+            
+            let errorData;
+            try {
+                errorData = JSON.parse(errorText);
+            } catch (e) {
+                errorData = { message: errorText };
+            }
+            
+            throw new Error(errorData.error?.message || errorText || `HTTP ${response.status}`);
         }
 
         const result = await response.json();
@@ -223,12 +243,15 @@ async function appendData(sheetId, sheetName, values, apiKey, headers) {
 
     } catch (error) {
         console.error('❌ Append data error:', error);
+        console.error('Error stack:', error.stack);
+        
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
                 success: false,
-                error: error.message
+                error: error.message,
+                details: error.stack
             })
         };
     }
