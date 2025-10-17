@@ -833,18 +833,18 @@ function drawYearMonthChart(yearMonthStats, canvasId = 'year-chart') {
             yAxisID: 'y'
         });
         
-        // 客数データセット（破線）
+        // 客数データセット（破線、オレンジ色で統一）
         datasets.push({
             label: `${year}年 客数`,
             data: customersByMonth,
-            borderColor: color.border,
-            backgroundColor: color.bg,
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.1)',
             borderWidth: 2,
             borderDash: [5, 5],  // 破線スタイル
             fill: false,
             tension: 0.3,
             pointRadius: 3,
-            pointBackgroundColor: color.border,
+            pointBackgroundColor: '#f59e0b',
             pointBorderColor: '#fff',
             pointBorderWidth: 1,
             spanGaps: true,
@@ -1029,16 +1029,18 @@ function drawYearWeekdayChart(yearWeekdayStats, canvasId = 'year-weekday-chart')
             yAxisID: 'y'
         });
         
-        // 客数データセット
+        // 客数データセット（オレンジ色で統一）
         datasets.push({
             label: `${year}年 客数`,
             data: customersByWeekday,
-            backgroundColor: color.bg,
-            borderColor: color.border,
+            backgroundColor: 'rgba(245, 158, 11, 0.6)',
+            borderColor: '#f59e0b',
             borderWidth: 2,
             yAxisID: 'y1',
             type: 'line',
-            borderDash: [5, 5]
+            borderDash: [5, 5],
+            pointBackgroundColor: '#f59e0b',
+            pointRadius: 3
         });
     });
     
@@ -1142,185 +1144,4 @@ function drawYearWeekdayChart(yearWeekdayStats, canvasId = 'year-weekday-chart')
     });
     
     console.log('✅ 年曜日別チャート描画完了');
-}
-
-/**
- * 年別の日別推移チャートを描画
- */
-function drawYearDailyChart(data, canvasId = 'year-daily-chart') {
-    console.log('📊 年日別チャート描画開始:', data.length, '件');
-    
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) {
-        console.error(`❌ Canvas要素 '${canvasId}' が見つかりません`);
-        return;
-    }
-    
-    const ctx = canvas.getContext('2d');
-    
-    // 既存チャートを破棄
-    if (chartInstances[canvasId]) {
-        chartInstances[canvasId].destroy();
-    }
-    
-    // 日付ごとに集計
-    const dailyStats = {};
-    data.forEach(row => {
-        if (!row || !row['日付']) return;
-        const date = row['日付'];
-        const sales = Number(row['売り上げ']) || 0;
-        const customers = Number(row['客数']) || 0;
-        
-        if (!dailyStats[date]) {
-            dailyStats[date] = { sales: 0, customers: 0 };
-        }
-        dailyStats[date].sales += sales;
-        dailyStats[date].customers += customers;
-    });
-    
-    // 日付を昇順にソート
-    const dates = Object.keys(dailyStats).sort();
-    const salesData = dates.map(date => dailyStats[date].sales);
-    const customersData = dates.map(date => dailyStats[date].customers);
-    
-    // ラベルを見やすく（MM/DD形式）
-    const labels = dates.map(date => {
-        const parts = date.split('/');
-        if (parts.length >= 3) {
-            return `${parts[1]}/${parts[2]}`;
-        }
-        return date;
-    });
-    
-    chartInstances[canvasId] = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: '売上',
-                    data: salesData,
-                    borderColor: '#0ea5e9',
-                    backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                    borderWidth: 2,
-                    fill: true,
-                    tension: 0.1,
-                    pointRadius: 2,
-                    yAxisID: 'y'
-                },
-                {
-                    label: '客数',
-                    data: customersData,
-                    borderColor: '#f59e0b',
-                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                    borderWidth: 2,
-                    borderDash: [5, 5],
-                    fill: false,
-                    tension: 0.1,
-                    pointRadius: 2,
-                    yAxisID: 'y1'
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false
-            },
-            plugins: {
-                title: {
-                    display: true,
-                    text: '日別 売上・客数推移',
-                    font: {
-                        size: 18,
-                        weight: 'bold'
-                    }
-                },
-                legend: {
-                    display: true,
-                    position: 'top'
-                },
-                tooltip: {
-                    callbacks: {
-                        title: function(context) {
-                            // 完全な日付を表示
-                            return dates[context[0].dataIndex];
-                        },
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            if (context.dataset.yAxisID === 'y') {
-                                label += '¥' + context.parsed.y.toLocaleString();
-                            } else {
-                                label += context.parsed.y.toLocaleString() + '人';
-                            }
-                            return label;
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    type: 'linear',
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: '売上（円）',
-                        font: {
-                            size: 14,
-                            weight: 'bold'
-                        },
-                        color: '#0ea5e9'
-                    },
-                    ticks: {
-                        font: {
-                            size: 12
-                        },
-                        callback: function(value) {
-                            return '¥' + value.toLocaleString();
-                        }
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: '客数（人）',
-                        font: {
-                            size: 14,
-                            weight: 'bold'
-                        },
-                        color: '#f59e0b'
-                    },
-                    ticks: {
-                        font: {
-                            size: 12
-                        },
-                        callback: function(value) {
-                            return value + '人';
-                        }
-                    },
-                    grid: {
-                        drawOnChartArea: false
-                    }
-                },
-                x: {
-                    ticks: {
-                        font: {
-                            size: 10
-                        },
-                        maxRotation: 45,
-                        minRotation: 45
-                    }
-                }
-            }
-        }
-    });
-    
-    console.log('✅ 年日別チャート描画完了');
 }
