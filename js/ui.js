@@ -563,23 +563,6 @@ function showYearAnalysis() {
                 }
                 drawYearWeekdayChart(window.yearWeekdayStatsData, 'year-weekday-chart');
             }
-            
-            // 日別グラフ
-            if (window.yearDailyData) {
-                let dailyChartCanvas = document.getElementById('year-daily-chart');
-                if (!dailyChartCanvas) {
-                    const dailyCanvasContainer = document.createElement('div');
-                    dailyCanvasContainer.style.cssText = `
-                        margin: 20px 0;
-                        text-align: center;
-                        height: 400px;
-                        position: relative;
-                    `;
-                    dailyCanvasContainer.innerHTML = '<canvas id="year-daily-chart"></canvas>';
-                    chartArea.appendChild(dailyCanvasContainer);
-                }
-                drawYearDailyChart(window.yearDailyData, 'year-daily-chart');
-            }
         }
     }, 100);
 }
