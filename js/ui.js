@@ -512,8 +512,10 @@ function showMonthAnalysis() {
             canvasContainer.style.cssText = `
                 margin: 20px 0;
                 text-align: center;
+                height: 400px;
+                position: relative;
             `;
-            canvasContainer.innerHTML = '<canvas id="monthly-line-chart" width="800" height="400"></canvas>';
+            canvasContainer.innerHTML = '<canvas id="monthly-line-chart"></canvas>';
             chartArea.appendChild(canvasContainer);
         }
         drawMonthlySalesChart(monthData, 'monthly-line-chart');
