@@ -137,15 +137,20 @@ function drawMonthlyChart() {
                                     font: {
                                         size: 14,
                                         weight: 'bold'
-                                    }
+                                    },
+                                    color: '#4e79a7'
                                 },
                                 ticks: {
                                     font: {
                                         size: 12
                                     },
+                                    color: '#4e79a7',
                                     callback: function(value) {
                                         return '¥' + value.toLocaleString();
                                     }
+                                },
+                                grid: {
+                                    color: 'rgba(78, 121, 167, 0.1)'
                                 }
                             },
                             y1: {
@@ -153,22 +158,28 @@ function drawMonthlyChart() {
                                 display: true,
                                 position: 'right',
                                 beginAtZero: true,
-                                max: Math.max(...customersArr) * 3, // 客数最大値の3倍を上限にして売上より下に表示
+                                // 客数の最大値に余裕を持たせる（1.2倍）
+                                max: Math.ceil(Math.max(...customersArr) * 1.2),
                                 title: {
                                     display: true,
-                                    text: '客数',
+                                    text: '客数（人）',
                                     font: {
                                         size: 14,
                                         weight: 'bold'
-                                    }
+                                    },
+                                    color: '#f28e2b'
                                 },
                                 ticks: {
                                     font: {
                                         size: 12
+                                    },
+                                    color: '#f28e2b',
+                                    callback: function(value) {
+                                        return value + '人';
                                     }
                                 },
                                 grid: {
-                                    drawOnChartArea: false
+                                    drawOnChartArea: false // 右軸のグリッド線は非表示
                                 }
                             },
                             x: {
@@ -459,7 +470,19 @@ function drawComboChart(data, canvasId = 'comboChart') {
             plugins: {
                 title: {
                     display: true,
-                    text: '月別売上と客数'
+                    text: '月別売上と客数',
+                    font: {
+                        size: 18,
+                        weight: 'bold'
+                    }
+                },
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 14
+                        }
+                    }
                 }
             },
             scales: {
@@ -468,10 +491,26 @@ function drawComboChart(data, canvasId = 'comboChart') {
                     display: true,
                     position: 'left',
                     beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '売上（¥）',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        color: '#0ea5e9'
+                    },
                     ticks: {
+                        font: {
+                            size: 12
+                        },
+                        color: '#0ea5e9',
                         callback: function(value) {
                             return '¥' + value.toLocaleString();
                         }
+                    },
+                    grid: {
+                        color: 'rgba(14, 165, 233, 0.1)'
                     }
                 },
                 y1: {
@@ -479,13 +518,26 @@ function drawComboChart(data, canvasId = 'comboChart') {
                     display: true,
                     position: 'right',
                     beginAtZero: true,
-                    grid: {
-                        drawOnChartArea: false,
+                    title: {
+                        display: true,
+                        text: '客数（人）',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        color: '#f59e0b'
                     },
                     ticks: {
+                        font: {
+                            size: 12
+                        },
+                        color: '#f59e0b',
                         callback: function(value) {
                             return value + '人';
                         }
+                    },
+                    grid: {
+                        drawOnChartArea: false // 右軸のグリッド線は非表示
                     }
                 }
             }
