@@ -767,3 +767,157 @@ function drawYearChart(data, canvasId = 'year-chart') {
     
     console.log('✅ 年別チャート描画完了');
 }
+
+/**
+ * 年別の月次推移チャートを描画（各年の月別売上を折れ線グラフで表示）
+ */
+function drawYearMonthChart(yearMonthStats, canvasId = 'year-chart') {
+    console.log('📊 年月別チャート描画開始:', yearMonthStats);
+    
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) {
+        console.error(`❌ Canvas要素 '${canvasId}' が見つかりません`);
+        return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    
+    // 既存チャートを破棄
+    if (chartInstances[canvasId]) {
+        chartInstances[canvasId].destroy();
+    }
+    
+    // 年ごとのデータセットを作成
+    const datasets = [];
+    const colors = [
+        { border: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.1)' },    // 青
+        { border: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },    // 緑
+        { border: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },    // オレンジ
+        { border: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' },     // 赤
+        { border: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.1)' },    // 紫
+        { border: '#ec4899', bg: 'rgba(236, 72, 153, 0.1)' }     // ピンク
+    ];
+    
+    // 年を昇順にソート
+    const years = Object.keys(yearMonthStats).sort();
+    
+    years.forEach((year, index) => {
+        const monthData = yearMonthStats[year];
+        const color = colors[index % colors.length];
+        
+        // 1月から12月までのデータを用意
+        const salesByMonth = [];
+        for (let month = 1; month <= 12; month++) {
+            const monthKey = `${year}/${String(month).padStart(2, '0')}`;
+            const sales = monthData[monthKey] ? monthData[monthKey].sales : null;
+            salesByMonth.push(sales);
+        }
+        
+        datasets.push({
+            label: `${year}年`,
+            data: salesByMonth,
+            borderColor: color.border,
+            backgroundColor: color.bg,
+            borderWidth: 3,
+            fill: false,
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: color.border,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            spanGaps: true  // null値を飛ばして線を引く
+        });
+    });
+    
+    // 月のラベル
+    const monthLabels = ['1月', '2月', '3月', '4月', '5月', '6月', 
+                        '7月', '8月', '9月', '10月', '11月', '12月'];
+    
+    chartInstances[canvasId] = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: monthLabels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: '年別 月次売上推移',
+                    font: {
+                        size: 18,
+                        weight: 'bold'
+                    }
+                },
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 13
+                        },
+                        usePointStyle: true,
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += '¥' + context.parsed.y.toLocaleString();
+                            } else {
+                                label += 'データなし';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    title: {
+                        display: true,
+                        text: '売上（円）',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    ticks: {
+                        font: {
+                            size: 12
+                        },
+                        callback: function(value) {
+                            return '¥' + value.toLocaleString();
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 12
+                        }
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+    
+    console.log('✅ 年月別チャート描画完了');
+}

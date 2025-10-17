@@ -531,7 +531,7 @@ function showYearAnalysis() {
     // 年次分析用のチャートを描画
     setTimeout(() => {
         const chartArea = document.getElementById('analysis-results');
-        if (chartArea) {
+        if (chartArea && window.yearMonthStatsData) {
             // Canvas要素を動的に作成
             let chartCanvas = document.getElementById('year-chart');
             if (!chartCanvas) {
@@ -545,7 +545,8 @@ function showYearAnalysis() {
                 canvasContainer.innerHTML = '<canvas id="year-chart"></canvas>';
                 chartArea.appendChild(canvasContainer);
             }
-            drawYearChart(data, 'year-chart');
+            // 年月別データを渡してグラフを描画
+            drawYearMonthChart(window.yearMonthStatsData, 'year-chart');
         }
     }, 100);
 }
@@ -805,6 +806,9 @@ function renderYearAnalysis(data) {
     if (resultsArea) {
         resultsArea.innerHTML = html;
     }
+    
+    // 年月別データをグローバルに保存（グラフ描画用）
+    window.yearMonthStatsData = yearMonthStats;
 }
 
 /**
