@@ -807,14 +807,18 @@ function drawYearMonthChart(yearMonthStats, canvasId = 'year-chart') {
         
         // 1月から12月までのデータを用意
         const salesByMonth = [];
+        const customersByMonth = [];
         for (let month = 1; month <= 12; month++) {
             const monthKey = `${year}/${String(month).padStart(2, '0')}`;
             const sales = monthData[monthKey] ? monthData[monthKey].sales : null;
+            const customers = monthData[monthKey] ? monthData[monthKey].customers : null;
             salesByMonth.push(sales);
+            customersByMonth.push(customers);
         }
         
+        // 売上データセット（実線）
         datasets.push({
-            label: `${year}年`,
+            label: `${year}年 売上`,
             data: salesByMonth,
             borderColor: color.border,
             backgroundColor: color.bg,
@@ -825,7 +829,26 @@ function drawYearMonthChart(yearMonthStats, canvasId = 'year-chart') {
             pointBackgroundColor: color.border,
             pointBorderColor: '#fff',
             pointBorderWidth: 2,
-            spanGaps: true  // null値を飛ばして線を引く
+            spanGaps: true,
+            yAxisID: 'y'
+        });
+        
+        // 客数データセット（破線）
+        datasets.push({
+            label: `${year}年 客数`,
+            data: customersByMonth,
+            borderColor: color.border,
+            backgroundColor: color.bg,
+            borderWidth: 2,
+            borderDash: [5, 5],  // 破線スタイル
+            fill: false,
+            tension: 0.3,
+            pointRadius: 3,
+            pointBackgroundColor: color.border,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 1,
+            spanGaps: true,
+            yAxisID: 'y1'
         });
     });
     
@@ -849,7 +872,7 @@ function drawYearMonthChart(yearMonthStats, canvasId = 'year-chart') {
             plugins: {
                 title: {
                     display: true,
-                    text: '年別 月次売上推移',
+                    text: '年別 月次売上・客数推移',
                     font: {
                         size: 18,
                         weight: 'bold'
@@ -860,10 +883,10 @@ function drawYearMonthChart(yearMonthStats, canvasId = 'year-chart') {
                     position: 'top',
                     labels: {
                         font: {
-                            size: 13
+                            size: 12
                         },
                         usePointStyle: true,
-                        padding: 15
+                        padding: 10
                     }
                 },
                 tooltip: {
@@ -874,7 +897,12 @@ function drawYearMonthChart(yearMonthStats, canvasId = 'year-chart') {
                                 label += ': ';
                             }
                             if (context.parsed.y !== null) {
-                                label += '¥' + context.parsed.y.toLocaleString();
+                                // 売上か客数かを判定
+                                if (context.dataset.yAxisID === 'y') {
+                                    label += '¥' + context.parsed.y.toLocaleString();
+                                } else {
+                                    label += context.parsed.y.toLocaleString() + '人';
+                                }
                             } else {
                                 label += 'データなし';
                             }
@@ -885,24 +913,53 @@ function drawYearMonthChart(yearMonthStats, canvasId = 'year-chart') {
             },
             scales: {
                 y: {
+                    type: 'linear',
+                    position: 'left',
                     title: {
                         display: true,
                         text: '売上（円）',
                         font: {
                             size: 14,
                             weight: 'bold'
-                        }
+                        },
+                        color: '#0ea5e9'
                     },
                     ticks: {
                         font: {
                             size: 12
                         },
+                        color: '#4e79a7',
                         callback: function(value) {
                             return '¥' + value.toLocaleString();
                         }
                     },
                     grid: {
                         color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: '客数（人）',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        color: '#f59e0b'
+                    },
+                    ticks: {
+                        font: {
+                            size: 12
+                        },
+                        color: '#f28e2b',
+                        callback: function(value) {
+                            return value + '人';
+                        }
+                    },
+                    grid: {
+                        drawOnChartArea: false
                     }
                 },
                 x: {
