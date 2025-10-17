@@ -532,21 +532,54 @@ function showYearAnalysis() {
     setTimeout(() => {
         const chartArea = document.getElementById('analysis-results');
         if (chartArea && window.yearMonthStatsData) {
-            // Canvas要素を動的に作成
-            let chartCanvas = document.getElementById('year-chart');
-            if (!chartCanvas) {
-                const canvasContainer = document.createElement('div');
-                canvasContainer.style.cssText = `
+            // 月次推移グラフ
+            let monthChartCanvas = document.getElementById('year-month-chart');
+            if (!monthChartCanvas) {
+                const monthCanvasContainer = document.createElement('div');
+                monthCanvasContainer.style.cssText = `
                     margin: 20px 0;
                     text-align: center;
                     height: 400px;
                     position: relative;
                 `;
-                canvasContainer.innerHTML = '<canvas id="year-chart"></canvas>';
-                chartArea.appendChild(canvasContainer);
+                monthCanvasContainer.innerHTML = '<canvas id="year-month-chart"></canvas>';
+                chartArea.appendChild(monthCanvasContainer);
             }
-            // 年月別データを渡してグラフを描画
-            drawYearMonthChart(window.yearMonthStatsData, 'year-chart');
+            drawYearMonthChart(window.yearMonthStatsData, 'year-month-chart');
+            
+            // 曜日別グラフ
+            if (window.yearWeekdayStatsData) {
+                let weekdayChartCanvas = document.getElementById('year-weekday-chart');
+                if (!weekdayChartCanvas) {
+                    const weekdayCanvasContainer = document.createElement('div');
+                    weekdayCanvasContainer.style.cssText = `
+                        margin: 20px 0;
+                        text-align: center;
+                        height: 400px;
+                        position: relative;
+                    `;
+                    weekdayCanvasContainer.innerHTML = '<canvas id="year-weekday-chart"></canvas>';
+                    chartArea.appendChild(weekdayCanvasContainer);
+                }
+                drawYearWeekdayChart(window.yearWeekdayStatsData, 'year-weekday-chart');
+            }
+            
+            // 日別グラフ
+            if (window.yearDailyData) {
+                let dailyChartCanvas = document.getElementById('year-daily-chart');
+                if (!dailyChartCanvas) {
+                    const dailyCanvasContainer = document.createElement('div');
+                    dailyCanvasContainer.style.cssText = `
+                        margin: 20px 0;
+                        text-align: center;
+                        height: 400px;
+                        position: relative;
+                    `;
+                    dailyCanvasContainer.innerHTML = '<canvas id="year-daily-chart"></canvas>';
+                    chartArea.appendChild(dailyCanvasContainer);
+                }
+                drawYearDailyChart(window.yearDailyData, 'year-daily-chart');
+            }
         }
     }, 100);
 }
@@ -807,8 +840,10 @@ function renderYearAnalysis(data) {
         resultsArea.innerHTML = html;
     }
     
-    // 年月別データをグローバルに保存（グラフ描画用）
+    // 年月別データと曜日別データをグローバルに保存（グラフ描画用）
     window.yearMonthStatsData = yearMonthStats;
+    window.yearWeekdayStatsData = yearWeekdayStats;
+    window.yearDailyData = data; // 日別グラフ用に全データを保存
 }
 
 /**
