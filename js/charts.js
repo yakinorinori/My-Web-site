@@ -158,8 +158,7 @@ function drawMonthlyChart() {
                                 display: true,
                                 position: 'right',
                                 beginAtZero: true,
-                                // 客数の最大値に余裕を持たせる（1.2倍）
-                                max: Math.ceil(Math.max(...customersArr) * 1.2),
+                                max: Math.ceil(Math.max(...customersArr) * 1.2), // 客数最大値の1.2倍
                                 title: {
                                     display: true,
                                     text: '客数（人）',
@@ -179,7 +178,7 @@ function drawMonthlyChart() {
                                     }
                                 },
                                 grid: {
-                                    drawOnChartArea: false // 右軸のグリッド線は非表示
+                                    drawOnChartArea: false
                                 }
                             },
                             x: {
@@ -537,7 +536,7 @@ function drawComboChart(data, canvasId = 'comboChart') {
                         }
                     },
                     grid: {
-                        drawOnChartArea: false // 右軸のグリッド線は非表示
+                        drawOnChartArea: false
                     }
                 }
             }
