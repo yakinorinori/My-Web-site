@@ -28,14 +28,25 @@ function drawMonthlyChart() {
                 const monthMap = {};
                 for (let i = 1; i < lines.length; i++) {
                     const cols = lines[i].split(',');
-                    const date = cols[0];
-                    const customer = parseInt(cols[2], 10) || 0;
+                    if (!cols[0] || cols[0].trim() === '') continue; // 空行をスキップ
+                    
+                    const date = cols[0].trim();
+                    const payer = cols[1] ? cols[1].trim() : '';
+                    const customer = parseInt(cols[2], 10); // NaNの場合は0として扱う
                     const sales = parseInt(cols[3], 10) || 0;
-                    const month = date.split('/')[1];
-                    if (!monthMap[month]) monthMap[month] = { sales: 0, customers: 0, groups: 0 };
+                    
+                    // 月を取得（YYYY/MM形式から）
+                    const monthMatch = date.match(/(\d+)\/(\d+)/);
+                    if (!monthMatch) continue;
+                    const month = monthMatch[2]; // MM
+                    
+                    if (!monthMap[month]) {
+                        monthMap[month] = { sales: 0, customers: 0, groups: 0 };
+                    }
+                    
                     monthMap[month].sales += sales;
-                    monthMap[month].customers += customer;
-                    monthMap[month].groups += 1;
+                    monthMap[month].customers += (isNaN(customer) ? 0 : customer); // 客数0も正しく加算
+                    monthMap[month].groups += 1; // 伝票数
                 }
                 const months = Object.keys(monthMap).sort((a,b)=>a-b).map(m => m+'月');
                 const salesArr = Object.values(monthMap).map(m => m.sales);
@@ -388,15 +399,16 @@ function drawComboChart(data, canvasId = 'comboChart') {
     const monthStats = {};
     data.forEach(row => {
         if (!row || !row['日付']) return;
-        const month = row['日付'].slice(0, 7);
+        const month = row['日付'].slice(0, 7); // YYYY/MM
         const sales = Number(row['売り上げ']) || 0;
-        const customers = Number(row['客数']) || 0;
+        const customers = Number(row['客数']); // 0も正しく扱う（NaNの場合のみ0）
         
         if (!monthStats[month]) {
             monthStats[month] = { sales: 0, customers: 0 };
         }
         monthStats[month].sales += sales;
-        monthStats[month].customers += customers;
+        // 客数はNaNでなければそのまま加算（0も含む）
+        monthStats[month].customers += (isNaN(customers) ? 0 : customers);
     });
     
     const labels = Object.keys(monthStats).sort();

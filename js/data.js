@@ -199,14 +199,16 @@ function getMonthlyStats(data) {
  * 曜日別統計を取得
  */
 function getWeekdayStats(data) {
-    const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+    // グラフ表示と同じ順序: 月〜日
+    const weekdayOrder = ['月', '火', '水', '木', '金', '土', '日'];
+    const weekdayMap = ['日', '月', '火', '水', '木', '金', '土']; // getDay()の戻り値用
     const stats = {};
-    weekdays.forEach(day => stats[day] = 0);
+    weekdayOrder.forEach(day => stats[day] = 0);
     
     data.forEach(row => {
         if (!row || !row['日付']) return;
         const date = new Date(row['日付']);
-        const weekday = weekdays[date.getDay()];
+        const weekday = weekdayMap[date.getDay()];
         const sales = Number(row['売り上げ']) || 0;
         stats[weekday] += sales;
     });
