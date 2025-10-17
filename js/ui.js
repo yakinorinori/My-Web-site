@@ -501,25 +501,6 @@ function showMonthAnalysis() {
     renderMonthAnalysis(monthData, selectedMonth);
     renderMonthPersonAnalysis(data);
     renderMonthWeekdayAnalysis(data, selectedMonth);
-    
-    // チャートを描画（Canvas要素が存在することを確認）
-    const chartArea = document.getElementById('analysis-results');
-    if (chartArea) {
-        // Canvas要素を動的に作成
-        let chartCanvas = document.getElementById('monthly-line-chart');
-        if (!chartCanvas) {
-            const canvasContainer = document.createElement('div');
-            canvasContainer.style.cssText = `
-                margin: 20px 0;
-                text-align: center;
-                height: 400px;
-                position: relative;
-            `;
-            canvasContainer.innerHTML = '<canvas id="monthly-line-chart"></canvas>';
-            chartArea.appendChild(canvasContainer);
-        }
-        drawMonthlySalesChart(monthData, 'monthly-line-chart');
-    }
 }
 
 /**
@@ -547,11 +528,24 @@ function showYearAnalysis() {
     
     renderYearAnalysis(data);
     
-    // 年次分析用のチャートを表示（Canvas要素の存在を確認）
+    // 年次分析用のチャートを描画
     setTimeout(() => {
         const chartArea = document.getElementById('analysis-results');
-        if (chartArea && chartArea.innerHTML.includes('年間分析')) {
-            drawMonthlyChart();
+        if (chartArea) {
+            // Canvas要素を動的に作成
+            let chartCanvas = document.getElementById('year-chart');
+            if (!chartCanvas) {
+                const canvasContainer = document.createElement('div');
+                canvasContainer.style.cssText = `
+                    margin: 20px 0;
+                    text-align: center;
+                    height: 400px;
+                    position: relative;
+                `;
+                canvasContainer.innerHTML = '<canvas id="year-chart"></canvas>';
+                chartArea.appendChild(canvasContainer);
+            }
+            drawYearChart(data, 'year-chart');
         }
     }, 100);
 }

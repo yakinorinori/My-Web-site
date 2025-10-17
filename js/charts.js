@@ -579,3 +579,191 @@ const chartDefaults = {
         }
     }
 };
+
+/**
+ * 年別チャートを描画（売上と客数の二軸グラフ）
+ */
+function drawYearChart(data, canvasId = 'year-chart') {
+    console.log('📊 年別チャート描画開始:', data.length, '件');
+    
+    // 年別のデータを集計
+    const yearStats = {};
+    
+    data.forEach(row => {
+        if (!row || !row['日付']) return;
+        const year = row['日付'].slice(0, 4); // YYYY
+        const sales = Number(row['売り上げ']) || 0;
+        const customers = Number(row['客数']) || 0;
+        
+        if (!yearStats[year]) {
+            yearStats[year] = { sales: 0, customers: 0 };
+        }
+        
+        yearStats[year].sales += sales;
+        yearStats[year].customers += customers;
+    });
+    
+    // 年を昇順にソート
+    const years = Object.keys(yearStats).sort();
+    const salesData = years.map(year => yearStats[year].sales);
+    const customersData = years.map(year => yearStats[year].customers);
+    
+    console.log('📊 年別データ:', { years, salesData, customersData });
+    
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) {
+        console.error(`❌ Canvas要素 '${canvasId}' が見つかりません`);
+        return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    
+    // 既存チャートを破棄
+    if (chartInstances[canvasId]) {
+        chartInstances[canvasId].destroy();
+    }
+    
+    // 客数の最大値を計算（余白を持たせる）
+    const maxCustomers = Math.max(...customersData);
+    const customersMax = Math.ceil(maxCustomers * 1.2);
+    
+    chartInstances[canvasId] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: years.map(y => y + '年'),
+            datasets: [
+                {
+                    type: 'bar',
+                    label: '売上',
+                    data: salesData,
+                    backgroundColor: 'rgba(14, 165, 233, 0.6)',
+                    borderColor: '#0ea5e9',
+                    borderWidth: 2,
+                    yAxisID: 'y'
+                },
+                {
+                    type: 'line',
+                    label: '客数',
+                    data: customersData,
+                    borderColor: '#f59e0b',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    borderWidth: 3,
+                    fill: false,
+                    tension: 0.3,
+                    yAxisID: 'y1',
+                    pointRadius: 5,
+                    pointBackgroundColor: '#f59e0b'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: '年別 売上・客数推移',
+                    font: {
+                        size: 18,
+                        weight: 'bold'
+                    }
+                },
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 14
+                        },
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.dataset.yAxisID === 'y') {
+                                label += '¥' + context.parsed.y.toLocaleString();
+                            } else {
+                                label += context.parsed.y.toLocaleString() + '人';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: '売上（円）',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        color: '#0ea5e9'
+                    },
+                    ticks: {
+                        font: {
+                            size: 12
+                        },
+                        color: '#4e79a7',
+                        callback: function(value) {
+                            return '¥' + value.toLocaleString();
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: '客数（人）',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        color: '#f59e0b'
+                    },
+                    max: customersMax,
+                    ticks: {
+                        font: {
+                            size: 12
+                        },
+                        color: '#f28e2b',
+                        callback: function(value) {
+                            return value + '人';
+                        }
+                    },
+                    grid: {
+                        drawOnChartArea: false
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 12
+                        }
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+    
+    console.log('✅ 年別チャート描画完了');
+}
