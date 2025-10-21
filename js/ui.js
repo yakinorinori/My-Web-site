@@ -27,17 +27,6 @@ function createMainApp() {
     
     // メインコンテンツ作成
     createMainContent(root);
-    
-    // ログアウト関数をグローバルに追加（auth.jsの関数を参照）
-    window.logout = function() {
-        if (typeof logout === 'function') {
-            logout();
-        } else {
-            console.error('❌ logout関数が見つかりません');
-            // フォールバック：シンプルなページリロード
-            window.location.reload();
-        }
-    };
 }
 
 /**
