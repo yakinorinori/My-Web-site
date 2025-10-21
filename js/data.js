@@ -129,25 +129,40 @@ function updateDataInfo(data) {
  */
 function setupMonthSelector(data) {
     const monthSelect = document.getElementById('month-select');
-    if (monthSelect) {
-        const months = Array.from(new Set(
-            data.filter(row => row && row['日付']).map(row => row['日付'].slice(0,7))
-        )).sort();
-        monthSelect.innerHTML = '';
-        months.forEach(m => {
-            const opt = document.createElement('option');
-            opt.value = m;
-            opt.textContent = m;
-            monthSelect.appendChild(opt);
-        });
-        // デフォルトは最新月
-        if (months.length > 0) monthSelect.value = months[months.length-1];
-        
-        // プルダウン変更時のイベント
-        monthSelect.onchange = () => {
-            showMonthAnalysis();
-        };
+    if (!monthSelect) {
+        console.warn('⚠️ month-select要素が見つかりません');
+        return;
     }
+    
+    // データから月を取得してソート
+    const months = Array.from(new Set(
+        data.filter(row => row && row['日付']).map(row => row['日付'].slice(0,7))
+    )).sort();
+    
+    console.log('📅 利用可能な月:', months);
+    
+    // セレクトボックスを初期化
+    monthSelect.innerHTML = '';
+    
+    // 月のオプションを追加
+    months.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        monthSelect.appendChild(opt);
+    });
+    
+    // デフォルトは最新月を選択
+    if (months.length > 0) {
+        monthSelect.value = months[months.length - 1];
+        console.log('📅 デフォルト月を選択:', monthSelect.value);
+    }
+    
+    // プルダウン変更時のイベント
+    monthSelect.onchange = () => {
+        console.log('📅 月が変更されました:', monthSelect.value);
+        showMonthAnalysis();
+    };
 }
 
 /**

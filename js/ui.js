@@ -488,8 +488,8 @@ function showMonthAnalysis() {
     
     // 分析結果を表示
     renderMonthAnalysis(monthData, selectedMonth);
-    renderMonthPersonAnalysis(data);
-    renderMonthWeekdayAnalysis(data, selectedMonth);
+    renderMonthPersonAnalysis(monthData, selectedMonth);
+    renderMonthWeekdayAnalysis(monthData, selectedMonth);
 }
 
 /**
@@ -945,17 +945,18 @@ function renderMonthAnalysis(data, selectedMonth) {
 /**
  * 月ごとの支払い者別分析を表示
  */
-function renderMonthPersonAnalysis(data) {
-    const monthPersonStats = {};
+function renderMonthPersonAnalysis(data, selectedMonth) {
+    const personStats = {};
+    
+    // 選択された月のデータのみを集計
     data.forEach(row => {
         if (!row || !row['日付']) return;
-        const month = row['日付'].slice(0,7); // YYYY/MM
         const person = row['支払い者'];
         if (person === '不明') return; // 除外
         const sales = Number(row['売り上げ']) || 0;
-        if (!monthPersonStats[month]) monthPersonStats[month] = {};
-        if (!monthPersonStats[month][person]) monthPersonStats[month][person] = 0;
-        monthPersonStats[month][person] += sales;
+        
+        if (!personStats[person]) personStats[person] = 0;
+        personStats[person] += sales;
     });
     
     let html = `
@@ -976,52 +977,49 @@ function renderMonthPersonAnalysis(data) {
                 align-items: center;
             ">
                 <span style="margin-right: 12px;">👥</span>
-                月ごとの支払い者別合計金額（上位10名・不明除外）
+                支払い者別合計金額（上位10名・不明除外）
             </h2>
+            <div style="margin-bottom: 12px; color: #64748b; font-size: 14px;">
+                対象月: <strong style="color: #0ea5e9;">${selectedMonth}</strong>
+            </div>
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                    <thead>
+                        <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                            <th style="padding: 10px; text-align: left; font-weight: 600; color: #1e293b;">順位</th>
+                            <th style="padding: 10px; text-align: left; font-weight: 600; color: #1e293b;">支払い者</th>
+                            <th style="padding: 10px; text-align: right; font-weight: 600; color: #1e293b;">合計金額</th>
+                        </tr>
+                    </thead>
+                    <tbody>
     `;
     
-    Object.keys(monthPersonStats).sort().forEach(month => {
-        html += `
-            <div style="margin-bottom: 24px;">
-                <h3 style="color: #1e293b; font-size: 16px; margin: 0 0 12px 0;">${month}</h3>
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                        <thead>
-                            <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-                                <th style="padding: 10px; text-align: left; font-weight: 600; color: #1e293b;">支払い者</th>
-                                <th style="padding: 10px; text-align: right; font-weight: 600; color: #1e293b;">合計金額</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-        `;
+    // 金額順に並べて上位10名のみ
+    const sortedPersons = Object.entries(personStats)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 10);
         
-        // 金額順に並べて上位10名のみ
-        const sortedPersons = Object.entries(monthPersonStats[month])
-            .sort(([,a], [,b]) => b - a)
-            .slice(0, 10);
-            
-        sortedPersons.forEach(([person, total], index) => {
-            const isEven = index % 2 === 0;
-            html += `
-                <tr style="
-                    background: ${isEven ? '#f8fafc' : 'white'};
-                    border-bottom: 1px solid #f1f5f9;
-                ">
-                    <td style="padding: 10px; font-weight: 500; color: #1e293b;">${person}</td>
-                    <td style="padding: 10px; text-align: right; font-weight: 600; color: #0ea5e9;">¥${total.toLocaleString()}</td>
-                </tr>
-            `;
-        });
-        
+    sortedPersons.forEach(([person, total], index) => {
+        const isEven = index % 2 === 0;
+        const rank = index + 1;
         html += `
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <tr style="
+                background: ${isEven ? '#f8fafc' : 'white'};
+                border-bottom: 1px solid #f1f5f9;
+            ">
+                <td style="padding: 10px; font-weight: 600; color: #64748b;">${rank}</td>
+                <td style="padding: 10px; font-weight: 500; color: #1e293b;">${person}</td>
+                <td style="padding: 10px; text-align: right; font-weight: 600; color: #0ea5e9;">¥${total.toLocaleString()}</td>
+            </tr>
         `;
     });
     
-    html += '</div>';
+    html += `
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
     
     // 既存の結果に追加
     const resultsArea = document.getElementById('analysis-results');
@@ -1035,12 +1033,11 @@ function renderMonthPersonAnalysis(data) {
  */
 function renderMonthWeekdayAnalysis(data, selectedMonth) {
     const weekdays = ['日','月','火','水','木','金','土'];
-    const monthData = data.filter(row => row && row['日付'] && row['日付'].startsWith(selectedMonth));
     const weekdayStats = {};
     
     weekdays.forEach(wd => weekdayStats[wd] = { sales: 0, customers: 0, count: 0 });
     
-    monthData.forEach(row => {
+    data.forEach(row => {
         const date = row['日付'];
         const d = new Date(date.replace(/\//g,'-'));
         const wd = weekdays[d.getDay()];
