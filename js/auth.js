@@ -109,7 +109,7 @@ function showGitHubPagesLogin() {
                                            box-sizing: border-box;
                                            color: #1e293b;
                                        "
-                                       placeholder="kiradan"
+                                       placeholder="demo"
                                        onfocus="this.style.borderColor='#0ea5e9'; this.style.background='white'; this.style.boxShadow='0 0 0 3px rgba(14, 165, 233, 0.1)'"
                                        onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc'; this.style.boxShadow='none'">
                                 <div style="
@@ -223,7 +223,7 @@ function showGitHubPagesLogin() {
                             line-height: 1.5;
                             font-family: 'SF Mono', Monaco, monospace;
                         ">
-                            <div>👨‍💼 <strong>kiradan</strong> / kiradan2024!</div>
+                            <div>👨‍💼 <strong>demo</strong> / demo2024</div>
                         </div>
                     </div>
                 </div>
@@ -247,8 +247,8 @@ async function handleGitHubPagesLogin(event) {
     
     console.log('🔑 GitHub Pagesログイン試行:', username);
     
-    // 簡易認証（GitHub Pages用）
-    if (username === 'kiradan' && password === 'kiradan2024!') {
+    // 簡易認証（GitHub Pages用）- デモアカウント
+    if (username === 'demo' && password === 'demo2024') {
         console.log('✅ GitHub Pagesログイン成功');
         
         // ローカルストレージに認証状態を保存
