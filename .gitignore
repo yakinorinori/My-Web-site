@@ -68,3 +68,8 @@ tmp/
 logs/
 *.pid
 *.sock
+
+# 企業には見られたくないドキュメント
+TECHNICAL_SPECIFICATION.md
+PRESENTATION.md
+

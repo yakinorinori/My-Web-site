@@ -191,8 +191,8 @@ function createMobileSalesReportScreen() {
                                 padding: 8px 12px;
                                 margin-bottom: 8px;
                                 font-size: 12px;
-                                color: #2196F3;
-                                border-left: 3px solid #2196F3;
+                                color: white;
+                                border-left: 3px solid white;
                             ">
                                 💡 現金支払いか、カード・QR決済かを選択してください
                             </div>
@@ -1214,8 +1214,8 @@ function showReportSummary() {
                     padding: 16px;
                     margin-bottom: 24px;
                     font-size: 14px;
-                    color: #2196F3;
-                    border-left: 4px solid #2196F3;
+                    color: white;
+                    border-left: 4px solid white;
                 ">
                     📊 <strong>スプレッドシートに自動送信</strong><br>
                     売上データが設定されたシートに記録されました
