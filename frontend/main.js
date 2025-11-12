@@ -471,13 +471,23 @@ function createMainApp() {
     const btnMonth = document.createElement('button');
     btnMonth.id = 'btn-month';
     btnMonth.textContent = '月ごとの分析';
-    const btnYearComparison = document.createElement('button');
-    btnYearComparison.id = 'btn-year-comparison';
-    btnYearComparison.textContent = '📈 前年度比較';
-    btnYearComparison.style.cssText = 'background-color: #ff9800; color: white; margin-left: 10px;';
+    const btnAnnualTrend = document.createElement('button');
+    btnAnnualTrend.id = 'btn-annual-trend';
+    btnAnnualTrend.textContent = '📈 年間推移';
+    btnAnnualTrend.style.cssText = 'background-color: #17a2b8; color: white; margin-left: 10px;';
+    const btnMultiYearSales = document.createElement('button');
+    btnMultiYearSales.id = 'btn-multi-sales';
+    btnMultiYearSales.textContent = '💰 複数年売上比較';
+    btnMultiYearSales.style.cssText = 'background-color: #ff9800; color: white; margin-left: 5px;';
+    const btnMultiYearCustomers = document.createElement('button');
+    btnMultiYearCustomers.id = 'btn-multi-customers';
+    btnMultiYearCustomers.textContent = '� 複数年客数比較';
+    btnMultiYearCustomers.style.cssText = 'background-color: #28a745; color: white; margin-left: 5px;';
     btnDiv.appendChild(btnYear);
     btnDiv.appendChild(btnMonth);
-    btnDiv.appendChild(btnYearComparison);
+    btnDiv.appendChild(btnAnnualTrend);
+    btnDiv.appendChild(btnMultiYearSales);
+    btnDiv.appendChild(btnMultiYearCustomers);
     root.appendChild(btnDiv);
 
     // プルダウン（select）追加
@@ -505,10 +515,18 @@ function createMainApp() {
     const divWeekday = document.createElement('div');
     divWeekday.id = 'analysis-weekday';
     root.appendChild(divWeekday);
-    const divYearComparison = document.createElement('div');
-    divYearComparison.id = 'analysis-year-comparison';
-    divYearComparison.style.display = 'none';
-    root.appendChild(divYearComparison);
+    const divAnnualTrend = document.createElement('div');
+    divAnnualTrend.id = 'analysis-annual-trend';
+    divAnnualTrend.style.display = 'none';
+    root.appendChild(divAnnualTrend);
+    const divMultiSales = document.createElement('div');
+    divMultiSales.id = 'analysis-multi-sales';
+    divMultiSales.style.display = 'none';
+    root.appendChild(divMultiSales);
+    const divMultiCustomers = document.createElement('div');
+    divMultiCustomers.id = 'analysis-multi-customers';
+    divMultiCustomers.style.display = 'none';
+    root.appendChild(divMultiCustomers);
     const divTable = document.createElement('div');
     divTable.id = 'sales-table';
     root.appendChild(divTable);
@@ -591,11 +609,27 @@ function createMainApp() {
                 showMonthAnalysis();
                 monthSelectDiv.style.display = '';
             };
-            // 前年度比較ボタン
-            const btnYearComparison = document.getElementById('btn-year-comparison');
-            if (btnYearComparison) {
-                btnYearComparison.onclick = () => {
-                    showYearComparisonAnalysis();
+            // 年間推移ボタン
+            const btnAnnualTrend = document.getElementById('btn-annual-trend');
+            if (btnAnnualTrend) {
+                btnAnnualTrend.onclick = () => {
+                    showAnnualTrendAnalysis();
+                    monthSelectDiv.style.display = 'none';
+                };
+            }
+            // 複数年売上比較ボタン
+            const btnMultiSales = document.getElementById('btn-multi-sales');
+            if (btnMultiSales) {
+                btnMultiSales.onclick = () => {
+                    showMultiYearSalesAnalysis();
+                    monthSelectDiv.style.display = 'none';
+                };
+            }
+            // 複数年客数比較ボタン
+            const btnMultiCustomers = document.getElementById('btn-multi-customers');
+            if (btnMultiCustomers) {
+                btnMultiCustomers.onclick = () => {
+                    showMultiYearCustomersAnalysis();
                     monthSelectDiv.style.display = 'none';
                 };
             }
@@ -644,9 +678,47 @@ function showYearAnalysis() {
     document.getElementById('analysis-month').style.display = 'none';
     document.getElementById('analysis-weekday').style.display = 'none';
     document.getElementById('sales-table').style.display = 'none';
-    document.getElementById('analysis-year-comparison').style.display = 'none';
+    document.getElementById('analysis-annual-trend').style.display = 'none';
+    document.getElementById('analysis-multi-sales').style.display = 'none';
+    document.getElementById('analysis-multi-customers').style.display = 'none';
     document.getElementById('month-select-div').style.display = 'none';
     renderYearAnalysis(globalData);
+}
+
+function showAnnualTrendAnalysis() {
+    document.getElementById('analysis-year').style.display = 'none';
+    document.getElementById('analysis-month').style.display = 'none';
+    document.getElementById('analysis-weekday').style.display = 'none';
+    document.getElementById('sales-table').style.display = 'none';
+    document.getElementById('analysis-annual-trend').style.display = '';
+    document.getElementById('analysis-multi-sales').style.display = 'none';
+    document.getElementById('analysis-multi-customers').style.display = 'none';
+    document.getElementById('month-select-div').style.display = 'none';
+    renderAnnualTrendAnalysis(globalData);
+}
+
+function showMultiYearSalesAnalysis() {
+    document.getElementById('analysis-year').style.display = 'none';
+    document.getElementById('analysis-month').style.display = 'none';
+    document.getElementById('analysis-weekday').style.display = 'none';
+    document.getElementById('sales-table').style.display = 'none';
+    document.getElementById('analysis-annual-trend').style.display = 'none';
+    document.getElementById('analysis-multi-sales').style.display = '';
+    document.getElementById('analysis-multi-customers').style.display = 'none';
+    document.getElementById('month-select-div').style.display = 'none';
+    renderMultiYearSalesAnalysis(globalData);
+}
+
+function showMultiYearCustomersAnalysis() {
+    document.getElementById('analysis-year').style.display = 'none';
+    document.getElementById('analysis-month').style.display = 'none';
+    document.getElementById('analysis-weekday').style.display = 'none';
+    document.getElementById('sales-table').style.display = 'none';
+    document.getElementById('analysis-annual-trend').style.display = 'none';
+    document.getElementById('analysis-multi-sales').style.display = 'none';
+    document.getElementById('analysis-multi-customers').style.display = '';
+    document.getElementById('month-select-div').style.display = 'none';
+    renderMultiYearCustomersAnalysis(globalData);
 }
 
 function showYearComparisonAnalysis() {
@@ -654,7 +726,9 @@ function showYearComparisonAnalysis() {
     document.getElementById('analysis-month').style.display = 'none';
     document.getElementById('analysis-weekday').style.display = 'none';
     document.getElementById('sales-table').style.display = 'none';
-    document.getElementById('analysis-year-comparison').style.display = '';
+    document.getElementById('analysis-annual-trend').style.display = 'none';
+    document.getElementById('analysis-multi-sales').style.display = 'none';
+    document.getElementById('analysis-multi-customers').style.display = 'none';
     document.getElementById('month-select-div').style.display = 'none';
     renderYearComparisonAnalysis(globalData);
 }
@@ -1618,6 +1692,305 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('📊 自動レポート機能を初期化中...');
     setupAutomaticReports();
 });
+}
+
+// 1. 年間推移分析関数（直近1年の日単位推移）
+function renderAnnualTrendAnalysis(data) {
+    if (!data || data.length === 0) {
+        document.getElementById('analysis-annual-trend').innerHTML = '<p>データがありません</p>';
+        return;
+    }
+
+    // 直近1年のデータを抽出
+    const today = new Date();
+    const oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+    const recentData = data.filter(row => {
+        const d = new Date(row['日付'].replace(/\//g, '-'));
+        return d >= oneYearAgo;
+    });
+
+    // 日付別集計
+    const dateStats = {};
+    recentData.forEach(row => {
+        const date = row['日付'];
+        if (!dateStats[date]) {
+            dateStats[date] = { sales: 0, customers: 0 };
+        }
+        dateStats[date].sales += Number(row['売り上げ']) || 0;
+        dateStats[date].customers += Number(row['客数']) || 0;
+    });
+
+    const sortedDates = Object.keys(dateStats).sort();
+    const salesByDate = sortedDates.map(d => dateStats[d].sales);
+    const customersByDate = sortedDates.map(d => dateStats[d].customers);
+
+    // HTML構築
+    let html = '<h2>📅 年間推移グラフ（直近1年）</h2>';
+    html += '<div style="background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 8px; font-size: 14px; color: #666;">';
+    html += `<p>直近1年間（${sortedDates[0]}～${sortedDates[sortedDates.length-1]}）の日単位での売上と客数の推移を表示します</p>`;
+    html += '</div>';
+
+    // レスポンシブコンテナ
+    html += '<div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">';
+    html += '<div style="flex: 1; min-width: 100%; max-width: 1200px;">';
+    html += '<h3>💰 売上推移</h3>';
+    html += '<canvas id="annualSalesChart" width="1000" height="300"></canvas>';
+    html += '</div>';
+    html += '<div style="flex: 1; min-width: 100%; max-width: 1200px;">';
+    html += '<h3>👥 客数推移</h3>';
+    html += '<canvas id="annualCustomersChart" width="1000" height="300"></canvas>';
+    html += '</div>';
+    html += '</div>';
+
+    document.getElementById('analysis-annual-trend').innerHTML = html;
+
+    // グラフ描画
+    setTimeout(() => {
+        // 売上グラフ
+        const ctxSales = document.getElementById('annualSalesChart')?.getContext('2d');
+        if (ctxSales) {
+            new Chart(ctxSales, {
+                type: 'line',
+                data: {
+                    labels: sortedDates,
+                    datasets: [{
+                        label: '売上',
+                        data: salesByDate,
+                        borderColor: '#2ecc71',
+                        backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#27ae60',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { font: { size: 12 } } }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: v => '¥' + v.toLocaleString() }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 客数グラフ
+        const ctxCustomers = document.getElementById('annualCustomersChart')?.getContext('2d');
+        if (ctxCustomers) {
+            new Chart(ctxCustomers, {
+                type: 'line',
+                data: {
+                    labels: sortedDates,
+                    datasets: [{
+                        label: '客数',
+                        data: customersByDate,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#2980b9',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { font: { size: 12 } } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+    }, 100);
+}
+
+// 2. 複数年売上比較分析関数
+function renderMultiYearSalesAnalysis(data) {
+    if (!data || data.length === 0) {
+        document.getElementById('analysis-multi-sales').innerHTML = '<p>データがありません</p>';
+        return;
+    }
+
+    // 年ごと・月ごとの売上集計
+    const yearMonthStats = {};
+    data.forEach(row => {
+        const year = row['日付'].slice(0, 4);
+        const month = row['日付'].slice(5, 7);
+        const sales = Number(row['売り上げ']) || 0;
+
+        if (!yearMonthStats[year]) yearMonthStats[year] = {};
+        if (!yearMonthStats[year][month]) yearMonthStats[year][month] = 0;
+        yearMonthStats[year][month] += sales;
+    });
+
+    const years = Object.keys(yearMonthStats).sort();
+    const months = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+    const colors = [
+        { border: '#1f77b4', bg: 'rgba(31, 119, 180, 0.1)' },
+        { border: '#ff7f0e', bg: 'rgba(255, 127, 14, 0.1)' },
+        { border: '#d62728', bg: 'rgba(214, 39, 40, 0.1)' }
+    ];
+
+    const datasets = years.map((year, idx) => {
+        const yearData = yearMonthStats[year];
+        const salesByMonth = months.map(m => yearData[m] || 0);
+        const color = colors[idx % colors.length];
+
+        return {
+            label: `${year}年`,
+            data: salesByMonth,
+            borderColor: color.border,
+            backgroundColor: color.bg,
+            borderWidth: 3,
+            pointRadius: 5,
+            pointBackgroundColor: color.border,
+            tension: 0.3,
+            fill: false
+        };
+    });
+
+    // HTML構築
+    let html = '<h2>💰 複数年売上比較</h2>';
+    html += '<div style="background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 8px; font-size: 14px; color: #666;">';
+    html += '<p>複数年の月別売上を比較します</p>';
+    html += '</div>';
+    html += '<div style="display: flex; justify-content: center;">';
+    html += '<div style="width: 100%; max-width: 1200px;">';
+    html += '<canvas id="multiYearSalesChart" width="1000" height="400"></canvas>';
+    html += '</div>';
+    html += '</div>';
+
+    document.getElementById('analysis-multi-sales').innerHTML = html;
+
+    // グラフ描画
+    setTimeout(() => {
+        const ctx = document.getElementById('multiYearSalesChart')?.getContext('2d');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months.map(m => `${m}月`),
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { font: { size: 14, weight: 'bold' } }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: v => '¥' + v.toLocaleString() }
+                        }
+                    }
+                }
+            });
+        }
+    }, 100);
+}
+
+// 3. 複数年客数比較分析関数
+function renderMultiYearCustomersAnalysis(data) {
+    if (!data || data.length === 0) {
+        document.getElementById('analysis-multi-customers').innerHTML = '<p>データがありません</p>';
+        return;
+    }
+
+    // 年ごと・月ごとの客数集計
+    const yearMonthStats = {};
+    data.forEach(row => {
+        const year = row['日付'].slice(0, 4);
+        const month = row['日付'].slice(5, 7);
+        const customers = Number(row['客数']) || 0;
+
+        if (!yearMonthStats[year]) yearMonthStats[year] = {};
+        if (!yearMonthStats[year][month]) yearMonthStats[year][month] = 0;
+        yearMonthStats[year][month] += customers;
+    });
+
+    const years = Object.keys(yearMonthStats).sort();
+    const months = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+    const colors = [
+        { border: '#2ca02c', bg: 'rgba(44, 160, 44, 0.1)' },
+        { border: '#9467bd', bg: 'rgba(148, 103, 189, 0.1)' },
+        { border: '#e377c2', bg: 'rgba(227, 119, 194, 0.1)' }
+    ];
+
+    const datasets = years.map((year, idx) => {
+        const yearData = yearMonthStats[year];
+        const customersByMonth = months.map(m => yearData[m] || 0);
+        const color = colors[idx % colors.length];
+
+        return {
+            label: `${year}年`,
+            data: customersByMonth,
+            borderColor: color.border,
+            backgroundColor: color.bg,
+            borderWidth: 3,
+            pointRadius: 5,
+            pointBackgroundColor: color.border,
+            tension: 0.3,
+            fill: false
+        };
+    });
+
+    // HTML構築
+    let html = '<h2>👥 複数年客数比較</h2>';
+    html += '<div style="background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 8px; font-size: 14px; color: #666;">';
+    html += '<p>複数年の月別客数を比較します</p>';
+    html += '</div>';
+    html += '<div style="display: flex; justify-content: center;">';
+    html += '<div style="width: 100%; max-width: 1200px;">';
+    html += '<canvas id="multiYearCustomersChart" width="1000" height="400"></canvas>';
+    html += '</div>';
+    html += '</div>';
+
+    document.getElementById('analysis-multi-customers').innerHTML = html;
+
+    // グラフ描画
+    setTimeout(() => {
+        const ctx = document.getElementById('multiYearCustomersChart')?.getContext('2d');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months.map(m => `${m}月`),
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { font: { size: 14, weight: 'bold' } }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: v => v + '人' }
+                        }
+                    }
+                }
+            });
+        }
+    }, 100);
 }
 
 // 前年度比較分析関数
