@@ -1731,34 +1731,47 @@ function renderAnnualTrendAnalysis(data) {
         return;
     }
 
-    // 直近1年のデータを抽出
-    const today = new Date();
-    const oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
-    const recentData = data.filter(row => {
-        const d = new Date(row['日付'].replace(/\//g, '-'));
-        return d >= oneYearAgo;
-    });
+    console.log('📅 年間推移分析開始:', data.length, '行');
 
-    // 日付別集計
+    // 日付別集計（全データを使用）
     const dateStats = {};
-    recentData.forEach(row => {
+    let totalSales = 0;
+    let totalCustomers = 0;
+    
+    data.forEach(row => {
         const date = row['日付'];
+        const sales = Number(row['売り上げ']) || 0;
+        const customers = Number(row['客数']) || 0;
+        
+        totalSales += sales;
+        totalCustomers += customers;
+        
         if (!dateStats[date]) {
             dateStats[date] = { sales: 0, customers: 0 };
         }
-        dateStats[date].sales += Number(row['売り上げ']) || 0;
-        dateStats[date].customers += Number(row['客数']) || 0;
+        dateStats[date].sales += sales;
+        dateStats[date].customers += customers;
     });
+
+    console.log('💰 合計売上:', totalSales);
+    console.log('👥 合計客数:', totalCustomers);
+    console.log('📊 ユニーク日付数:', Object.keys(dateStats).length);
 
     const sortedDates = Object.keys(dateStats).sort();
     const salesByDate = sortedDates.map(d => dateStats[d].sales);
     const customersByDate = sortedDates.map(d => dateStats[d].customers);
 
     // HTML構築
-    let html = '<h2>📅 年間推移グラフ（直近1年）</h2>';
-    html += '<div style="background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 8px; font-size: 14px; color: #666;">';
-    html += `<p>直近1年間（${sortedDates[0]}～${sortedDates[sortedDates.length-1]}）の日単位での売上と客数の推移を表示します</p>`;
+    let html = '<h2>📅 年間推移グラフ（全期間）</h2>';
+    html += '<div style="display: flex; gap: 20px; margin: 15px 0;">';
+    html += '<div style="flex: 1; background: #f0f8ff; padding: 15px; border-radius: 8px; border-left: 4px solid #2ecc71;">';
+    html += `<p style="margin: 0; color: #2ecc71; font-weight: bold;">💰 合計売上: ¥${totalSales.toLocaleString()}</p>`;
     html += '</div>';
+    html += '<div style="flex: 1; background: #f0fff0; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db;">';
+    html += `<p style="margin: 0; color: #3498db; font-weight: bold;">👥 合計客数: ${totalCustomers.toLocaleString()} 人</p>`;
+    html += '</div>';
+    html += '</div>';
+    html += '<p style="font-size: 13px; color: #666;">期間: ' + (sortedDates[0] || 'N/A') + ' ～ ' + (sortedDates[sortedDates.length-1] || 'N/A') + '</p>';
 
     // レスポンシブコンテナ
     html += '<div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">';
