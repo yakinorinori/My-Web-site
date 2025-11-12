@@ -1625,6 +1625,8 @@ function renderYearComparisonAnalysis(data) {
     // 年ごと・月ごとの売上を集計
     const yearMonthStats = {};
     
+    console.log('📊 前年度比較データ集計開始:', data.length, '行');
+    
     data.forEach(row => {
         const date = row['日付'];
         const year = date.slice(0, 4);
@@ -1647,6 +1649,9 @@ function renderYearComparisonAnalysis(data) {
     // 年をソート
     const years = Object.keys(yearMonthStats).sort();
     
+    console.log('📊 年別統計:', years);
+    console.log('📊 2024年データ:', yearMonthStats['2024']);
+    
     // HTML構築
     let html = '<h2>📈 前年度比較グラフ</h2>';
     html += '<div style="background: #f9f9f9; padding: 20px; margin: 20px 0; border-radius: 8px;">';
@@ -1662,27 +1667,40 @@ function renderYearComparisonAnalysis(data) {
     // グラフ用データセット構築
     const months = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
     const datasets = [];
-    const colors = ['#4e79a7', '#f28e2b', '#e15759', '#59a14f', '#8c564b'];
+    // より見やすい色分け（濃い色を使用）
+    const colors = [
+        { bg: '#1f77b4', border: '#0d3b8a', label: '2023年' },    // 濃い青
+        { bg: '#ff7f0e', border: '#cc6400', label: '2024年' },    // 濃いオレンジ
+        { bg: '#d62728', border: '#a01f1f', label: '2025年' }     // 濃い赤
+    ];
     
     years.forEach((year, idx) => {
         const yearData = yearMonthStats[year];
-        const salesByMonth = months.map(month => yearData[month]?.sales || 0);
-        const customersByMonth = months.map(month => yearData[month]?.customers || 0);
+        const salesByMonth = months.map(month => {
+            const monthData = yearData[month];
+            return monthData ? monthData.sales : 0;
+        });
+        
+        const colorObj = colors[idx % colors.length];
         
         datasets.push({
             label: `${year}年売上`,
             data: salesByMonth,
-            borderColor: colors[idx % colors.length],
-            backgroundColor: `rgba(${parseInt(colors[idx].slice(1, 3), 16)}, ${parseInt(colors[idx].slice(3, 5), 16)}, ${parseInt(colors[idx].slice(5, 7), 16)}, 0.1)`,
-            borderWidth: 2,
-            tension: 0.3,
-            fill: false,
+            borderColor: colorObj.border,
+            backgroundColor: colorObj.bg + '33', // 薄い背景色
+            borderWidth: 3, // 太い線
+            pointRadius: 6, // 大きな点
+            pointBackgroundColor: colorObj.border,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            tension: 0.4,
+            fill: true,
             yAxisID: 'y'
         });
     });
     
     html += `<h3>売上の年度別推移</h3>`;
-    html += `<canvas id="yearComparisonSalesChart" width="800" height="300"></canvas>`;
+    html += `<canvas id="yearComparisonSalesChart" width="1000" height="400"></canvas>`;
     
     // 前年度比較テーブル
     if (years.length >= 2) {
@@ -1730,14 +1748,47 @@ function renderYearComparisonAnalysis(data) {
                 options: {
                     responsive: false,
                     plugins: {
-                        legend: { position: 'top' },
-                        title: { display: false }
+                        legend: { 
+                            position: 'top',
+                            labels: {
+                                font: { size: 14, weight: 'bold' },
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        },
+                        title: { display: false },
+                        filler: {
+                            propagate: true
+                        }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            title: { display: true, text: '売上（円）' }
+                            ticks: {
+                                font: { size: 12 },
+                                callback: function(value) {
+                                    return '¥' + value.toLocaleString();
+                                }
+                            },
+                            title: { 
+                                display: true, 
+                                text: '売上（円）',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)',
+                                drawBorder: true
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: { size: 12 }
+                            }
                         }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
                     }
                 }
             });
