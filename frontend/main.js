@@ -255,17 +255,89 @@ async function handleLogin(event) {
 function loadDemoData() {
     console.log('🎬 デモデータを読み込み中...');
     
-    // GitHub Pages用のサンプルデータ
-    const demoData = [
-        { 日付: "2024-01-01", 商品名: "サンプル商品A", 販売数量: 10, 単価: 1000, 売上: 10000 },
-        { 日付: "2024-01-02", 商品名: "サンプル商品B", 販売数量: 5, 単価: 2000, 売上: 10000 },
-        { 日付: "2024-01-03", 商品名: "サンプル商品C", 販売数量: 8, 単価: 1500, 売上: 12000 },
-        { 日付: "2024-01-04", 商品名: "サンプル商品A", 販売数量: 12, 単価: 1000, 売上: 12000 },
-        { 日付: "2024-01-05", 商品名: "サンプル商品D", 販売数量: 3, 単価: 3000, 売上: 9000 },
-        { 日付: "2024-01-06", 商品名: "サンプル商品B", 販売数量: 7, 単価: 2000, 売上: 14000 },
-        { 日付: "2024-01-07", 商品名: "サンプル商品C", 販売数量: 15, 単価: 1500, 売上: 22500 },
-        { 日付: "2024-01-08", 商品名: "サンプル商品A", 販売数量: 20, 単価: 1000, 売上: 20000 }
+    // 拡張版: 2023-2025年のサンプルデータ（3年分）
+    // 前年度比較・前々年度比較グラフ用
+    const demoData = [];
+    
+    // 2023年データ（6月-12月、9月分は調整用）
+    const months2023 = [
+        { month: '2023/06', days: 25, baseSales: 320000, variation: 0.9 },
+        { month: '2023/07', days: 30, baseSales: 380000, variation: 1.0 },
+        { month: '2023/08', days: 28, baseSales: 410000, variation: 1.1 },
+        { month: '2023/09', days: 26, baseSales: 390000, variation: 0.95 },
+        { month: '2023/10', days: 32, baseSales: 450000, variation: 1.2 },
+        { month: '2023/11', days: 29, baseSales: 520000, variation: 1.3 },
+        { month: '2023/12', days: 31, baseSales: 580000, variation: 1.4 }
     ];
+    
+    // 2024年データ（1月-12月）
+    const months2024 = [
+        { month: '2024/01', days: 30, baseSales: 380000, variation: 1.1 },
+        { month: '2024/02', days: 28, baseSales: 350000, variation: 1.0 },
+        { month: '2024/03', days: 31, baseSales: 420000, variation: 1.2 },
+        { month: '2024/04', days: 29, baseSales: 390000, variation: 1.1 },
+        { month: '2024/05', days: 31, baseSales: 480000, variation: 1.3 },
+        { month: '2024/06', days: 30, baseSales: 520000, variation: 1.4 },  // 前年比 130%
+        { month: '2024/07', days: 31, baseSales: 580000, variation: 1.5 },  // 前年比 150%
+        { month: '2024/08', days: 31, baseSales: 640000, variation: 1.55 }, // 前年比 155%
+        { month: '2024/09', days: 29, baseSales: 520000, variation: 1.3 },  // 調整
+        { month: '2024/10', days: 32, baseSales: 680000, variation: 1.5 },  // 前年比 150%
+        { month: '2024/11', days: 30, baseSales: 750000, variation: 1.4 },  // 前年比 144%
+        { month: '2024/12', days: 31, baseSales: 820000, variation: 1.4 }   // 前年比 141%
+    ];
+    
+    // 2025年データ（1月-11月、見通しデータ）
+    const months2025 = [
+        { month: '2025/01', days: 31, baseSales: 450000, variation: 1.2 },
+        { month: '2025/02', days: 28, baseSales: 420000, variation: 1.2 },
+        { month: '2025/03', days: 30, baseSales: 510000, variation: 1.2 },
+        { month: '2025/04', days: 29, baseSales: 480000, variation: 1.2 },
+        { month: '2025/05', days: 31, baseSales: 580000, variation: 1.2 },
+        { month: '2025/06', days: 30, baseSales: 640000, variation: 1.2 },
+        { month: '2025/07', days: 31, baseSales: 710000, variation: 1.2 },
+        { month: '2025/08', days: 31, baseSales: 780000, variation: 1.2 },
+        { month: '2025/09', days: 29, baseSales: 640000, variation: 1.2 },
+        { month: '2025/10', days: 32, baseSales: 820000, variation: 1.2 },
+        { month: '2025/11', days: 30, baseSales: 890000, variation: 1.2 }
+    ];
+    
+    // データ生成ヘルパー
+    function generateMonthData(dateStr, days, baseSales, variation) {
+        const [year, month] = dateStr.split('/');
+        const salesPerDay = (baseSales * variation) / days;
+        const customersPerDay = Math.floor((baseSales * variation) / days / 15000); // 平均単価15000
+        
+        const data = [];
+        for (let d = 1; d <= days; d++) {
+            const dayStr = String(d).padStart(2, '0');
+            const date = `${year}/${month}/${dayStr}`;
+            const dailySales = Math.floor(salesPerDay * (0.8 + Math.random() * 0.4)); // ばらつき
+            const dailyCustomers = Math.floor(customersPerDay * (0.9 + Math.random() * 0.2));
+            
+            data.push({
+                日付: date,
+                支払い者: ['新井さん', 'みなみちゃん', '鈴木さん', '吉田先生', '会長', 'ゆきさん'][Math.floor(Math.random() * 6)],
+                客数: Math.max(1, dailyCustomers),
+                売り上げ: Math.max(5000, dailySales)
+            });
+        }
+        return data;
+    }
+    
+    // 2023年データを追加
+    months2023.forEach(({ month, days, baseSales, variation }) => {
+        demoData.push(...generateMonthData(month, days, baseSales, variation));
+    });
+    
+    // 2024年データを追加
+    months2024.forEach(({ month, days, baseSales, variation }) => {
+        demoData.push(...generateMonthData(month, days, baseSales, variation));
+    });
+    
+    // 2025年データを追加
+    months2025.forEach(({ month, days, baseSales, variation }) => {
+        demoData.push(...generateMonthData(month, days, baseSales, variation));
+    });
     
     globalData = demoData;
     
@@ -278,7 +350,7 @@ function loadDemoData() {
     // グラフを生成
     createCharts();
     
-    console.log('✅ デモデータ読み込み完了');
+    console.log(`✅ デモデータ読み込み完了（${demoData.length}行）`);
 }
 
 function showDemoUserInfo() {
@@ -399,8 +471,13 @@ function createMainApp() {
     const btnMonth = document.createElement('button');
     btnMonth.id = 'btn-month';
     btnMonth.textContent = '月ごとの分析';
+    const btnYearComparison = document.createElement('button');
+    btnYearComparison.id = 'btn-year-comparison';
+    btnYearComparison.textContent = '📈 前年度比較';
+    btnYearComparison.style.cssText = 'background-color: #ff9800; color: white; margin-left: 10px;';
     btnDiv.appendChild(btnYear);
     btnDiv.appendChild(btnMonth);
+    btnDiv.appendChild(btnYearComparison);
     root.appendChild(btnDiv);
 
     // プルダウン（select）追加
@@ -428,6 +505,10 @@ function createMainApp() {
     const divWeekday = document.createElement('div');
     divWeekday.id = 'analysis-weekday';
     root.appendChild(divWeekday);
+    const divYearComparison = document.createElement('div');
+    divYearComparison.id = 'analysis-year-comparison';
+    divYearComparison.style.display = 'none';
+    root.appendChild(divYearComparison);
     const divTable = document.createElement('div');
     divTable.id = 'sales-table';
     root.appendChild(divTable);
@@ -506,6 +587,14 @@ function createMainApp() {
                 showMonthAnalysis();
                 monthSelectDiv.style.display = '';
             };
+            // 前年度比較ボタン
+            const btnYearComparison = document.getElementById('btn-year-comparison');
+            if (btnYearComparison) {
+                btnYearComparison.onclick = () => {
+                    showYearComparisonAnalysis();
+                    monthSelectDiv.style.display = 'none';
+                };
+            }
             // プルダウン変更時
             monthSelect.onchange = () => {
                 showMonthAnalysis();
@@ -551,8 +640,19 @@ function showYearAnalysis() {
     document.getElementById('analysis-month').style.display = 'none';
     document.getElementById('analysis-weekday').style.display = 'none';
     document.getElementById('sales-table').style.display = 'none';
+    document.getElementById('analysis-year-comparison').style.display = 'none';
     document.getElementById('month-select-div').style.display = 'none';
     renderYearAnalysis(globalData);
+}
+
+function showYearComparisonAnalysis() {
+    document.getElementById('analysis-year').style.display = 'none';
+    document.getElementById('analysis-month').style.display = 'none';
+    document.getElementById('analysis-weekday').style.display = 'none';
+    document.getElementById('sales-table').style.display = 'none';
+    document.getElementById('analysis-year-comparison').style.display = '';
+    document.getElementById('month-select-div').style.display = 'none';
+    renderYearComparisonAnalysis(globalData);
 }
 
 // 年ごとの売上・客数・組数・支払い者別合計金額（上位10名・不明除外）
@@ -1510,4 +1610,129 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('📊 自動レポート機能を初期化中...');
     setupAutomaticReports();
 });
+}
+
+// 前年度比較分析関数
+function renderYearComparisonAnalysis(data) {
+    // 年ごと・月ごとの売上を集計
+    const yearMonthStats = {};
+    
+    data.forEach(row => {
+        const date = row['日付'];
+        const year = date.slice(0, 4);
+        const month = date.slice(5, 7);
+        const sales = Number(row['売り上げ']) || 0;
+        const customers = Number(row['客数']) || 0;
+        
+        if (!yearMonthStats[year]) {
+            yearMonthStats[year] = {};
+        }
+        if (!yearMonthStats[year][month]) {
+            yearMonthStats[year][month] = { sales: 0, customers: 0, count: 0 };
+        }
+        
+        yearMonthStats[year][month].sales += sales;
+        yearMonthStats[year][month].customers += customers;
+        yearMonthStats[year][month].count += 1;
+    });
+    
+    // 年をソート
+    const years = Object.keys(yearMonthStats).sort();
+    
+    // HTML構築
+    let html = '<h2>📈 前年度比較グラフ</h2>';
+    html += '<div style="background: #f9f9f9; padding: 20px; margin: 20px 0; border-radius: 8px;">';
+    html += '<p style="margin: 0; font-size: 14px; color: #666;">複数年の月別売上・客数の推移を折れ線グラフで表示します</p>';
+    html += '</div>';
+    
+    if (years.length === 0) {
+        html += '<p>データがありません</p>';
+        document.getElementById('analysis-year-comparison').innerHTML = html;
+        return;
+    }
+    
+    // グラフ用データセット構築
+    const months = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
+    const datasets = [];
+    const colors = ['#4e79a7', '#f28e2b', '#e15759', '#59a14f', '#8c564b'];
+    
+    years.forEach((year, idx) => {
+        const yearData = yearMonthStats[year];
+        const salesByMonth = months.map(month => yearData[month]?.sales || 0);
+        const customersByMonth = months.map(month => yearData[month]?.customers || 0);
+        
+        datasets.push({
+            label: `${year}年売上`,
+            data: salesByMonth,
+            borderColor: colors[idx % colors.length],
+            backgroundColor: `rgba(${parseInt(colors[idx].slice(1, 3), 16)}, ${parseInt(colors[idx].slice(3, 5), 16)}, ${parseInt(colors[idx].slice(5, 7), 16)}, 0.1)`,
+            borderWidth: 2,
+            tension: 0.3,
+            fill: false,
+            yAxisID: 'y'
+        });
+    });
+    
+    html += `<h3>売上の年度別推移</h3>`;
+    html += `<canvas id="yearComparisonSalesChart" width="800" height="300"></canvas>`;
+    
+    // 前年度比較テーブル
+    if (years.length >= 2) {
+        const currentYear = years[years.length - 1];
+        const previousYear = years[years.length - 2];
+        
+        html += `<h3>${currentYear}年 vs ${previousYear}年 月別比較</h3>`;
+        html += '<table border="1" style="margin: 20px 0; border-collapse: collapse; width: 100%;">';
+        html += '<tr style="background: #f0f0f0;"><th>月</th><th>売上</th><th>比率</th><th>客数</th><th>客数比率</th></tr>';
+        
+        months.forEach(month => {
+            const currentData = yearMonthStats[currentYear][month] || { sales: 0, customers: 0 };
+            const prevData = yearMonthStats[previousYear][month] || { sales: 0, customers: 0 };
+            
+            const salesRatio = prevData.sales > 0 ? (currentData.sales / prevData.sales * 100).toFixed(0) : '-';
+            const customerRatio = prevData.customers > 0 ? (currentData.customers / prevData.customers * 100).toFixed(0) : '-';
+            
+            const salesColor = salesRatio > 100 ? '#2ecc71' : salesRatio < 100 ? '#e74c3c' : '#95a5a6';
+            const customerColor = customerRatio > 100 ? '#2ecc71' : customerRatio < 100 ? '#e74c3c' : '#95a5a6';
+            
+            html += `<tr>`;
+            html += `<td style="font-weight: bold;">${month}月</td>`;
+            html += `<td>${currentData.sales.toLocaleString()}</td>`;
+            html += `<td style="color: ${salesColor}; font-weight: bold;">${salesRatio}%</td>`;
+            html += `<td>${currentData.customers}</td>`;
+            html += `<td style="color: ${customerColor}; font-weight: bold;">${customerRatio}%</td>`;
+            html += `</tr>`;
+        });
+        
+        html += '</table>';
+    }
+    
+    document.getElementById('analysis-year-comparison').innerHTML = html;
+    
+    // グラフ描画
+    setTimeout(() => {
+        const ctx = document.getElementById('yearComparisonSalesChart')?.getContext('2d');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months.map(m => `${m}月`),
+                    datasets: datasets
+                },
+                options: {
+                    responsive: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: '売上（円）' }
+                        }
+                    }
+                }
+            });
+        }
+    }, 100);
 }
