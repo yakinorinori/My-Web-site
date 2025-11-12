@@ -1852,24 +1852,33 @@ function renderMultiYearSalesAnalysis(data) {
         return;
     }
 
+    console.log('📊 複数年売上比較データ集計開始:', data.length, '行');
+
     // 年ごと・月ごとの売上集計
     const yearMonthStats = {};
+    let totalSales = 0;
+    
     data.forEach(row => {
         const year = row['日付'].slice(0, 4);
         const month = row['日付'].slice(5, 7);
         const sales = Number(row['売り上げ']) || 0;
+        
+        totalSales += sales;
 
         if (!yearMonthStats[year]) yearMonthStats[year] = {};
         if (!yearMonthStats[year][month]) yearMonthStats[year][month] = 0;
         yearMonthStats[year][month] += sales;
     });
 
+    console.log('📊 年別売上:', yearMonthStats);
+    console.log('💰 総売上:', totalSales);
+
     const years = Object.keys(yearMonthStats).sort();
     const months = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
     const colors = [
-        { border: '#1f77b4', bg: 'rgba(31, 119, 180, 0.1)' },
-        { border: '#ff7f0e', bg: 'rgba(255, 127, 14, 0.1)' },
-        { border: '#d62728', bg: 'rgba(214, 39, 40, 0.1)' }
+        { border: '#1f77b4', bg: 'rgba(31, 119, 180, 0.2)' },      // 濃い青
+        { border: '#ff7f0e', bg: 'rgba(255, 127, 14, 0.2)' },      // 濃いオレンジ
+        { border: '#d62728', bg: 'rgba(214, 39, 40, 0.2)' }        // 濃い赤
     ];
 
     const datasets = years.map((year, idx) => {
@@ -1877,27 +1886,32 @@ function renderMultiYearSalesAnalysis(data) {
         const salesByMonth = months.map(m => yearData[m] || 0);
         const color = colors[idx % colors.length];
 
+        console.log(`📈 ${year}年データ:`, salesByMonth);
+
         return {
             label: `${year}年`,
             data: salesByMonth,
             borderColor: color.border,
             backgroundColor: color.bg,
             borderWidth: 3,
-            pointRadius: 5,
+            pointRadius: 6,
             pointBackgroundColor: color.border,
-            tension: 0.3,
-            fill: false
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            tension: 0.4,
+            fill: true
         };
     });
 
     // HTML構築
     let html = '<h2>💰 複数年売上比較</h2>';
-    html += '<div style="background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 8px; font-size: 14px; color: #666;">';
+    html += '<div style="background: #f0f8ff; padding: 15px; margin: 15px 0; border-radius: 8px; font-size: 14px; color: #1f77b4; border-left: 4px solid #1f77b4;">';
+    html += `<p><strong>合計売上: ¥${totalSales.toLocaleString()}</strong></p>`;
     html += '<p>複数年の月別売上を比較します</p>';
     html += '</div>';
-    html += '<div style="display: flex; justify-content: center;">';
+    html += '<div style="display: flex; justify-content: center; margin: 20px 0;">';
     html += '<div style="width: 100%; max-width: 1200px;">';
-    html += '<canvas id="multiYearSalesChart" width="1000" height="400"></canvas>';
+    html += '<canvas id="multiYearSalesChart" width="1000" height="450" style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></canvas>';
     html += '</div>';
     html += '</div>';
 
@@ -1907,6 +1921,7 @@ function renderMultiYearSalesAnalysis(data) {
     setTimeout(() => {
         const ctx = document.getElementById('multiYearSalesChart')?.getContext('2d');
         if (ctx) {
+            console.log('🎨 グラフ描画開始');
             new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -1919,17 +1934,44 @@ function renderMultiYearSalesAnalysis(data) {
                     plugins: {
                         legend: {
                             position: 'top',
-                            labels: { font: { size: 14, weight: 'bold' } }
+                            labels: { 
+                                font: { size: 14, weight: 'bold' },
+                                padding: 15,
+                                usePointStyle: true
+                            }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { callback: v => '¥' + v.toLocaleString() }
+                            ticks: { 
+                                callback: v => '¥' + v.toLocaleString(),
+                                font: { size: 12 }
+                            },
+                            title: {
+                                display: true,
+                                text: '売上（円）',
+                                font: { size: 13, weight: 'bold' }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)',
+                                drawBorder: true
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { size: 12 }
+                            }
                         }
                     }
                 }
             });
+            console.log('✅ グラフ描画完了');
+        } else {
+            console.error('❌ キャンバス要素が見つかりません');
         }
     }, 100);
 }
@@ -1941,24 +1983,33 @@ function renderMultiYearCustomersAnalysis(data) {
         return;
     }
 
+    console.log('👥 複数年客数比較データ集計開始:', data.length, '行');
+
     // 年ごと・月ごとの客数集計
     const yearMonthStats = {};
+    let totalCustomers = 0;
+    
     data.forEach(row => {
         const year = row['日付'].slice(0, 4);
         const month = row['日付'].slice(5, 7);
         const customers = Number(row['客数']) || 0;
+        
+        totalCustomers += customers;
 
         if (!yearMonthStats[year]) yearMonthStats[year] = {};
         if (!yearMonthStats[year][month]) yearMonthStats[year][month] = 0;
         yearMonthStats[year][month] += customers;
     });
 
+    console.log('👥 年別客数:', yearMonthStats);
+    console.log('👥 総客数:', totalCustomers);
+
     const years = Object.keys(yearMonthStats).sort();
     const months = Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0'));
     const colors = [
-        { border: '#2ca02c', bg: 'rgba(44, 160, 44, 0.1)' },
-        { border: '#9467bd', bg: 'rgba(148, 103, 189, 0.1)' },
-        { border: '#e377c2', bg: 'rgba(227, 119, 194, 0.1)' }
+        { border: '#2ca02c', bg: 'rgba(44, 160, 44, 0.2)' },       // 濃い緑
+        { border: '#9467bd', bg: 'rgba(148, 103, 189, 0.2)' },     // 濃い紫
+        { border: '#e377c2', bg: 'rgba(227, 119, 194, 0.2)' }      // 濃いピンク
     ];
 
     const datasets = years.map((year, idx) => {
@@ -1966,27 +2017,32 @@ function renderMultiYearCustomersAnalysis(data) {
         const customersByMonth = months.map(m => yearData[m] || 0);
         const color = colors[idx % colors.length];
 
+        console.log(`👥 ${year}年データ:`, customersByMonth);
+
         return {
             label: `${year}年`,
             data: customersByMonth,
             borderColor: color.border,
             backgroundColor: color.bg,
             borderWidth: 3,
-            pointRadius: 5,
+            pointRadius: 6,
             pointBackgroundColor: color.border,
-            tension: 0.3,
-            fill: false
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            tension: 0.4,
+            fill: true
         };
     });
 
     // HTML構築
     let html = '<h2>👥 複数年客数比較</h2>';
-    html += '<div style="background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 8px; font-size: 14px; color: #666;">';
+    html += '<div style="background: #f0fff0; padding: 15px; margin: 15px 0; border-radius: 8px; font-size: 14px; color: #2ca02c; border-left: 4px solid #2ca02c;">';
+    html += `<p><strong>合計客数: ${totalCustomers.toLocaleString()} 人</strong></p>`;
     html += '<p>複数年の月別客数を比較します</p>';
     html += '</div>';
-    html += '<div style="display: flex; justify-content: center;">';
+    html += '<div style="display: flex; justify-content: center; margin: 20px 0;">';
     html += '<div style="width: 100%; max-width: 1200px;">';
-    html += '<canvas id="multiYearCustomersChart" width="1000" height="400"></canvas>';
+    html += '<canvas id="multiYearCustomersChart" width="1000" height="450" style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></canvas>';
     html += '</div>';
     html += '</div>';
 
@@ -1996,6 +2052,7 @@ function renderMultiYearCustomersAnalysis(data) {
     setTimeout(() => {
         const ctx = document.getElementById('multiYearCustomersChart')?.getContext('2d');
         if (ctx) {
+            console.log('🎨 グラフ描画開始');
             new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -2008,17 +2065,44 @@ function renderMultiYearCustomersAnalysis(data) {
                     plugins: {
                         legend: {
                             position: 'top',
-                            labels: { font: { size: 14, weight: 'bold' } }
+                            labels: { 
+                                font: { size: 14, weight: 'bold' },
+                                padding: 15,
+                                usePointStyle: true
+                            }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { callback: v => v + '人' }
+                            ticks: { 
+                                callback: v => v + '人',
+                                font: { size: 12 }
+                            },
+                            title: {
+                                display: true,
+                                text: '客数（人）',
+                                font: { size: 13, weight: 'bold' }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)',
+                                drawBorder: true
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: { size: 12 }
+                            }
                         }
                     }
                 }
             });
+            console.log('✅ グラフ描画完了');
+        } else {
+            console.error('❌ キャンバス要素が見つかりません');
         }
     }, 100);
 }
