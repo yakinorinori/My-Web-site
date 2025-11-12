@@ -579,7 +579,8 @@ function createMainApp() {
                 const dataInfo = document.getElementById('data-info');
                 if (dataInfo) {
                     const recordCount = data.length;
-                    const totalSales = data.reduce((sum, row) => sum + parseInt(row['売上'] || 0), 0);
+                    const totalSales = data.reduce((sum, row) => sum + (Number(row['売り上げ']) || 0), 0);
+                    console.log(`📊 データ解析: ${recordCount}件, 合計売上: ¥${totalSales.toLocaleString()}`);
                     dataInfo.innerHTML = `
                         ${dataType === 'real' ? '💼 実データ' : '📋 デモデータ'}: 
                         ${recordCount}件のレコード, 
@@ -951,14 +952,43 @@ function renderYearAnalysis(data) {
 
 // CSVテキストを配列に変換
 function csvToArray(str) {
-    const rows = str.trim().split('\n');
-    const headers = rows[0].split(',');
-    return rows.slice(1).map(row => {
-        const values = row.split(',');
+    const lines = str.trim().split('\n');
+    if (lines.length === 0) return [];
+    
+    const headers = lines[0].split(',').map(h => h.trim());
+    const result = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue; // 空行をスキップ
+        
+        // 簡易 CSV パース（クォーテーション対応）
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let j = 0; j < line.length; j++) {
+            const char = line[j];
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                values.push(current.trim().replace(/^"|"$/g, ''));
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        values.push(current.trim().replace(/^"|"$/g, ''));
+        
+        // オブジェクトに変換
         let obj = {};
-        headers.forEach((h, i) => obj[h] = values[i]);
-        return obj;
-    });
+        headers.forEach((h, idx) => {
+            obj[h] = values[idx] || '';
+        });
+        result.push(obj);
+    }
+    
+    return result;
 }
 
 // 月ごとに支払い者ごとの合計金額を集計・表示
