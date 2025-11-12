@@ -484,6 +484,24 @@ window.sendTodayData = sendTodayData;
 window.loadSalesDataFromSpreadsheet = loadSalesDataFromSpreadsheet;
 window.syncDataFromSpreadsheet = syncDataFromSpreadsheet;
 
+/**
+ * デフォルトAPI Key初期化（Netlify Functions対応）
+ * Netlify FunctionsではAPI Keyがサーバー側で管理されるため
+ * クライアント側では何もしない
+ */
+function initializeDefaultApiKey() {
+    try {
+        console.log('🔧 Netlify Functions環境での初期化');
+        // Netlify Functionsを使用する場合、クライアント側でのAPI Key設定は不要
+        console.log('✅ Netlify Functionsでの自動認証が有効です');
+    } catch (error) {
+        console.error('⚠️ 初期化エラー:', error);
+    }
+}
+
+// グローバルに公開
+window.initializeDefaultApiKey = initializeDefaultApiKey;
+
 // 初期化：デフォルトAPI Keyを自動設定
 if (typeof window !== 'undefined') {
     // ページ読み込み時に自動実行
