@@ -420,20 +420,20 @@ async function initializeApp() {
     
     // GitHub Pagesの場合
     if (IS_GITHUB_PAGES) {
-        console.log('🌐 GitHub Pagesモード');
+        console.log('🌐 GitHub Pagesモード - デモデータを自動読み込み');
         
         // 認証状態をチェック
         const isAuthenticated = await checkAuthentication();
         if (!isAuthenticated) {
-            // 未認証の場合はログイン画面を表示
-            console.log('🔑 ログイン画面を表示');
-            showGitHubPagesLogin();
+            // 未認証の場合もデモデータを読み込み（GitHub Pagesではログイン不要）
+            console.log('🔑 デモデータを自動読み込み');
+            loadDemoData();
             return;
         }
         
-        // 認証済みの場合はメインアプリを表示
-        console.log('✅ 認証済み - メインアプリ表示');
-        createMainApp();
+        // 認証済みの場合もデモデータを表示
+        console.log('✅ 認証済み - デモアプリ表示');
+        loadDemoData();
         return;
     }
     
@@ -544,7 +544,11 @@ function createMainApp() {
 
     // データ取得関数
     function loadData(dataType = 'demo') {
-        const url = `${API_BASE_URL}/sales.csv?type=${dataType}`;
+        // GitHub Pages では相対パスを使用
+        let url = `${API_BASE_URL}/sales.csv?type=${dataType}`;
+        if (IS_GITHUB_PAGES) {
+            url = './sales.csv'; // 相対パス
+        }
         console.log(`📥 データ取得中: ${dataType} data from ${url}`);
         
         return authenticatedFetch(url)
@@ -1485,7 +1489,11 @@ function renderWeekdayAnalysis(data, selectedMonth) {
 
 function drawMonthlyChart() {
     // キャッシュ回避のためにダミークエリを付与（認証付き・バックエンドから）
-    authenticatedFetch(`${API_BASE_URL}/sales.csv?ts=` + new Date().getTime())
+    let url = `${API_BASE_URL}/sales.csv?ts=` + new Date().getTime();
+    if (IS_GITHUB_PAGES) {
+        url = './sales.csv?ts=' + new Date().getTime(); // GitHub Pages: 相対パス
+    }
+    authenticatedFetch(url)
             .then(response => response.text())
             .then(csv => {
                 const lines = csv.trim().split('\n');
