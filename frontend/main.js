@@ -575,6 +575,18 @@ function createMainApp() {
                 const data = csvToArray(text);
                 globalData = data;
                 
+                // ⭐️ デバッグ: 最初の3行を詳しく出力
+                console.log('=== CSV パース結果 ===');
+                console.log('総行数:', data.length);
+                console.log('最初の3行:');
+                for (let i = 0; i < Math.min(3, data.length); i++) {
+                    console.log(`行${i}:`, data[i]);
+                    console.log(`  売り上げ (文字列):'${data[i]['売り上げ']}'`);
+                    console.log(`  売り上げ (Number): ${Number(data[i]['売り上げ'])}`);
+                    console.log(`  客数 (文字列): '${data[i]['客数']}'`);
+                    console.log(`  客数 (Number): ${Number(data[i]['客数'])}`);
+                }
+                
                 // データ情報を更新
                 const dataInfo = document.getElementById('data-info');
                 if (dataInfo) {
@@ -952,10 +964,18 @@ function renderYearAnalysis(data) {
 
 // CSVテキストを配列に変換
 function csvToArray(str) {
+    console.log('🔍 CSV パース開始');
+    console.log('📄 CSVテキスト長:', str.length);
+    console.log('📄 最初の300文字:', str.substring(0, 300));
+    
     const lines = str.trim().split('\n');
+    console.log('📋 総行数:', lines.length);
+    
     if (lines.length === 0) return [];
     
     const headers = lines[0].split(',').map(h => h.trim());
+    console.log('🏷️  ヘッダー:', headers);
+    
     const result = [];
     
     for (let i = 1; i < lines.length; i++) {
@@ -985,9 +1005,16 @@ function csvToArray(str) {
         headers.forEach((h, idx) => {
             obj[h] = values[idx] || '';
         });
+        
+        // 最初の3行をデバッグ出力
+        if (i <= 3) {
+            console.log(`📍 行${i}:`, obj);
+        }
+        
         result.push(obj);
     }
     
+    console.log('✅ CSV パース完了:', result.length, '行');
     return result;
 }
 
