@@ -10,14 +10,71 @@ let globalData = [];
  * CSV文字列を配列オブジェクトに変換
  */
 function csvToArray(str) {
-    const rows = str.trim().split('\n');
-    const headers = rows[0].split(',');
-    return rows.slice(1).map(row => {
-        const values = row.split(',');
+    console.log('🔍 CSV パース開始');
+    const lines = str.trim().split('\n');
+    console.log('📋 総行数:', lines.length);
+    
+    if (lines.length === 0) return [];
+    
+    const headers = lines[0].split(',').map(h => h.trim());
+    console.log('🏷️  ヘッダー:', headers);
+    
+    const result = [];
+    let skippedRows = 0;
+    
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue; // 空行をスキップ
+        
+        // 簡易 CSV パース（クォーテーション対応）
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let j = 0; j < line.length; j++) {
+            const char = line[j];
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                values.push(current.trim().replace(/^"|"$/g, ''));
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        values.push(current.trim().replace(/^"|"$/g, ''));
+        
+        // ✅ カラム数チェック: 4カラム必須
+        if (values.length < 4) {
+            console.warn(`⚠️  スキップ行${i}: カラム数不足 (${values.length}/4) - "${line.substring(0, 50)}..."`);
+            skippedRows++;
+            continue;
+        }
+        
+        // ✅ 売上値チェック: 数値でなければスキップ
+        const salesValue = values[3]?.trim();
+        if (!salesValue || isNaN(Number(salesValue))) {
+            console.warn(`⚠️  スキップ行${i}: 売上値が無効 - "${line.substring(0, 50)}..."`);
+            skippedRows++;
+            continue;
+        }
+        
+        // オブジェクトに変換
         let obj = {};
-        headers.forEach((h, i) => obj[h] = values[i]);
-        return obj;
-    });
+        headers.forEach((h, idx) => {
+            obj[h] = values[idx] || '';
+        });
+        
+        // 最初の3行をデバッグ出力
+        if (result.length < 3) {
+            console.log(`📍 行${result.length}:`, obj);
+        }
+        
+        result.push(obj);
+    }
+    
+    console.log('✅ CSV パース完了:', result.length, '行', `(スキップ: ${skippedRows}行)`);
+    return result;
 }
 
 /**
