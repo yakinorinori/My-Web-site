@@ -1762,23 +1762,25 @@ function renderAnnualTrendAnalysis(data) {
 
     // レスポンシブコンテナ
     html += '<div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">';
-    html += '<div style="flex: 1; min-width: 100%; max-width: 1200px;">';
+    html += '<div style="flex: 1; min-width: 100%; max-width: 1200px; position: relative; height: 400px;">';
     html += '<h3>💰 売上推移</h3>';
-    html += '<canvas id="annualSalesChart" width="1000" height="300"></canvas>';
+    html += '<canvas id="annualSalesChart" style="max-width: 100%;"></canvas>';
     html += '</div>';
-    html += '<div style="flex: 1; min-width: 100%; max-width: 1200px;">';
+    html += '<div style="flex: 1; min-width: 100%; max-width: 1200px; position: relative; height: 400px;">';
     html += '<h3>👥 客数推移</h3>';
-    html += '<canvas id="annualCustomersChart" width="1000" height="300"></canvas>';
+    html += '<canvas id="annualCustomersChart" style="max-width: 100%;"></canvas>';
     html += '</div>';
     html += '</div>';
 
     document.getElementById('analysis-annual-trend').innerHTML = html;
 
-    // グラフ描画
+    // グラフ描画（DOM準備完了後）
     setTimeout(() => {
+        console.log('🎨 年間推移グラフ描画開始');
         // 売上グラフ
         const ctxSales = document.getElementById('annualSalesChart')?.getContext('2d');
         if (ctxSales) {
+            console.log('📊 売上グラフデータ:', { sortedDates: sortedDates.length, salesByDate: salesByDate });
             new Chart(ctxSales, {
                 type: 'line',
                 data: {
@@ -1814,6 +1816,7 @@ function renderAnnualTrendAnalysis(data) {
         // 客数グラフ
         const ctxCustomers = document.getElementById('annualCustomersChart')?.getContext('2d');
         if (ctxCustomers) {
+            console.log('👥 客数グラフデータ:', { sortedDates: sortedDates.length, customersByDate: customersByDate });
             new Chart(ctxCustomers, {
                 type: 'line',
                 data: {
@@ -1841,8 +1844,9 @@ function renderAnnualTrendAnalysis(data) {
                     }
                 }
             });
+            console.log('✅ 客数グラフ描画完了');
         }
-    }, 100);
+    }, 300);
 }
 
 // 2. 複数年売上比較分析関数
@@ -1910,8 +1914,8 @@ function renderMultiYearSalesAnalysis(data) {
     html += '<p>複数年の月別売上を比較します</p>';
     html += '</div>';
     html += '<div style="display: flex; justify-content: center; margin: 20px 0;">';
-    html += '<div style="width: 100%; max-width: 1200px;">';
-    html += '<canvas id="multiYearSalesChart" width="1000" height="450" style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></canvas>';
+    html += '<div style="width: 100%; max-width: 1200px; position: relative; height: 450px;">';
+    html += '<canvas id="multiYearSalesChart" style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 100%;"></canvas>';
     html += '</div>';
     html += '</div>';
 
@@ -1921,7 +1925,8 @@ function renderMultiYearSalesAnalysis(data) {
     setTimeout(() => {
         const ctx = document.getElementById('multiYearSalesChart')?.getContext('2d');
         if (ctx) {
-            console.log('🎨 グラフ描画開始');
+            console.log('🎨 複数年売上グラフ描画開始');
+            console.log('📊 データセット:', datasets.length, 'ヶ年');
             new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -1969,11 +1974,11 @@ function renderMultiYearSalesAnalysis(data) {
                     }
                 }
             });
-            console.log('✅ グラフ描画完了');
+            console.log('✅ 複数年売上グラフ描画完了');
         } else {
             console.error('❌ キャンバス要素が見つかりません');
         }
-    }, 100);
+    }, 300);
 }
 
 // 3. 複数年客数比較分析関数
@@ -2041,8 +2046,8 @@ function renderMultiYearCustomersAnalysis(data) {
     html += '<p>複数年の月別客数を比較します</p>';
     html += '</div>';
     html += '<div style="display: flex; justify-content: center; margin: 20px 0;">';
-    html += '<div style="width: 100%; max-width: 1200px;">';
-    html += '<canvas id="multiYearCustomersChart" width="1000" height="450" style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></canvas>';
+    html += '<div style="width: 100%; max-width: 1200px; position: relative; height: 450px;">';
+    html += '<canvas id="multiYearCustomersChart" style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 100%;"></canvas>';
     html += '</div>';
     html += '</div>';
 
@@ -2052,7 +2057,8 @@ function renderMultiYearCustomersAnalysis(data) {
     setTimeout(() => {
         const ctx = document.getElementById('multiYearCustomersChart')?.getContext('2d');
         if (ctx) {
-            console.log('🎨 グラフ描画開始');
+            console.log('🎨 複数年客数グラフ描画開始');
+            console.log('👥 データセット:', datasets.length, 'ヶ年');
             new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -2104,7 +2110,7 @@ function renderMultiYearCustomersAnalysis(data) {
         } else {
             console.error('❌ キャンバス要素が見つかりません');
         }
-    }, 100);
+    }, 300);
 }
 
 // 前年度比較分析関数
