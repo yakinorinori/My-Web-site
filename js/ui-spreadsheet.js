@@ -22,7 +22,7 @@ function showSpreadsheetSettings() {
                 align-items: center;
                 gap: 12px;
             ">
-                📊 Googleスプレッドシート連携設定
+                📊 Googleスプレッドシート連携
             </h2>
             
             <div style="
@@ -35,39 +35,13 @@ function showSpreadsheetSettings() {
                 <p style="color: #1e40af; font-size: 14px; font-weight: 600; margin: 0 0 8px 0;">
                     🔒 セキュアな設定
                 </p>
+                <p style="color: #1e3a8a; font-size: 12px; line-height: 1.5; margin: 0 0 8px 0;">
+                    スプレッドシートIDと認証情報はNetlify環境変数で安全に管理されます。
+                </p>
                 <p style="color: #1e3a8a; font-size: 12px; line-height: 1.5; margin: 0;">
-                    API KeyはNetlify Functionsで安全に管理されます。ブラウザにAPI Keyは保存されません。
+                    書き込み先シート名: <strong>「売上データ」</strong>（固定）
                 </p>
-            </div>
-            
-            <div style="margin-bottom: 24px;">
-                <h3 style="color: #1e293b; margin-bottom: 12px;">🔗 スプレッドシートURL</h3>
-                <p style="color: #64748b; margin-bottom: 16px; line-height: 1.6;">
-                    「リンクを知っている人のみ閲覧可能」に設定されたGoogleスプレッドシートのURLを入力してください。
-                </p>
-                <input 
-                    type="url" 
-                    id="spreadsheet-url" 
-                    placeholder="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/edit?usp=sharing"
-                    style="
-                        width: 100%;
-                        padding: 12px 16px;
-                        border: 2px solid #e2e8f0;
-                        border-radius: 8px;
-                        font-size: 14px;
-                        box-sizing: border-box;
-                        transition: border-color 0.2s;
-                    "
-                    onFocus="this.style.borderColor='#0ea5e9'"
-                    onBlur="this.style.borderColor='#e2e8f0'"
-                />
-            </div>
-            
-            <div style="margin-bottom: 24px;">
-                <h3 style="color: #1e293b; margin-bottom: 12px;">📝 書き込み先シート名</h3>
-                <input 
-                    type="text" 
-                    id="sheet-name" 
+            </div> 
                     placeholder="売上データ"
                     value="売上データ"
                     style="
@@ -99,20 +73,6 @@ function showSpreadsheetSettings() {
                     🔍 接続テスト
                 </button>
                 
-                <button onclick="saveSpreadsheetSettings()" style="
-                    background: #0ea5e9;
-                    color: white;
-                    border: none;
-                    padding: 12px 24px;
-                    border-radius: 8px;
-                    font-size: 14px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: background-color 0.2s;
-                " onMouseOver="this.style.background='#0284c7'" onMouseOut="this.style.background='#0ea5e9'">
-                    💾 設定保存
-                </button>
-                
                 <button onclick="syncDataFromSpreadsheet()" style="
                     background: #f59e0b;
                     color: white;
@@ -137,6 +97,7 @@ function showSpreadsheetSettings() {
                     font-weight: 600;
                     cursor: pointer;
                     transition: background-color 0.2s;
+                    grid-column: span 2;
                 " onMouseOver="this.style.background='#7c3aed'" onMouseOut="this.style.background='#8b5cf6'">
                     📤 今日のデータ送信
                 </button>
@@ -176,9 +137,10 @@ function showSpreadsheetSettings() {
                     <li>Googleスプレッドシートを作成し、「URLを知っている人のみ閲覧可能」に設定</li>
                     <li>Google Cloud ConsoleでSheets APIを有効化し、<strong>テスト用</strong>APIキーを取得</li>
                     <li>APIキーの制限設定（HTTP リファラー、特定APIのみ等）を必ず設定</li>
-                    <li>上記情報を入力し「接続テスト」で動作確認</li>
-                    <li>「設定保存」で暗号化保存（セキュリティ警告あり）</li>
-                    <li><strong>本番環境移行時は必ずサーバーサイドプロキシに変更</strong></li>
+                    <li>Netlify環境変数に GOOGLE_SHEET_ID と GOOGLE_SERVICE_ACCOUNT_JSON を設定</li>
+                    <li>スプレッドシートにサービスアカウントのメールアドレスを共有設定で追加</li>
+                    <li>「接続テスト」で動作確認</li>
+                    <li>書き込み先シート名は「売上データ」固定（プログラム内で変更可能）</li>
                 </ol>
             </div>
         </div>
@@ -187,11 +149,6 @@ function showSpreadsheetSettings() {
     const resultsArea = document.getElementById('analysis-results');
     if (resultsArea) {
         resultsArea.innerHTML = html;
-        
-        // 保存された設定を読み込み
-        if (typeof loadSpreadsheetSettings === 'function') {
-            loadSpreadsheetSettings();
-        }
     }
 }
 

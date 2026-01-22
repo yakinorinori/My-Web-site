@@ -1562,23 +1562,14 @@ async function sendMobileSalesDataToSpreadsheet(receipts, reportDate) {
 
 /**
  * モバイル用スプレッドシート設定を取得
- * 🔒 sheetIdはNetlify環境変数で管理されるので、sheetNameのみ返す
+ * 🔒 sheetIdはNetlify環境変数で管理
+ * シート名は「売上データ」固定（プログラム内で変更可能）
  */
 function getMobileSpreadsheetConfig() {
-    try {
-        const config = localStorage.getItem('spreadsheet_config');
-        if (!config) return null;
-        
-        const settings = JSON.parse(config);
-        
-        return {
-            sheetName: settings.sheetName || '売上データ'
-        };
-        
-    } catch (error) {
-        console.error('❌ スプレッドシート設定取得エラー:', error);
-        return null;
-    }
+    // シート名は固定値を返す
+    return {
+        sheetName: '売上データ'
+    };
 }
 
 /**

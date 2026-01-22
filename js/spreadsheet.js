@@ -70,53 +70,17 @@ async function callNetlifyFunction(action, params) {
     }
 }
 
-/**
- * スプレッドシート設定を保存
- * 🔒 シートIDはNetlify環境変数で管理されるため、シート名のみ保存
- */
-function saveSpreadsheetSettings() {
-    const sheetName = document.getElementById('sheet-name')?.value || '売上データ';
-    
-    const config = {
-        sheetName,
-        savedAt: new Date().toISOString()
-    };
-    
-    localStorage.setItem(SPREADSHEET_CONFIG_KEY, JSON.stringify(config));
-    
-    console.log('📊 スプレッドシート設定保存:', { sheetName });
-    console.log('🔒 シートIDはNetlify環境変数で安全に管理されています');
-    
-    // 設定を即座に反映（リロード不要）
-    if (document.getElementById('sheet-name')) {
-        document.getElementById('sheet-name').value = sheetName;
-    }
-    
-    showSpreadsheetStatus('✅ 設定を保存しました！「📥 データ読み込み」ボタンでデータを取得できます', 'success');
-}
+// スプレッドシート設定は不要（シート名は固定値を使用）
+
+// スプレッドシート設定読み込みは不要（シート名は固定値を使用）
 
 /**
- * スプレッドシート設定を読み込み
+ * （削除予定の関数）
  */
 function loadSpreadsheetSettings() {
     try {
-        const config = localStorage.getItem(SPREADSHEET_CONFIG_KEY);
-        if (!config) return;
-        
-        const settings = JSON.parse(config);
-        
-        // フォームに設定値を反映
-        const urlInput = document.getElementById('spreadsheet-url');
-        const sheetNameInput = document.getElementById('sheet-name');
-        
-        if (urlInput && settings.url) {
-            urlInput.value = settings.url;
-        }
-        if (sheetNameInput && settings.sheetName) {
-            sheetNameInput.value = settings.sheetName;
-        }
-        
-        console.log('✅ スプレッドシート設定を読み込みました');
+        // 何もしない
+        return;
     } catch (error) {
         console.error('⚠️ 設定読み込みエラー:', error);
     }
@@ -267,34 +231,16 @@ async function getTodaysSalesData() {
 }
 
 /**
- * スプレッドシート設定を取得（LocalStorageまたは入力フィールドから）
+ * スプレッドシート設定を取得（固定値）
+ * シート名: 「売上データ」（プログラム内で固定）
+ * シートID: Netlify環境変数 GOOGLE_SHEET_ID から自動取得
  */
 function getSpreadsheetConfig() {
-    // まずLocalStorageから取得を試みる
-    try {
-        const stored = localStorage.getItem(SPREADSHEET_CONFIG_KEY);
-        if (stored) {
-            const config = JSON.parse(stored);
-            
-            if (config.sheetName) {
-                return {
-                    sheetName: config.sheetName
-                };
-            }
-        }
-    } catch (error) {
-        console.error('設定読み込みエラー:', error);
-    }
-    
-    // LocalStorageになければ入力フィールドから取得
-    const sheetName = document.getElementById('sheet-name')?.value || '売上データ';
-    
-    if (!sheetName) {
-        showSpreadsheetStatus('⚠️ スプレッドシート設定がありません。シート名を入力して「💾 設定保存」ボタンをクリックしてください', 'warning');
-        return null;
-    }
-    
-    return { sheetName };
+    // シート名は固定値「売上データ」を使用
+    // 必要に応じてこの値を変更してください
+    return {
+        sheetName: '売上データ'
+    };
 }
 
 /**
