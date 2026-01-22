@@ -3,11 +3,19 @@
  * スマートフォン向けの日次売上報告機能
  */
 
+// LINEブラウザの検出
+const isLineApp = /Line/i.test(navigator.userAgent);
+console.log('🔍 LINEブラウザ:', isLineApp ? 'はい' : 'いいえ');
+
 /**
  * モバイル売上報告アプリを初期化
  */
 function initMobileSalesReport() {
     console.log('📱 モバイル売上報告システム初期化中...');
+    
+    if (isLineApp) {
+        console.log('📱 LINEブラウザ検出 - 最適化モードで起動');
+    }
     
     // 既存のapp-rootをクリア
     const appRoot = document.getElementById('app-root');
@@ -711,9 +719,9 @@ function handleImageCapture(event) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            // 最大サイズを制限（Safariのメモリ制限対策）
-            const maxWidth = 1200;
-            const maxHeight = 1600;
+            // LINEブラウザ用にさらに小さいサイズに制限
+            const maxWidth = isLineApp ? 800 : 1200;
+            const maxHeight = isLineApp ? 1000 : 1600;
             let width = img.width;
             let height = img.height;
             
@@ -733,8 +741,11 @@ function handleImageCapture(event) {
             // 画像を描画
             ctx.drawImage(img, 0, 0, width, height);
             
-            // 最適化されたData URLを取得（品質0.85でファイルサイズ削減）
-            const optimizedDataURL = canvas.toDataURL('image/jpeg', 0.85);
+            // LINEブラウザ用により高圧縮（品質0.7）、それ以外は0.85
+            const quality = isLineApp ? 0.7 : 0.85;
+            const optimizedDataURL = canvas.toDataURL('image/jpeg', quality);
+            
+            console.log(`📸 画像サイズ: ${width}x${height}, 品質: ${quality}, Data URL長: ${optimizedDataURL.length}`);
             
             currentReceiptData = {
                 image: optimizedDataURL,
@@ -1013,14 +1024,24 @@ function completeReport() {
 async function generateReportImages(groups) {
     const reportDate = document.getElementById('report-date').value;
     
+    // LINEブラウザの場合は画像サイズを小さくする
+    const canvasWidth = isLineApp ? 800 : 1200;
+    const canvasHeight = isLineApp ? 900 : 1300;
+    const imgWidth = isLineApp ? 240 : 360;
+    const imgHeight = isLineApp ? 320 : 480;
+    const startX = isLineApp ? 20 : 30;
+    const startY = isLineApp ? 80 : 120;
+    const spacingX = isLineApp ? 260 : 390;
+    const spacingY = isLineApp ? 340 : 500;
+    
     for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
         const group = groups[groupIndex];
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
-        // キャンバスサイズ設定（縦画面2行3列レイアウト + 金額表示スペース）
-        canvas.width = 1200;
-        canvas.height = 1300;  // 金額表示スペースを最適化
+        // キャンバスサイズ設定
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
         
         // 背景色
         ctx.fillStyle = '#ffffff';
@@ -1028,21 +1049,13 @@ async function generateReportImages(groups) {
         
         // タイトル
         ctx.fillStyle = '#333';
-        ctx.font = 'bold 32px sans-serif';
+        ctx.font = isLineApp ? 'bold 20px sans-serif' : 'bold 32px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`売上報告書 - ${reportDate}`, canvas.width / 2, 50);
+        ctx.fillText(`売上報告書 - ${reportDate}`, canvas.width / 2, isLineApp ? 30 : 50);
         
         // グループ情報
-        ctx.font = '24px sans-serif';
-        ctx.fillText(`${groupIndex + 1}/${groups.length}ページ`, canvas.width / 2, 80);
-        
-        // 伝票画像配置（縦画面撮影対応：2行3列レイアウト）
-        const imgWidth = 360;  // 縦画面に最適化された幅
-        const imgHeight = 480; // 縦画面に最適化された高さ（4:3比率）
-        const startX = 30;     // 左端余白を最小化
-        const startY = 120;    // 上端位置
-        const spacingX = 390;  // 横間隔を最小化（余白10px）
-        const spacingY = 500;  // 縦間隔
+        ctx.font = isLineApp ? '16px sans-serif' : '24px sans-serif';
+        ctx.fillText(`${groupIndex + 1}/${groups.length}ページ`, canvas.width / 2, isLineApp ? 50 : 80);
         
         // すべての画像を並列で読み込む（Safari対応）
         const imageLoadPromises = group.map((receipt, index) => {
@@ -1064,19 +1077,19 @@ async function generateReportImages(groups) {
                         
                         // 金額と支払い方法の表示（スタイリッシュデザイン）
                         ctx.fillStyle = '#666';
-                        ctx.font = '16px sans-serif';
+                        ctx.font = isLineApp ? '12px sans-serif' : '16px sans-serif';
                         ctx.textAlign = 'center';
                         ctx.fillText(
                             `${receipt.paymentMethod === 'cash' ? '現金' : 'その他'}`,
                             x + imgWidth / 2,
-                            y + imgHeight + 20
+                            y + imgHeight + (isLineApp ? 15 : 20)
                         );
                         ctx.fillStyle = '#000';
-                        ctx.font = 'bold 20px sans-serif';
+                        ctx.font = isLineApp ? 'bold 14px sans-serif' : 'bold 20px sans-serif';
                         ctx.fillText(
                             `¥${receipt.amount.toLocaleString()}`,
                             x + imgWidth / 2,
-                            y + imgHeight + 45
+                            y + imgHeight + (isLineApp ? 30 : 45)
                         );
                         
                         resolve();
@@ -1104,14 +1117,18 @@ async function generateReportImages(groups) {
             if (groupIndex === groups.length - 1) {
                 const allTotal = receipts.reduce((sum, receipt) => sum + receipt.amount, 0);
                 const totalCustomers = receipts.reduce((sum, receipt) => sum + (receipt.customerCount || 0), 0);
+                
+                const boxHeight = isLineApp ? 70 : 100;
+                const boxY = canvas.height - (isLineApp ? 100 : 150);
+                
                 ctx.fillStyle = '#4CAF50';
-                ctx.fillRect(50, canvas.height - 150, canvas.width - 100, 100);
+                ctx.fillRect(50, boxY, canvas.width - 100, boxHeight);
                 ctx.fillStyle = '#fff';
-                ctx.font = 'bold 36px sans-serif';
+                ctx.font = isLineApp ? 'bold 20px sans-serif' : 'bold 36px sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText(`合計金額: ¥${allTotal.toLocaleString()}`, canvas.width / 2, canvas.height - 95);
-                ctx.font = '20px sans-serif';
-                ctx.fillText(`伝票数: ${receipts.length}枚 | 総客数: ${totalCustomers}名`, canvas.width / 2, canvas.height - 60);
+                ctx.fillText(`合計金額: ¥${allTotal.toLocaleString()}`, canvas.width / 2, boxY + (isLineApp ? 30 : 55));
+                ctx.font = isLineApp ? '14px sans-serif' : '20px sans-serif';
+                ctx.fillText(`伝票数: ${receipts.length}枚 | 総客数: ${totalCustomers}名`, canvas.width / 2, boxY + (isLineApp ? 50 : 80));
             }
             
             // 画像を写真フォルダに保存またはダウンロード
@@ -1129,8 +1146,77 @@ async function generateReportImages(groups) {
  */
 async function saveImageToPhotos(canvas, filename) {
     try {
-        // Safari対応：JPEGで圧縮してサイズを削減
-        const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+        // LINEブラウザ用により高圧縮（品質0.75）、それ以外は0.9
+        const quality = isLineApp ? 0.75 : 0.9;
+        const dataURL = canvas.toDataURL('image/jpeg', quality);
+        
+        console.log(`💾 保存画像 - サイズ: ${canvas.width}x${canvas.height}, 品質: ${quality}, Data URL長: ${dataURL.length}`);
+        
+        // LINEブラウザの場合、window.open()が制限されることがあるので対策
+        if (isLineApp) {
+            console.log('📱 LINEブラウザ検出 - 代替保存方法を使用');
+            
+            // 方法1: 直接ダウンロードリンクを作成
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = filename;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            
+            // ユーザーに通知を表示
+            showNotification('📱 画像を長押しして保存してください', 'info', 5000);
+            
+            // 画像を画面に表示（長押しで保存可能）
+            const imageDiv = document.createElement('div');
+            imageDiv.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.95);
+                z-index: 99999;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                box-sizing: border-box;
+                overflow-y: auto;
+            `;
+            
+            imageDiv.innerHTML = `
+                <div style="color: white; text-align: center; margin-bottom: 20px; padding: 15px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; max-width: 90%;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">📱 画像の保存方法</div>
+                    <div style="font-size: 14px; line-height: 1.5;">
+                        ↓ 下の画像を<strong>長押し</strong>して<br>「写真に保存」または「画像を保存」を選択してください
+                    </div>
+                </div>
+                <img src="${dataURL}" style="max-width: 90%; height: auto; border-radius: 10px; box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1); display: block;">
+                <button onclick="this.parentElement.remove()" style="
+                    margin-top: 20px;
+                    background: #007AFF;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    cursor: pointer;
+                ">閉じる</button>
+            `;
+            
+            document.body.appendChild(imageDiv);
+            
+            // クリーンアップ
+            setTimeout(() => {
+                if (link.parentElement) {
+                    document.body.removeChild(link);
+                }
+            }, 1000);
+            
+            return;
+        }
         
         // 新しいウィンドウで画像を表示（長押しで保存可能）
         const imageWindow = window.open('', '_blank');
@@ -1206,7 +1292,8 @@ async function saveImageToPhotos(canvas, filename) {
         
         // フォールバック：データURLで直接表示
         try {
-            const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+            const quality = isLineApp ? 0.75 : 0.9;
+            const dataURL = canvas.toDataURL('image/jpeg', quality);
             const link = document.createElement('a');
             link.href = dataURL;
             link.download = filename;
@@ -1225,9 +1312,10 @@ async function saveImageToPhotos(canvas, filename) {
             console.error('フォールバックエラー:', fallbackError);
             
             // 最終フォールバック：従来のダウンロード
+            const quality = isLineApp ? 0.75 : 0.9;
             const link = document.createElement('a');
             link.download = filename;
-            link.href = canvas.toDataURL('image/jpeg', 0.9);
+            link.href = canvas.toDataURL('image/jpeg', quality);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1326,7 +1414,7 @@ function showReportSummary() {
 /**
  * モバイル専用通知表示
  */
-function showNotification(message, type = 'info') {
+function showNotification(message, type = 'info', duration = null) {
     const notification = document.createElement('div');
     const colors = {
         success: '#4CAF50',
@@ -1356,13 +1444,13 @@ function showNotification(message, type = 'info') {
     notification.textContent = message;
     document.body.appendChild(notification);
     
-    // 6秒後に自動削除（写真保存メッセージは長めに表示）
-    const duration = message.includes('写真に保存') ? 8000 : 4000;
+    // 自動削除（カスタム時間または写真保存メッセージは長めに表示）
+    const displayDuration = duration || (message.includes('写真に保存') ? 8000 : 4000);
     setTimeout(() => {
         if (notification.parentNode) {
             notification.parentNode.removeChild(notification);
         }
-    }, duration);
+    }, displayDuration);
 }
 
 /**
