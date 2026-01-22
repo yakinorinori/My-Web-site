@@ -4,6 +4,10 @@
 - **GitHub Pages**: https://yakinorinori.github.io/My-Web-site/
 - **📱 モバイル売上報告**: https://yakinorinori.github.io/My-Web-site/mobile.html
 
+## 📖 セットアップガイド
+- **🚀 初めての方**: [Netlify環境変数の設定ガイド](NETLIFY_SETUP.md) を必ずお読みください
+- **🔒 セキュリティ**: ログイン認証を使用するには環境変数の設定が必須です
+
 ## 🎯 機能
 
 ### 📊 **デスクトップ版（メイン機能）**
@@ -114,49 +118,21 @@ python3 -m http.server 8080
 - **GitHub Pages**: プッシュ時に自動デプロイ ✅ 常時稼働
 - **Netlify Functions**: サーバーレス関数で認証とGoogle Sheets API を使用
 
-### Netlify Functions の設定（重要）
+### ⚙️ 環境変数の設定（必須）
 
-このシステムでは**3つの環境変数**が必要です：
+**📖 詳細な設定手順は [NETLIFY_SETUP.md](NETLIFY_SETUP.md) を参照してください**
 
-#### 🔒 認証情報
+このシステムを使用するには、Netlifyで以下の環境変数を設定する必要があります：
 
-1. **`AUTH_USERNAME`**
-   - ログイン用ユーザー名
-   - **セキュリティ上、クライアント側には保存しません**
-   - Netlify環境変数として安全に管理
-
-2. **`AUTH_PASSWORD`**
-   - ログイン用パスワード
-   - **セキュリティ上、クライアント側には保存しません**
-   - Netlify環境変数として安全に管理
+#### 🔒 認証情報（必須）
+- `AUTH_USERNAME`: ログイン用ユーザー名
+- `AUTH_PASSWORD`: ログイン用パスワード
 
 #### 📊 Google Sheets連携（オプション）
+- `GOOGLE_SHEET_ID`: スプレッドシートのID
+- `GOOGLE_SERVICE_ACCOUNT_JSON`: サービスアカウントのJSON認証情報
 
-3. **`GOOGLE_SHEET_ID`** 🔒
-   - 対象スプレッドシートのID
-   - 例: `1abc...xyz`（スプレッドシートURLから抽出）
-
-4. **`GOOGLE_SERVICE_ACCOUNT_JSON`**
-   - Google Cloud Consoleで作成したサービスアカウントのJSON認証情報
-
-### 環境変数の設定方法
-
-**Netlify Dashboard** で設定：
-
-1. https://app.netlify.com/ にアクセス
-2. サイトを選択
-3. 「Site configuration」 → 「Environment variables」
-4. 「Add a variable」をクリック
-5. 以下の変数を追加：
-
-```
-AUTH_USERNAME=your_username
-AUTH_PASSWORD=your_secure_password
-GOOGLE_SHEET_ID=1abc...xyz
-GOOGLE_SERVICE_ACCOUNT_JSON={ "type": "service_account", ... }
-```
-
-6. デプロイをトリガー（GitHubへのプッシュで自動）
+**👉 [詳細な設定手順はこちら](NETLIFY_SETUP.md)**
 
 ### GitHub Actions デプロイ状況確認
 1. リポジトリページで「Actions」タブをクリック
