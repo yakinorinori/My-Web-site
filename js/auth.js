@@ -266,11 +266,10 @@ async function handleGitHubPagesLogin(event) {
         const result = await response.json();
         
         if (result.success) {
-            console.log('✅ GitHub Pagesログイン成功');
+            console.log('✅ ログイン成功');
             
-            // ローカルストレージに認証状態を保存
-            localStorage.setItem('githubPagesAuth', 'true');
-            localStorage.setItem('githubPagesUser', username);
+            // 認証データを保存（タイムスタンプ付き）
+            saveAuthData(username);
             
             // メインアプリを表示
             createMainApp();
@@ -340,37 +339,72 @@ function showLoginMessage() {
 }
 
 /**
- * 認証状態を確認
+ * 認証状態を確認（タイムアウトチェック付き）
  */
 function isAuthenticated() {
-    if (IS_GITHUB_PAGES) {
-        return localStorage.getItem('githubPagesAuth') === 'true';
+    const authData = localStorage.getItem('authData');
+    
+    if (!authData) {
+        return false;
     }
-    // ローカル環境では常に認証済みとして扱う（開発用）
-    return true;
+    
+    try {
+        const { timestamp, user } = JSON.parse(authData);
+        const now = Date.now();
+        const TEN_MINUTES = 10 * 60 * 1000; // 10分
+        
+        // タイムアウトチェック
+        if (now - timestamp > TEN_MINUTES) {
+            console.log('⏱️ セッションタイムアウト（10分経過）');
+            localStorage.removeItem('authData');
+            return false;
+        }
+        
+        return true;
+    } catch (error) {
+        console.error('❌ 認証データ解析エラー:', error);
+        localStorage.removeItem('authData');
+        return false;
+    }
 }
 
 /**
  * 認証ユーザー名を取得
  */
 function getAuthenticatedUser() {
-    if (IS_GITHUB_PAGES) {
-        return localStorage.getItem('githubPagesUser') || 'Guest';
+    const authData = localStorage.getItem('authData');
+    
+    if (!authData) {
+        return 'Guest';
     }
-    return 'Developer';
+    
+    try {
+        const { user } = JSON.parse(authData);
+        return user || 'Guest';
+    } catch (error) {
+        return 'Guest';
+    }
+}
+
+/**
+ * 認証データを保存
+ */
+function saveAuthData(username) {
+    const authData = {
+        user: username,
+        timestamp: Date.now()
+    };
+    localStorage.setItem('authData', JSON.stringify(authData));
+    console.log('✅ 認証データ保存:', username);
 }
 
 /**
  * ログアウト処理
  */
 function logout() {
-    if (IS_GITHUB_PAGES) {
-        localStorage.removeItem('githubPagesAuth');
-        localStorage.removeItem('githubPagesUser');
-        showGitHubPagesLogin();
-    } else {
-        window.location.href = `${API_BASE_URL}/logout`;
-    }
+    localStorage.removeItem('authData');
+    console.log('👋 ログアウト完了');
+    showGitHubPagesLogin();
 }
 
 /**
@@ -379,17 +413,26 @@ function logout() {
 function initAuth() {
     console.log('🔐 認証システム初期化...');
     
-    if (IS_GITHUB_PAGES) {
-        if (isAuthenticated()) {
-            console.log('✅ GitHub Pages認証済み');
-            createMainApp();
-        } else {
-            console.log('❌ GitHub Pages未認証');
-            showGitHubPagesLogin();
-        }
-    } else {
-        // ローカル環境では認証をスキップ
-        console.log('🏠 ローカル環境 - 認証スキップ');
+    if (isAuthenticated()) {
+        console.log('✅ 認証済み - セッション有効');
         createMainApp();
+    } else {
+        console.log('❌ 未認証またはセッションタイムアウト');
+        showGitHubPagesLogin();
     }
+}
+
+/**
+ * セッションタイムアウトチェックを開始
+ */
+function startSessionTimeoutCheck() {
+    // 1分ごとにセッションをチェック
+    setInterval(() => {
+        if (!isAuthenticated()) {
+            console.log('⏱️ セッションタイムアウト検出 - ログアウト');
+            logout();
+        }
+    }, 60 * 1000); // 1分ごと
+    
+    console.log('⏱️ セッションタイムアウトチェック開始（10分）');
 }

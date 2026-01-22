@@ -26,6 +26,9 @@ function initializeApp() {
         // 認証システムの初期化
         initAuth();
         
+        // セッションタイムアウトチェック（1分ごと）
+        startSessionTimeoutCheck();
+        
         // データの初期読み込み
         loadData().then(() => {
             console.log('📊 データ読み込み完了');
