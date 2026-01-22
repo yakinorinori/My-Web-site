@@ -5,7 +5,8 @@
 - **📱 モバイル売上報告**: https://yakinorinori.github.io/My-Web-site/mobile.html
 
 ## 📖 セットアップガイド
-- **🚀 初めての方**: [Netlify環境変数の設定ガイド](NETLIFY_SETUP.md) を必ずお読みください
+- **🚀 推奨（無料）**: [Vercel環境変数の設定ガイド](VERCEL_SETUP.md) - 無料枠が充実
+- **📘 代替方法**: [Netlify環境変数の設定ガイド](NETLIFY_SETUP.md)
 - **🔒 セキュリティ**: ログイン認証を使用するには環境変数の設定が必須です
 
 ## 🎯 機能
@@ -113,14 +114,29 @@ python3 -m http.server 8080
 ```
 
 ## 🚀 デプロイメント
-- **GitHub Pages**: プッシュ時に自動デプロイ ✅ 常時稼働
-- **Netlify Functions**: サーバーレス関数で認証とGoogle Sheets API を使用
+
+### 推奨: Vercel（無料）
+- **サーバーレス関数**: 認証とGoogle Sheets API を使用
+- **無料枠が充実**: 100GB帯域幅/月、100時間関数実行/月
+- **📖 設定ガイド**: [VERCEL_SETUP.md](VERCEL_SETUP.md)
+
+### 代替: Netlify
+- **サーバーレス関数**: 認証とGoogle Sheets API を使用
+- **📖 設定ガイド**: [NETLIFY_SETUP.md](NETLIFY_SETUP.md)
+
+### GitHub Pages
+- プッシュ時に自動デプロイ ✅ 常時稼働
+- 静的ファイルのホスティングのみ
+
+---
 
 ### ⚙️ 環境変数の設定（必須）
 
-**📖 詳細な設定手順は [NETLIFY_SETUP.md](NETLIFY_SETUP.md) を参照してください**
+**📖 詳細な設定手順**
+- **Vercel**: [VERCEL_SETUP.md](VERCEL_SETUP.md) 👈 推奨
+- **Netlify**: [NETLIFY_SETUP.md](NETLIFY_SETUP.md)
 
-このシステムを使用するには、Netlifyで以下の環境変数を設定する必要があります：
+このシステムを使用するには、以下の環境変数を設定する必要があります：
 
 #### 🔒 認証情報（必須）
 - `AUTH_USERNAME`: ログイン用ユーザー名
@@ -129,8 +145,6 @@ python3 -m http.server 8080
 #### 📊 Google Sheets連携（オプション）
 - `GOOGLE_SHEET_ID`: スプレッドシートのID
 - `GOOGLE_SERVICE_ACCOUNT_JSON`: サービスアカウントのJSON認証情報
-
-**👉 [詳細な設定手順はこちら](NETLIFY_SETUP.md)**
 
 ### GitHub Actions デプロイ状況確認
 1. リポジトリページで「Actions」タブをクリック

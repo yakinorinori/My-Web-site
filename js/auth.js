@@ -254,8 +254,8 @@ async function handleGitHubPagesLogin(event) {
     submitButton.textContent = '認証中...';
     
     try {
-        // Netlify Functions経由で認証
-        const response = await fetch('/.netlify/functions/auth', {
+        // Vercel Functions経由で認証
+        const response = await fetch('/api/auth', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
