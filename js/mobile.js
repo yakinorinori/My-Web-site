@@ -700,11 +700,44 @@ function handleImageCapture(event) {
     reader.onload = function(e) {
         // 画像の縦横比をチェック
         const img = new Image();
+        
+        // Safari対応：crossOrigin属性を設定
+        img.crossOrigin = 'anonymous';
+        
         img.onload = function() {
             const isPortrait = img.height > img.width;
             
+            // Safari対応：画像を最適化してcanvasで再エンコード
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 最大サイズを制限（Safariのメモリ制限対策）
+            const maxWidth = 1200;
+            const maxHeight = 1600;
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > maxWidth || height > maxHeight) {
+                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                width = width * ratio;
+                height = height * ratio;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            // 白背景を描画（透過PNG対策）
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, width, height);
+            
+            // 画像を描画
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // 最適化されたData URLを取得（品質0.85でファイルサイズ削減）
+            const optimizedDataURL = canvas.toDataURL('image/jpeg', 0.85);
+            
             currentReceiptData = {
-                image: e.target.result,
+                image: optimizedDataURL,
                 timestamp: new Date(),
                 paymentMethod: null,
                 amount: 0,
@@ -735,12 +768,12 @@ function handleImageCapture(event) {
             
             preview.innerHTML = `
                 <div style="position: relative;">
-                    <img src="${e.target.result}" style="
+                    <img src="${optimizedDataURL}" style="
                         width: 100%;
                         height: 160px;
                         object-fit: cover;
                         border-radius: 8px;
-                    ">
+                    " crossorigin="anonymous">
                     ${orientationWarning}
                 </div>
             `;
@@ -757,8 +790,20 @@ function handleImageCapture(event) {
             const cameraBtn = document.getElementById('camera-btn');
             cameraBtn.textContent = '次の伝票を撮影する';
         };
+        
+        img.onerror = function() {
+            console.error('画像の読み込みに失敗しました');
+            showNotification('❌ 画像の読み込みに失敗しました', 'error');
+        };
+        
         img.src = e.target.result;
     };
+    
+    reader.onerror = function() {
+        console.error('ファイルの読み込みに失敗しました');
+        showNotification('❌ ファイルの読み込みに失敗しました', 'error');
+    };
+    
     reader.readAsDataURL(file);
 }
 
@@ -881,7 +926,7 @@ function updateReceiptList() {
         
         receiptItem.innerHTML = `
             <div style="display: flex; align-items: center; flex: 1;">
-                <img src="${receipt.image}" style="
+                <img src="${receipt.image}" crossorigin="anonymous" style="
                     width: 30px;
                     height: 40px;
                     object-fit: cover;
@@ -965,8 +1010,11 @@ function completeReport() {
 /**
  * レポート画像を生成（6枚1組）
  */
-function generateReportImages(groups) {
-    groups.forEach((group, groupIndex) => {
+async function generateReportImages(groups) {
+    const reportDate = document.getElementById('report-date').value;
+    
+    for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
+        const group = groups[groupIndex];
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
         
@@ -982,7 +1030,6 @@ function generateReportImages(groups) {
         ctx.fillStyle = '#333';
         ctx.font = 'bold 32px sans-serif';
         ctx.textAlign = 'center';
-        const reportDate = document.getElementById('report-date').value;
         ctx.fillText(`売上報告書 - ${reportDate}`, canvas.width / 2, 50);
         
         // グループ情報
@@ -997,58 +1044,84 @@ function generateReportImages(groups) {
         const spacingX = 390;  // 横間隔を最小化（余白10px）
         const spacingY = 500;  // 縦間隔
         
-        let totalAmount = 0;
-        group.forEach((receipt, index) => {
-            const col = index % 3;  // 3列レイアウト
-            const row = Math.floor(index / 3);  // 2行レイアウト
-            const x = startX + col * spacingX;
-            const y = startY + row * spacingY;
-            
-            // 画像描画
-            const img = new Image();
-            img.onload = function() {
-                ctx.drawImage(img, x, y, imgWidth, imgHeight);
+        // すべての画像を並列で読み込む（Safari対応）
+        const imageLoadPromises = group.map((receipt, index) => {
+            return new Promise((resolve, reject) => {
+                const col = index % 3;  // 3列レイアウト
+                const row = Math.floor(index / 3);  // 2行レイアウト
+                const x = startX + col * spacingX;
+                const y = startY + row * spacingY;
                 
-                // 金額と支払い方法の表示（スタイリッシュデザイン）
-                ctx.fillStyle = '#666';
-                ctx.font = '16px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(
-                    `${receipt.paymentMethod === 'cash' ? '現金' : 'その他'}`,
-                    x + imgWidth / 2,
-                    y + imgHeight + 20
-                );
-                ctx.fillStyle = '#000';
-                ctx.font = 'bold 20px sans-serif';
-                ctx.fillText(
-                    `¥${receipt.amount.toLocaleString()}`,
-                    x + imgWidth / 2,
-                    y + imgHeight + 45
-                );
-            };
-            img.src = receipt.image;
-            
-            totalAmount += receipt.amount;
+                const img = new Image();
+                
+                // Safari対応：crossOrigin属性を設定
+                img.crossOrigin = 'anonymous';
+                
+                img.onload = function() {
+                    try {
+                        // 画像描画
+                        ctx.drawImage(img, x, y, imgWidth, imgHeight);
+                        
+                        // 金額と支払い方法の表示（スタイリッシュデザイン）
+                        ctx.fillStyle = '#666';
+                        ctx.font = '16px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(
+                            `${receipt.paymentMethod === 'cash' ? '現金' : 'その他'}`,
+                            x + imgWidth / 2,
+                            y + imgHeight + 20
+                        );
+                        ctx.fillStyle = '#000';
+                        ctx.font = 'bold 20px sans-serif';
+                        ctx.fillText(
+                            `¥${receipt.amount.toLocaleString()}`,
+                            x + imgWidth / 2,
+                            y + imgHeight + 45
+                        );
+                        
+                        resolve();
+                    } catch (error) {
+                        console.error('画像描画エラー:', error);
+                        reject(error);
+                    }
+                };
+                
+                img.onerror = function(error) {
+                    console.error('画像読み込みエラー:', error);
+                    reject(error);
+                };
+                
+                // Safari対応：Data URLを直接設定
+                img.src = receipt.image;
+            });
         });
         
-        // 合計金額（最後のページに表示）
-        if (groupIndex === groups.length - 1) {
-            const allTotal = receipts.reduce((sum, receipt) => sum + receipt.amount, 0);
-            ctx.fillStyle = '#4CAF50';
-            ctx.fillRect(50, canvas.height - 150, canvas.width - 100, 100);
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 36px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(`合計金額: ¥${allTotal.toLocaleString()}`, canvas.width / 2, canvas.height - 80);
-            ctx.font = '20px sans-serif';
-            ctx.fillText(`伝票数: ${receipts.length}枚`, canvas.width / 2, canvas.height - 50);
+        // すべての画像が読み込まれるまで待機
+        try {
+            await Promise.all(imageLoadPromises);
+            
+            // 合計金額（最後のページに表示）
+            if (groupIndex === groups.length - 1) {
+                const allTotal = receipts.reduce((sum, receipt) => sum + receipt.amount, 0);
+                const totalCustomers = receipts.reduce((sum, receipt) => sum + (receipt.customerCount || 0), 0);
+                ctx.fillStyle = '#4CAF50';
+                ctx.fillRect(50, canvas.height - 150, canvas.width - 100, 100);
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 36px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`合計金額: ¥${allTotal.toLocaleString()}`, canvas.width / 2, canvas.height - 95);
+                ctx.font = '20px sans-serif';
+                ctx.fillText(`伝票数: ${receipts.length}枚 | 総客数: ${totalCustomers}名`, canvas.width / 2, canvas.height - 60);
+            }
+            
+            // 画像を写真フォルダに保存またはダウンロード
+            await saveImageToPhotos(canvas, `売上報告_${reportDate}_${groupIndex + 1}.png`);
+            
+        } catch (error) {
+            console.error('レポート生成エラー:', error);
+            showNotification('⚠️ 一部の画像の読み込みに失敗しました', 'error');
         }
-        
-        // 画像を写真フォルダに保存またはダウンロード
-        setTimeout(() => {
-            saveImageToPhotos(canvas, `売上報告_${reportDate}_${groupIndex + 1}.png`);
-        }, 1000);
-    });
+    }
 }
 
 /**
@@ -1056,16 +1129,16 @@ function generateReportImages(groups) {
  */
 async function saveImageToPhotos(canvas, filename) {
     try {
-        // Canvas to Blob conversion
-        const blob = await new Promise(resolve => {
-            canvas.toBlob(resolve, 'image/png', 0.95);
-        });
-        
-        // iPhone Safari用の画像保存
-        const dataURL = canvas.toDataURL('image/png', 0.95);
+        // Safari対応：JPEGで圧縮してサイズを削減
+        const dataURL = canvas.toDataURL('image/jpeg', 0.9);
         
         // 新しいウィンドウで画像を表示（長押しで保存可能）
         const imageWindow = window.open('', '_blank');
+        
+        if (!imageWindow) {
+            throw new Error('ポップアップがブロックされました');
+        }
+        
         imageWindow.document.write(`
             <!DOCTYPE html>
             <html>
@@ -1098,6 +1171,7 @@ async function saveImageToPhotos(canvas, filename) {
                         height: auto;
                         border-radius: 10px;
                         box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+                        display: block;
                     }
                     .close-btn {
                         margin-top: 20px;
@@ -1116,11 +1190,14 @@ async function saveImageToPhotos(canvas, filename) {
                     📱 <strong>iPhone写真アプリに保存する方法</strong><br>
                     ↓ 下の画像を長押しして「写真に保存」を選択してください
                 </div>
-                <img src="${dataURL}" alt="売上報告書">
+                <img src="${dataURL}" alt="売上報告書" crossorigin="anonymous">
                 <button class="close-btn" onclick="window.close()">閉じる</button>
             </body>
             </html>
         `);
+        
+        // ドキュメントを閉じて描画を完了
+        imageWindow.document.close();
         
         showNotification('📱 新しい画面で画像を長押しして「写真に保存」を選択してください', 'success');
         
@@ -1129,11 +1206,19 @@ async function saveImageToPhotos(canvas, filename) {
         
         // フォールバック：データURLで直接表示
         try {
-            const dataURL = canvas.toDataURL('image/png', 0.95);
+            const dataURL = canvas.toDataURL('image/jpeg', 0.9);
             const link = document.createElement('a');
             link.href = dataURL;
+            link.download = filename;
             link.target = '_blank';
-            link.click();
+            
+            // Safari対応：クリックイベントを作成
+            const clickEvent = new MouseEvent('click', {
+                view: window,
+                bubbles: true,
+                cancelable: true
+            });
+            link.dispatchEvent(clickEvent);
             
             showNotification('📱 開いた画像を長押しして「写真に保存」を選択してください', 'info');
         } catch (fallbackError) {
@@ -1142,8 +1227,10 @@ async function saveImageToPhotos(canvas, filename) {
             // 最終フォールバック：従来のダウンロード
             const link = document.createElement('a');
             link.download = filename;
-            link.href = canvas.toDataURL();
+            link.href = canvas.toDataURL('image/jpeg', 0.9);
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
             showNotification('ダウンロードフォルダに保存されました', 'warning');
         }
     }

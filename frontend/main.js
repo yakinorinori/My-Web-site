@@ -490,6 +490,11 @@ function createMainApp() {
     btnDiv.appendChild(btnMultiYearCustomers);
     root.appendChild(btnDiv);
 
+    // 設定パネルを追加
+    const settingsPanelDiv = document.createElement('div');
+    settingsPanelDiv.innerHTML = createSettingsPanelHTML();
+    root.appendChild(settingsPanelDiv);
+
     // プルダウン（select）追加
     const monthSelectDiv = document.createElement('div');
     monthSelectDiv.id = 'month-select-div';
@@ -556,8 +561,20 @@ function createMainApp() {
         root.appendChild(dataSourceSelector);
         root.appendChild(chartArea);
         
-        // デフォルトでデモデータを読み込み
-        loadData('demo');
+        // ユーザー設定を読み込み、その後データを読み込み
+        setTimeout(async () => {
+            console.log('⏳ ユーザー設定を読み込み中...');
+            const settingsLoaded = await loadUserSettings();
+            
+            // CSVソース設定から適切なデータタイプを判定
+            let dataType = 'demo';
+            if (userSettings.csvSource.includes('real')) {
+                dataType = 'real';
+            }
+            
+            console.log('📊 データを読み込み中（設定済み）:', dataType);
+            loadData(dataType);
+        }, 300);
     }
 
     // データ取得関数

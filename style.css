@@ -137,6 +137,121 @@ canvas {
     justify-content: center;
 }
 
+/* 設定パネル用スタイル */
+#settings-panel {
+    margin-bottom: 24px;
+    padding: 18px 20px;
+    background: linear-gradient(135deg, #f0f7ff 0%, #f5f9ff 100%);
+    border: 1.5px solid #d1e3f3;
+    border-radius: 12px;
+    display: none;
+}
+
+#settings-panel.active {
+    display: block;
+}
+
+#settings-panel h3 {
+    margin: 0 0 16px 0;
+    color: #2a4d8f;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.settings-group {
+    margin-bottom: 16px;
+}
+
+.settings-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: #555;
+    font-weight: 500;
+    font-size: 0.95em;
+}
+
+.settings-group input,
+.settings-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #b0b8d8;
+    border-radius: 6px;
+    font-size: 0.95em;
+    box-sizing: border-box;
+    background: white;
+    color: #333;
+}
+
+.settings-group input:focus,
+.settings-group select:focus {
+    outline: none;
+    border-color: #4e79a7;
+    box-shadow: 0 0 0 3px rgba(78, 121, 167, 0.1);
+}
+
+.settings-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.settings-btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.settings-btn-save {
+    background: #4e79a7;
+    color: white;
+}
+
+.settings-btn-save:hover {
+    background: #3f628d;
+    box-shadow: 0 2px 8px rgba(78, 121, 167, 0.3);
+}
+
+.settings-btn-reset {
+    background: #e8eef8;
+    color: #2a4d8f;
+    border: 1px solid #b0b8d8;
+}
+
+.settings-btn-reset:hover {
+    background: #d8e3f0;
+}
+
+.settings-btn-toggle {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 54px;
+    height: 54px;
+    background: #4e79a7;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.4em;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(78, 121, 167, 0.3);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.settings-btn-toggle:hover {
+    background: #3f628d;
+    box-shadow: 0 6px 16px rgba(78, 121, 167, 0.4);
+    transform: scale(1.05);
+}
+
 @media (max-width: 700px) {
     #app-root {
         padding: 10px 2vw 10px 2vw;
@@ -151,5 +266,13 @@ canvas {
         width: 98vw !important;
         max-width: 100% !important;
         height: auto !important;
+    }
+    
+    .settings-btn-toggle {
+        bottom: 16px;
+        right: 16px;
+        width: 48px;
+        height: 48px;
+        font-size: 1.2em;
     }
 }

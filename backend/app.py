@@ -264,6 +264,119 @@ def fetch_sales():
         json.dump(sales, f, ensure_ascii=False, indent=2)
     return jsonify({"status": "success", "count": len(sales)})
 
+# ユーザー設定の保存ディレクトリを作成
+USER_SETTINGS_DIR = 'user_settings'
+if not os.path.exists(USER_SETTINGS_DIR):
+    os.makedirs(USER_SETTINGS_DIR)
+
+def get_user_settings_file(username):
+    """ユーザー設定ファイルのパスを取得"""
+    return os.path.join(USER_SETTINGS_DIR, f"{username}_settings.json")
+
+# ユーザー設定を保存
+@app.route('/api/user-settings', methods=['POST'])
+@login_required
+def save_user_settings():
+    """ユーザーのCSV設定を保存"""
+    username = session.get('username')
+    data = request.get_json()
+    
+    if not username:
+        return jsonify({'error': 'ユーザー名が取得できません'}), 400
+    
+    if not data:
+        return jsonify({'error': 'データが必要です'}), 400
+    
+    try:
+        # ユーザー設定ファイルに保存
+        settings = {
+            'username': username,
+            'csvSource': data.get('csvSource', './sales.csv'),
+            'filters': data.get('filters', {}),
+            'updatedAt': datetime.now().isoformat()
+        }
+        
+        settings_file = get_user_settings_file(username)
+        with open(settings_file, 'w', encoding='utf-8') as f:
+            json.dump(settings, f, ensure_ascii=False, indent=2)
+        
+        print(f'✅ 設定を保存しました: {username}')
+        return jsonify({
+            'success': True,
+            'message': 'ユーザー設定を保存しました',
+            'settings': settings
+        }), 200
+    
+    except Exception as e:
+        print(f'❌ 設定保存エラー: {str(e)}')
+        return jsonify({'error': f'設定の保存に失敗しました: {str(e)}'}), 500
+
+# ユーザー設定を取得
+@app.route('/api/user-settings', methods=['GET'])
+@login_required
+def load_user_settings():
+    """ユーザーのCSV設定を取得"""
+    username = session.get('username')
+    
+    if not username:
+        return jsonify({'error': 'ユーザー名が取得できません'}), 400
+    
+    try:
+        settings_file = get_user_settings_file(username)
+        
+        if os.path.exists(settings_file):
+            with open(settings_file, 'r', encoding='utf-8') as f:
+                settings = json.load(f)
+            print(f'✅ 設定を読み込みました: {username}')
+            return jsonify({
+                'success': True,
+                'settings': settings
+            }), 200
+        else:
+            # デフォルト設定を返す
+            default_settings = {
+                'username': username,
+                'csvSource': './sales.csv',
+                'filters': {},
+                'createdAt': datetime.now().isoformat()
+            }
+            print(f'⚠️  デフォルト設定を返します: {username}')
+            return jsonify({
+                'success': True,
+                'settings': default_settings
+            }), 200
+    
+    except Exception as e:
+        print(f'❌ 設定読み込みエラー: {str(e)}')
+        return jsonify({'error': f'設定の読み込みに失敗しました: {str(e)}'}), 500
+
+# ユーザー設定を削除
+@app.route('/api/user-settings', methods=['DELETE'])
+@login_required
+def delete_user_settings():
+    """ユーザーのCSV設定を削除"""
+    username = session.get('username')
+    
+    if not username:
+        return jsonify({'error': 'ユーザー名が取得できません'}), 400
+    
+    try:
+        settings_file = get_user_settings_file(username)
+        
+        if os.path.exists(settings_file):
+            os.remove(settings_file)
+            print(f'✅ 設定を削除しました: {username}')
+            return jsonify({
+                'success': True,
+                'message': 'ユーザー設定を削除しました'
+            }), 200
+        else:
+            return jsonify({'error': '設定ファイルが見つかりません'}), 404
+    
+    except Exception as e:
+        print(f'❌ 設定削除エラー: {str(e)}')
+        return jsonify({'error': f'設定の削除に失敗しました: {str(e)}'}), 500
+
 if __name__ == '__main__':
     # セキュリティ設定
     app.config['SESSION_COOKIE_SECURE'] = True  # HTTPS必須
