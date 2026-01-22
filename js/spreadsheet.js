@@ -39,9 +39,13 @@ if (typeof window !== 'undefined') {
 
 /**
  * Netlify Functions経由でスプレッドシート操作を実行
+ * 🔒 sheetIdはサーバー側の環境変数で管理されます
  */
 async function callNetlifyFunction(action, params) {
     try {
+        // sheetIdは送信しない（サーバー側で環境変数から取得）
+        const { sheetId, ...safeParams } = params;
+        
         const response = await fetch(NETLIFY_FUNCTION_URL, {
             method: 'POST',
             headers: {
@@ -49,7 +53,7 @@ async function callNetlifyFunction(action, params) {
             },
             body: JSON.stringify({
                 action,
-                ...params
+                ...safeParams
             })
         });
 
@@ -68,38 +72,22 @@ async function callNetlifyFunction(action, params) {
 
 /**
  * スプレッドシート設定を保存
+ * 🔒 シートIDはNetlify環境変数で管理されるため、シート名のみ保存
  */
 function saveSpreadsheetSettings() {
-    const url = document.getElementById('spreadsheet-url')?.value;
     const sheetName = document.getElementById('sheet-name')?.value || '売上データ';
     
-    if (!url) {
-        showSpreadsheetStatus('⚠️ スプレッドシートURLは必須です', 'warning');
-        return;
-    }
-    
-    // スプレッドシートIDを抽出
-    const sheetId = extractSheetId(url);
-    if (!sheetId) {
-        showSpreadsheetStatus('❌ 無効なスプレッドシートURLです', 'error');
-        return;
-    }
-    
     const config = {
-        url,
-        sheetId,
         sheetName,
         savedAt: new Date().toISOString()
     };
     
     localStorage.setItem(SPREADSHEET_CONFIG_KEY, JSON.stringify(config));
     
-    console.log('📊 スプレッドシート設定保存:', { sheetId, sheetName });
+    console.log('📊 スプレッドシート設定保存:', { sheetName });
+    console.log('🔒 シートIDはNetlify環境変数で安全に管理されています');
     
     // 設定を即座に反映（リロード不要）
-    if (document.getElementById('spreadsheet-url')) {
-        document.getElementById('spreadsheet-url').value = url;
-    }
     if (document.getElementById('sheet-name')) {
         document.getElementById('sheet-name').value = sheetName;
     }
@@ -140,23 +128,23 @@ function loadSpreadsheetSettings() {
 async function testSpreadsheetConnection() {
     const config = getSpreadsheetConfig();
     
-    if (!config || !config.sheetId) {
-        showSpreadsheetStatus('⚠️ スプレッドシートIDが設定されていません。まず「💾 設定保存」してください', 'warning');
+    if (!config) {
+        showSpreadsheetStatus('⚠️ スプレッドシート設定が見つかりません。まず「💾 設定保存」してください', 'warning');
         return;
     }
     
     showSpreadsheetStatus('🔍 接続テスト中...', 'info');
     
     console.log('🔧 接続テスト開始:', {
-        sheetId: config.sheetId,
-        sheetName: config.sheetName,
+        sheetName: config?.sheetName || '売上データ',
         functionUrl: NETLIFY_FUNCTION_URL
     });
+    console.log('🔒 シートIDはNetlify環境変数から取得されます');
     
     try {
+        // sheetIdは送信しない（サーバー側で環境変数から取得）
         const result = await callNetlifyFunction('test', {
-            sheetId: config.sheetId,
-            sheetName: config.sheetName
+            sheetName: config?.sheetName || '売上データ'
         });
         
         if (result.success) {
@@ -189,15 +177,13 @@ function extractSheetId(url) {
 
 /**
  * 今日の売上データを送信
+ * 🔒 sheetIdはサーバー側の環境変数から自動取得
  */
 async function sendTodayData() {
     const config = getSpreadsheetConfig();
-    if (!config || !config.sheetId) {
-        showSpreadsheetStatus('⚠️ スプレッドシートが設定されていません', 'warning');
-        return;
-    }
     
     showSpreadsheetStatus('📤 今日のデータを送信中...', 'info');
+    console.log('🔒 シートIDはNetlify環境変数から取得されます');
     
     try {
         // 今日のデータを集計
@@ -209,9 +195,9 @@ async function sendTodayData() {
         }
         
         // Netlify Functions経由でスプレッドシートに書き込み
+        // sheetIdは送信しない（サーバー側で環境変数から取得）
         const result = await callNetlifyFunction('append', {
-            sheetId: config.sheetId,
-            sheetName: config.sheetName || '売上データ',
+            sheetName: config?.sheetName || '売上データ',
             values: [[
                 todayData.date,
                 todayData.payer || '不明',
@@ -290,11 +276,9 @@ function getSpreadsheetConfig() {
         if (stored) {
             const config = JSON.parse(stored);
             
-            if (config.sheetId && config.sheetName) {
+            if (config.sheetName) {
                 return {
-                    sheetId: config.sheetId,
-                    sheetName: config.sheetName,
-                    url: config.url
+                    sheetName: config.sheetName
                 };
             }
         }
@@ -303,21 +287,14 @@ function getSpreadsheetConfig() {
     }
     
     // LocalStorageになければ入力フィールドから取得
-    const url = document.getElementById('spreadsheet-url')?.value;
     const sheetName = document.getElementById('sheet-name')?.value || '売上データ';
     
-    if (!url) {
-        showSpreadsheetStatus('⚠️ スプレッドシート設定がありません。URLを入力して「💾 設定保存」ボタンをクリックしてください', 'warning');
+    if (!sheetName) {
+        showSpreadsheetStatus('⚠️ スプレッドシート設定がありません。シート名を入力して「💾 設定保存」ボタンをクリックしてください', 'warning');
         return null;
     }
     
-    const sheetId = extractSheetId(url);
-    if (!sheetId) {
-        showSpreadsheetStatus('❌ 無効なスプレッドシートURLです', 'error');
-        return null;
-    }
-    
-    return { url, sheetId, sheetName };
+    return { sheetName };
 }
 
 /**
@@ -363,7 +340,7 @@ function showSpreadsheetStatus(message, type = 'info') {
 async function loadSalesDataFromSpreadsheet() {
     try {
         const config = getSpreadsheetConfig();
-        if (!config || !config.sheetId) {
+        if (!config) {
             throw new Error('スプレッドシート設定が見つかりません');
         }
         
@@ -371,7 +348,6 @@ async function loadSalesDataFromSpreadsheet() {
         
         // Netlify Functions経由でデータを取得
         const result = await callNetlifyFunction('read', {
-            sheetId: config.sheetId,
             sheetName: config.sheetName || '売上データ',
             range: 'A:E' // 日付、支払い者、客数、売り上げ、その他
         });

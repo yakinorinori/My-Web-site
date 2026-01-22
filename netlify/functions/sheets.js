@@ -68,17 +68,20 @@ exports.handler = async (event, context) => {
     try {
         // リクエストボディをパース
         const body = JSON.parse(event.body || '{}');
-        const { action, sheetId, sheetName, range, values } = body;
+        const { action, sheetName, range, values } = body;
 
-        console.log('📥 Request received:', { action, sheetId, sheetName });
+        // 🔒 sheetIdは環境変数から取得（安全）
+        const sheetId = process.env.GOOGLE_SHEET_ID;
+
+        console.log('📥 Request received:', { action, sheetName });
 
         if (!sheetId) {
             return {
-                statusCode: 400,
+                statusCode: 500,
                 headers,
                 body: JSON.stringify({ 
                     success: false,
-                    error: 'sheetId is required' 
+                    error: 'GOOGLE_SHEET_ID environment variable is not set' 
                 })
             };
         }

@@ -63,6 +63,17 @@ Google Sheets API v4では、**APIキーでは読み取り専用**の操作し�
 
 ### 3️⃣ Netlifyに環境変数を設定
 
+#### 重要な環境変数
+
+このシステムでは**2つの環境変数**が必要です：
+
+1. **`GOOGLE_SERVICE_ACCOUNT_JSON`** - サービスアカウントの認証情報
+2. **`GOOGLE_SHEET_ID`** - 対象スプレッドシートのID
+
+---
+
+#### 🔒 GOOGLE_SERVICE_ACCOUNT_JSON の設定
+
 1. **Netlify Dashboard**にアクセス
    - https://app.netlify.com/
 
@@ -88,6 +99,30 @@ Google Sheets API v4では、**APIキーでは読み取り専用**の操作し�
      ```
    - **Scopes**: `All scopes`（全環境で使用）
    - 「Create variable」をクリック
+
+---
+
+#### 🔒 GOOGLE_SHEET_ID の設定
+
+**セキュリティ上の理由により、スプレッドシートIDはクライアント側（ブラウザ）に保存しません。**
+代わりに、Netlify環境変数として安全に管理します。
+
+1. **スプレッドシートのIDを取得**
+   - Google スプレッドシートのURLから抽出します
+   - 例: `https://docs.google.com/spreadsheets/d/1abc...xyz/edit`
+   - ID部分: `1abc...xyz`
+
+2. **環境変数を追加**
+   - Netlify Dashboard → 「Environment variables」
+   - 「Add a variable」 → 「Add a single variable」
+   - **Key**: `GOOGLE_SHEET_ID`
+   - **Value**: 上記で取得したスプレッドシートID
+   - **Scopes**: `All scopes`
+   - 「Create variable」をクリック
+
+---
+
+#### ✅ デプロイを実行
 
 5. **デプロイをトリガー**
    - 「Deploys」タブに移動

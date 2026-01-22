@@ -1512,6 +1512,7 @@ async function sendMobileSalesDataToSpreadsheet(receipts, reportDate) {
         ]);
         
         console.log('📊 送信データ:', rows);
+        console.log('🔒 シートIDはNetlify環境変数から取得されます');
         
         // Netlify Functions経由でスプレッドシートにデータを送信
         const response = await fetch('/.netlify/functions/sheets', {
@@ -1521,8 +1522,7 @@ async function sendMobileSalesDataToSpreadsheet(receipts, reportDate) {
             },
             body: JSON.stringify({
                 action: 'append',
-                sheetId: config.sheetId,
-                sheetName: config.sheetName || '売上データ',
+                sheetName: config?.sheetName || '売上データ',
                 values: rows  // 複数行をまとめて送信
             })
         });
@@ -1562,6 +1562,7 @@ async function sendMobileSalesDataToSpreadsheet(receipts, reportDate) {
 
 /**
  * モバイル用スプレッドシート設定を取得
+ * 🔒 sheetIdはNetlify環境変数で管理されるので、sheetNameのみ返す
  */
 function getMobileSpreadsheetConfig() {
     try {
@@ -1569,11 +1570,8 @@ function getMobileSpreadsheetConfig() {
         if (!config) return null;
         
         const settings = JSON.parse(config);
-        if (!settings.sheetId) return null;
         
         return {
-            url: settings.url,
-            sheetId: settings.sheetId,
             sheetName: settings.sheetName || '売上データ'
         };
         

@@ -114,6 +114,22 @@ python3 -m http.server 8080
 - **GitHub Pages**: プッシュ時に自動デプロイ ✅ 常時稼働
 - **Netlify Functions**: サーバーレス関数で Google Sheets API を使用
 
+### Netlify Functions の設定（重要）
+
+Google Sheets連携には**2つの環境変数**が必要です：
+
+1. **`GOOGLE_SERVICE_ACCOUNT_JSON`**
+   - Google Cloud Consoleで作成したサービスアカウントのJSON認証情報
+   - 詳細: [GOOGLE_SERVICE_ACCOUNT_SETUP.md](GOOGLE_SERVICE_ACCOUNT_SETUP.md)
+
+2. **`GOOGLE_SHEET_ID`** 🔒
+   - 対象スプレッドシートのID
+   - **セキュリティ上の理由により、クライアント側には保存しません**
+   - Netlify環境変数として安全に管理
+   - 例: `1abc...xyz`（スプレッドシートURLから抽出）
+
+**設定手順**: [GOOGLE_SERVICE_ACCOUNT_SETUP.md](GOOGLE_SERVICE_ACCOUNT_SETUP.md) を参照
+
 ### GitHub Actions デプロイ状況確認
 1. リポジトリページで「Actions」タブをクリック
 2. 最新の「Deploy to GitHub Pages」ワークフローを確認
