@@ -421,22 +421,6 @@ function createMobileSalesReportScreen() {
                     🎯 売上報告を完了する
                 </button>
             </div>
-            
-            <!-- スプレッドシート連携状況表示 -->
-            <div id="spreadsheet-status-mobile" style="
-                position: fixed;
-                bottom: 20px;
-                left: 20px;
-                right: 20px;
-                background: rgba(0, 0, 0, 0.7);
-                color: white;
-                padding: 12px 16px;
-                border-radius: 12px;
-                font-size: 13px;
-                text-align: center;
-                backdrop-filter: blur(10px);
-                display: none;
-            "></div>
         </div>
 
 
@@ -449,9 +433,6 @@ function createMobileSalesReportScreen() {
     
     // イベントリスナーを設定
     setupMobileEventListeners();
-    
-    // スプレッドシート連携状況を確認・表示
-    checkAndDisplaySpreadsheetStatus();
 }
 
 /**
@@ -1383,18 +1364,6 @@ function showReportSummary() {
                     📱 <strong>iPhone写真アプリに保存完了</strong><br>
                     新しい画面で画像を長押しして「写真に保存」を選択してください
                 </div>
-                <div style="
-                    background: rgba(33, 150, 243, 0.2);
-                    border-radius: 12px;
-                    padding: 16px;
-                    margin-bottom: 24px;
-                    font-size: 14px;
-                    color: white;
-                    border-left: 4px solid white;
-                ">
-                    📊 <strong>スプレッドシートに自動送信</strong><br>
-                    売上データが設定されたシートに記録されました
-                </div>
                 <button onclick="location.reload()" style="
                     width: 100%;
                     background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
@@ -1451,36 +1420,6 @@ function showNotification(message, type = 'info', duration = null) {
             notification.parentNode.removeChild(notification);
         }
     }, displayDuration);
-}
-
-/**
- * スプレッドシート連携状況を確認・表示
- */
-function checkAndDisplaySpreadsheetStatus() {
-    const config = getMobileSpreadsheetConfig();
-    const statusDiv = document.getElementById('spreadsheet-status-mobile');
-    
-    if (!statusDiv) return;
-    
-    if (config) {
-        statusDiv.innerHTML = '📊 スプレッドシート連携: 有効 - 売上報告完了時に自動送信されます';
-        statusDiv.style.background = 'rgba(76, 175, 80, 0.9)';
-        statusDiv.style.display = 'block';
-        
-        // 5秒後に自動で非表示
-        setTimeout(() => {
-            statusDiv.style.display = 'none';
-        }, 5000);
-    } else {
-        statusDiv.innerHTML = '📊 スプレッドシート連携: 未設定 - デスクトップ版で設定できます';
-        statusDiv.style.background = 'rgba(255, 152, 0, 0.9)';
-        statusDiv.style.display = 'block';
-        
-        // 3秒後に自動で非表示
-        setTimeout(() => {
-            statusDiv.style.display = 'none';
-        }, 3000);
-    }
 }
 
 /**
