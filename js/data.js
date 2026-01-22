@@ -78,10 +78,42 @@ function csvToArray(str) {
 }
 
 /**
- * データを読み込む（リアルデータまたはデモデータ）
+ * データを読み込む（Googleスプレッドシートまたはデモデータ）
  */
-function loadData(dataType = 'real') {
-    // GitHub Pages環境では静的ファイルを直接読み込み
+async function loadData(dataType = 'real') {
+    // 認証済みの場合は、まずGoogleスプレッドシートから読み込みを試みる
+    if (typeof isAuthenticated === 'function' && isAuthenticated() && typeof loadSalesDataFromSpreadsheet === 'function') {
+        try {
+            console.log('📊 Googleスプレッドシートからデータを読み込み中...');
+            const spreadsheetData = await loadSalesDataFromSpreadsheet();
+            
+            if (spreadsheetData && spreadsheetData.length > 0) {
+                console.log('✅ Googleスプレッドシートからデータ取得成功:', spreadsheetData.length, '行');
+                globalData = spreadsheetData;
+                
+                // データ情報を更新
+                updateDataInfo(spreadsheetData);
+                
+                // プルダウンの選択肢をセット
+                setupMonthSelector(spreadsheetData);
+
+                // 初期表示は月分析
+                showMonthAnalysis();
+                
+                // 月選択divを表示
+                const monthSelectDiv = document.getElementById('month-select-div');
+                if (monthSelectDiv) {
+                    monthSelectDiv.style.display = 'block';
+                }
+                
+                return spreadsheetData;
+            }
+        } catch (error) {
+            console.warn('⚠️ Googleスプレッドシートからの読み込みに失敗、CSVにフォールバック:', error.message);
+        }
+    }
+    
+    // フォールバック: CSVファイルから読み込み
     const url = IS_GITHUB_PAGES 
         ? './sales.csv'  // GitHub Pages: 相対パスでCSVファイルを読み込み
         : `${API_BASE_URL}/sales.csv`;

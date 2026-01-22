@@ -285,16 +285,11 @@ function showSpreadsheetStatus(message, type = 'info') {
  */
 async function loadSalesDataFromSpreadsheet() {
     try {
-        const config = getSpreadsheetConfig();
-        if (!config) {
-            throw new Error('スプレッドシート設定が見つかりません');
-        }
-        
-        showSpreadsheetStatus('📊 スプレッドシートからデータを読み込み中...', 'info');
+        console.log('📊 スプレッドシートからデータを読み込み中...');
         
         // Vercel Serverless Function経由でデータを取得
         const result = await callNetlifyFunction('read', {
-            sheetName: config.sheetName || '売上データ',
+            sheetName: '売上データ',
             range: 'A:E' // 日付、支払い者、客数、売り上げ、その他
         });
         
@@ -305,7 +300,7 @@ async function loadSalesDataFromSpreadsheet() {
         // データをCSV形式に変換
         const csvData = convertSpreadsheetDataToCSV(result.values);
         
-        showSpreadsheetStatus(`✅ ${result.values.length - 1}件のデータを読み込みました`, 'success');
+        console.log(`✅ ${result.values.length - 1}件のデータをスプレッドシートから読み込みました`);
         
         return csvData;
         
