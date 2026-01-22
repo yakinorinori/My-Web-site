@@ -236,7 +236,8 @@ function showGitHubPagesLogin() {
 }
 
 /**
- * GitHub Pagesログイン処理
+ * GitHub Pagesログイン処理（サーバーサイド認証）
+ * 🔒 認証情報はNetlify環境変数で安全に管理
  */
 async function handleGitHubPagesLogin(event) {
     event.preventDefault();
@@ -244,23 +245,49 @@ async function handleGitHubPagesLogin(event) {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const errorDiv = document.getElementById('login-error');
+    const submitButton = event.target.querySelector('button[type="submit"]');
     
     console.log('🔑 GitHub Pagesログイン試行:', username);
     
-    // 簡易認証（GitHub Pages用）- デモアカウント
-    if (username === 'demo' && password === 'demo2024') {
-        console.log('✅ GitHub Pagesログイン成功');
+    // ボタンをローディング状態に
+    submitButton.disabled = true;
+    submitButton.textContent = '認証中...';
+    
+    try {
+        // Netlify Functions経由で認証
+        const response = await fetch('/.netlify/functions/auth', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        });
         
-        // ローカルストレージに認証状態を保存
-        localStorage.setItem('githubPagesAuth', 'true');
-        localStorage.setItem('githubPagesUser', username);
+        const result = await response.json();
         
-        // メインアプリを表示
-        createMainApp();
-    } else {
-        console.log('❌ GitHub Pagesログイン失敗');
-        errorDiv.textContent = 'ユーザー名またはパスワードが正しくありません';
+        if (result.success) {
+            console.log('✅ GitHub Pagesログイン成功');
+            
+            // ローカルストレージに認証状態を保存
+            localStorage.setItem('githubPagesAuth', 'true');
+            localStorage.setItem('githubPagesUser', username);
+            
+            // メインアプリを表示
+            createMainApp();
+        } else {
+            console.log('❌ GitHub Pagesログイン失敗');
+            errorDiv.textContent = 'ユーザー名またはパスワードが正しくありません';
+            errorDiv.style.display = 'block';
+            submitButton.disabled = false;
+            submitButton.textContent = 'ログイン';
+        }
+        
+    } catch (error) {
+        console.error('❌ 認証エラー:', error);
+        errorDiv.textContent = 'ログインエラーが発生しました。しばらくしてから再試行してください。';
         errorDiv.style.display = 'block';
+        submitButton.disabled = false;
+        submitButton.textContent = 'ログイン';
     }
 }
 

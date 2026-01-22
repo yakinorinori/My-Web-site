@@ -112,23 +112,51 @@ python3 -m http.server 8080
 
 ## 🚀 デプロイメント
 - **GitHub Pages**: プッシュ時に自動デプロイ ✅ 常時稼働
-- **Netlify Functions**: サーバーレス関数で Google Sheets API を使用
+- **Netlify Functions**: サーバーレス関数で認証とGoogle Sheets API を使用
 
 ### Netlify Functions の設定（重要）
 
-Google Sheets連携には**2つの環境変数**が必要です：
+このシステムでは**3つの環境変数**が必要です：
 
-1. **`GOOGLE_SERVICE_ACCOUNT_JSON`**
-   - Google Cloud Consoleで作成したサービスアカウントのJSON認証情報
-   - 詳細: [GOOGLE_SERVICE_ACCOUNT_SETUP.md](GOOGLE_SERVICE_ACCOUNT_SETUP.md)
+#### 🔒 認証情報
 
-2. **`GOOGLE_SHEET_ID`** 🔒
-   - 対象スプレッドシートのID
-   - **セキュリティ上の理由により、クライアント側には保存しません**
+1. **`AUTH_USERNAME`**
+   - ログイン用ユーザー名
+   - **セキュリティ上、クライアント側には保存しません**
    - Netlify環境変数として安全に管理
+
+2. **`AUTH_PASSWORD`**
+   - ログイン用パスワード
+   - **セキュリティ上、クライアント側には保存しません**
+   - Netlify環境変数として安全に管理
+
+#### 📊 Google Sheets連携（オプション）
+
+3. **`GOOGLE_SHEET_ID`** 🔒
+   - 対象スプレッドシートのID
    - 例: `1abc...xyz`（スプレッドシートURLから抽出）
 
-**設定手順**: [GOOGLE_SERVICE_ACCOUNT_SETUP.md](GOOGLE_SERVICE_ACCOUNT_SETUP.md) を参照
+4. **`GOOGLE_SERVICE_ACCOUNT_JSON`**
+   - Google Cloud Consoleで作成したサービスアカウントのJSON認証情報
+
+### 環境変数の設定方法
+
+**Netlify Dashboard** で設定：
+
+1. https://app.netlify.com/ にアクセス
+2. サイトを選択
+3. 「Site configuration」 → 「Environment variables」
+4. 「Add a variable」をクリック
+5. 以下の変数を追加：
+
+```
+AUTH_USERNAME=your_username
+AUTH_PASSWORD=your_secure_password
+GOOGLE_SHEET_ID=1abc...xyz
+GOOGLE_SERVICE_ACCOUNT_JSON={ "type": "service_account", ... }
+```
+
+6. デプロイをトリガー（GitHubへのプッシュで自動）
 
 ### GitHub Actions デプロイ状況確認
 1. リポジトリページで「Actions」タブをクリック
