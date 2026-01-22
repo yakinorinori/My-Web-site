@@ -2,7 +2,6 @@
 
 ## 🌐 デモサイト
 - **GitHub Pages**: https://yakinorinori.github.io/My-Web-site/
-- **Mac mini サーバー**: http://192.168.151.100:8080
 - **📱 モバイル売上報告**: https://yakinorinori.github.io/My-Web-site/mobile.html
 
 ## 🎯 機能
@@ -67,11 +66,6 @@
 5. 報告書を自動生成してiPhone写真アプリに保存
 6. **Google Sheetsへ自動送信**（設定済みの場合）
 
-### 🖥️ **Mac mini サーバー（フル機能版）**
-1. VPNまたはローカルネットワークから Mac mini にアクセス
-2. 本番用アカウントでログイン
-3. リアルタイムデータの表示・編集
-
 ## 📁 プロジェクト構造
 ```
 My-Web-site/
@@ -118,23 +112,18 @@ python3 -m http.server 8080
 
 ## 🚀 デプロイメント
 - **GitHub Pages**: プッシュ時に自動デプロイ ✅ 常時稼働
-- **Mac mini**: ローカル手動デプロイ（GitHub Actions無効化済み）
+- **Netlify Functions**: サーバーレス関数で Google Sheets API を使用
 
 ### GitHub Actions デプロイ状況確認
 1. リポジトリページで「Actions」タブをクリック
 2. 最新の「Deploy to GitHub Pages」ワークフローを確認
-3. GitHub Pagesのみ自動デプロイされます
+3. GitHub Pagesで自動デプロイされます
 
-### Mac mini 手動デプロイ（オプション）
-Mac miniでローカルに手動デプロイしたい場合：
-
-```bash
-# Mac mini上で実行
-cd ~/個人事業/My-Web-site
-git pull origin main
-chmod +x ./scripts/start-all-servers.sh
-./scripts/start-all-servers.sh
-```
+### Netlify連携
+Netlifyを使用して、サーバーレス関数経由でGoogle Sheets APIにアクセスします：
+- **Netlify Functions**: `/.netlify/functions/sheets`
+- **環境変数**: Netlify Dashboardで設定
+- **詳細**: [GOOGLE_SERVICE_ACCOUNT_SETUP.md](GOOGLE_SERVICE_ACCOUNT_SETUP.md) を参照
 
 ## 📈 データ形式
 
@@ -169,9 +158,8 @@ chmod +x ./scripts/start-all-servers.sh
 - **情報**: 日付、伝票画像、金額、支払い方法、合計
 
 ## 🛡️ セキュリティ
-- ユーザー認証システム
-- セッション管理
-- HTTPS対応（Mac mini）
+- ユーザー認証システム（GitHub Pagesではローカルストレージ認証）
+- Netlify Functions経由でAPI Keyを安全に管理
 - CORS設定
 
 ## 📱 モバイル版の特徴

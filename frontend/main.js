@@ -149,19 +149,23 @@ function showDemoMessage() {
                         <li>📈 売上データのグラフ表示</li>
                         <li>🍰 円グラフ、棒グラフ、線グラフ対応</li>
                         <li>📱 レスポンシブデザイン</li>
-                        <li>🔐 認証システム（ローカル環境）</li>
+                        <li>🔐 簡易認証システム</li>
+                        <li>☁️ Google Sheets連携（Netlify Functions）</li>
                     </ul>
+                </div>
+                
+                <div style="margin: 20px 0; padding: 15px; background: #e3f2fd; border-radius: 5px; border-left: 4px solid #2196F3;">
+                    <h3>☁️ Netlify Functions</h3>
+                    <p style="margin: 10px 0; font-size: 14px;">
+                    このシステムは<strong>Netlify</strong>のサーバーレス関数を使用して、<br>
+                    Google Sheets APIと連携しています。
+                    </p>
                 </div>
                 
                 <button onclick="loadDemoData()" 
                         style="background: #4CAF50; color: white; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 10px;">
                     📊 デモデータを表示
                 </button>
-                
-                <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 5px; border-left: 4px solid #ffc107;">
-                    <strong>💡 フル機能版</strong><br>
-                    完全な認証機能とリアルタイムデータは、ローカル環境（Mac mini）で利用可能です。
-                </div>
             </div>
         </div>
     `;
@@ -437,13 +441,6 @@ async function initializeApp() {
         return;
     }
     
-    // Mac mini環境では認証チェック
-    console.log('🖥️ Mac mini環境モード');
-    const isAuthenticated = await checkAuthentication();
-    if (!isAuthenticated) {
-        return; // showLoginMessage()は既にcheckAuthentication内で呼ばれる
-    }
-    
     // 認証成功後、アプリのUIを構築
     createMainApp();
 }
@@ -549,13 +546,8 @@ function createMainApp() {
         const dataSourceSelector = document.createElement('div');
         dataSourceSelector.style.cssText = 'margin: 20px 0; text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px;';
         dataSourceSelector.innerHTML = `
-            <h3>📊 データソース選択</h3>
-            <button id="demo-data-btn" class="data-source-btn" style="margin: 5px; padding: 10px 20px; background: #17a2b8; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                📋 デモデータ
-            </button>
-            <button id="real-data-btn" class="data-source-btn" style="margin: 5px; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                💼 実データ（Mac mini）
-            </button>
+            <h3>📊 デモデータ</h3>
+            <p style="margin: 10px 0; color: #6c757d;">サンプル売上データを表示しています</p>
             <div id="data-info" style="margin-top: 10px; font-size: 14px; color: #6c757d;"></div>
         `;
         root.appendChild(dataSourceSelector);
