@@ -4,16 +4,19 @@
  */
 
 // グローバル設定
-const API_BASE_URL = window.location.hostname === 'yakinorinori.github.io' 
+const API_BASE_URL = window.location.hostname.includes('vercel.app')
+    ? window.location.origin
+    : window.location.hostname === 'yakinorinori.github.io' 
     ? 'https://yakinorinori.github.io/My-Web-site'
     : window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:5000'
-    : 'https://yakinorinori.github.io/My-Web-site';
+    : window.location.origin;
 
 const IS_GITHUB_PAGES = window.location.hostname === 'yakinorinori.github.io';
+const IS_VERCEL = window.location.hostname.includes('vercel.app');
 
 console.log('🚀 売上管理システム開始');
-console.log('🌐 実行環境:', IS_GITHUB_PAGES ? 'GitHub Pages' : 'ローカル環境');
+console.log('🌐 実行環境:', IS_VERCEL ? 'Vercel' : IS_GITHUB_PAGES ? 'GitHub Pages' : 'ローカル環境');
 console.log('🔗 API Base URL:', API_BASE_URL);
 
 /**
