@@ -57,9 +57,7 @@
 
 ### 📊 **デスクトップ版 - GitHub Pages（デモ版）**
 1. https://yakinorinori.github.io/My-Web-site/ にアクセス
-2. デモ用アカウントでログイン：
-   - `kiradan` / `kiradan2024!`
-   - `user1` / `password123`
+2. Netlifyで設定した認証情報でログイン
 3. デモデータ（sales.csv）でグラフや統計を確認
 
 ### 📱 **モバイル版 - 売上報告システム（NEW!）**

@@ -78,7 +78,7 @@
 2. 「Add a single variable」を選択
 3. 以下を入力：
    - **Key**: `AUTH_USERNAME`
-   - **Values**: あなたが決めたユーザー名（例: `admin` や `kiradan`）
+   - **Values**: あなたが決めたユーザー名（例: `myusername`）
    - **Scopes**: `All scopes` を選択（デフォルト）
 4. 「Create variable」をクリック
 
@@ -214,7 +214,7 @@
 
 | 変数名 | 必須 | 説明 | 例 |
 |--------|------|------|-----|
-| `AUTH_USERNAME` | ✅ 必須 | ログイン用ユーザー名 | `admin` |
+| `AUTH_USERNAME` | ✅ 必須 | ログイン用ユーザー名 | `yourname` |
 | `AUTH_PASSWORD` | ✅ 必須 | ログイン用パスワード | `MySecure2026Pass!` |
 | `GOOGLE_SHEET_ID` | ⚪ オプション | スプレッドシートID | `1abc...xyz` |
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | ⚪ オプション | サービスアカウントJSON | `{"type":"service_account",...}` |
