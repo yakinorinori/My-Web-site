@@ -1454,7 +1454,7 @@ async function sendMobileSalesDataToSpreadsheet(receipts, reportDate) {
         console.log('🔒 シートIDはNetlify環境変数から取得されます');
         
         // Netlify Functions経由でスプレッドシートにデータを送信
-        const response = await fetch('/.netlify/functions/sheets', {
+        const response = await fetch('/api/sheets', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

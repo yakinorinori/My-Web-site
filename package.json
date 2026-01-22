@@ -1,7 +1,7 @@
 {
   "name": "yakinori-sales-analysis",
   "version": "1.0.0",
-  "description": "焼肉店の売上分析システム - Netlify Functions対応",
+  "description": "焼肉店の売上分析システム - Vercel Serverless Functions対応",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,7 +10,7 @@
     "sales",
     "analytics",
     "google-sheets",
-    "netlify-functions"
+    "vercel"
   ],
   "author": "",
   "license": "ISC",
