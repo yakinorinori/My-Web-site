@@ -7,6 +7,33 @@
 let globalData = [];
 
 /**
+ * データ読み込みステータスを表示
+ */
+function showDataLoadingStatus(message, type = 'info') {
+    console.log(`[${type.toUpperCase()}] ${message}`);
+    
+    const dataInfo = document.getElementById('data-info');
+    if (dataInfo) {
+        const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : '📊';
+        const color = type === 'success' ? '#0369a1' : type === 'error' ? '#dc2626' : '#6b7280';
+        
+        dataInfo.innerHTML = `
+            <div style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 8px;
+            ">
+                <span style="font-size: 16px; margin-right: 8px;">${icon}</span>
+                <strong style="color: ${color};">
+                    ${message}
+                </strong>
+            </div>
+        `;
+    }
+}
+
+/**
  * CSV文字列を配列オブジェクトに変換
  */
 function csvToArray(str) {
@@ -81,14 +108,21 @@ function csvToArray(str) {
  * データを読み込む（Googleスプレッドシートまたはデモデータ）
  */
 async function loadData(dataType = 'real') {
-    // 認証済みの場合は、まずGoogleスプレッドシートから読み込みを試みる
-    if (typeof isAuthenticated === 'function' && isAuthenticated() && typeof loadSalesDataFromSpreadsheet === 'function') {
+    // Vercel本番環境または認証済みの場合は、Googleスプレッドシートから読み込み
+    const isVercel = IS_VERCEL || window.location.hostname.includes('vercel.app');
+    const isAuthenticatedUser = typeof isAuthenticated === 'function' && isAuthenticated();
+    
+    if ((isVercel || isAuthenticatedUser) && typeof loadSalesDataFromSpreadsheet === 'function') {
         try {
             console.log('📊 Googleスプレッドシートからデータを読み込み中...');
+            showDataLoadingStatus('📊 Googleスプレッドシートからデータを読み込み中...', 'info');
+            
             const spreadsheetData = await loadSalesDataFromSpreadsheet();
             
             if (spreadsheetData && spreadsheetData.length > 0) {
                 console.log('✅ Googleスプレッドシートからデータ取得成功:', spreadsheetData.length, '行');
+                showDataLoadingStatus(`✅ Googleスプレッドシートから${spreadsheetData.length}件のデータを取得しました`, 'success');
+                
                 globalData = spreadsheetData;
                 
                 // データ情報を更新
@@ -109,15 +143,24 @@ async function loadData(dataType = 'real') {
                 return spreadsheetData;
             }
         } catch (error) {
-            console.warn('⚠️ Googleスプレッドシートからの読み込みに失敗、CSVにフォールバック:', error.message);
+            console.error('❌ Googleスプレッドシートからの読み込み失敗:', error);
+            showDataLoadingStatus(`❌ Googleスプレッドシート読み込み失敗: ${error.message}`, 'error');
+            
+            // Vercel環境ではCSVにフォールバックしない
+            if (isVercel) {
+                throw new Error(`Googleスプレッドシートの読み込みに失敗しました: ${error.message}`);
+            }
+            
+            console.warn('⚠️ CSVにフォールバック');
         }
     }
     
-    // フォールバック: CSVファイルから読み込み
+    // フォールバック: CSVファイルから読み込み（ローカル環境のみ）
     const url = IS_GITHUB_PAGES 
         ? './sales.csv'  // GitHub Pages: 相対パスでCSVファイルを読み込み
         : `${API_BASE_URL}/sales.csv`;
-    console.log(`📥 データ取得中: ${dataType} data from ${url}`);
+    console.log(`📥 CSVファイルからデータ取得中: ${dataType} data from ${url}`);
+    showDataLoadingStatus('📥 CSVファイルからデータを読み込み中...', 'info');
     
     return fetch(url)
         .then(response => {
